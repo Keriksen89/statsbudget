@@ -254,6 +254,10 @@ VG.render.all = function() {
     VG.demo.renderPanel();
   }
 
+  if (VG.state.activeTab === 'platform') {
+    VG.platform.renderPanel();
+  }
+
   VG.bindControls();
 };
 

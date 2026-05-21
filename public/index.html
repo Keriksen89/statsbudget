@@ -3,22 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Virtuel Regering — Bliv finansminister for en dag</title>
+<title>Virtuel Regering — Form dit politiske parti</title>
 
-<meta name="description" content="Datadreven simulator af det danske statsbudget. Juster udgifter, ændr politiske valg, og se konsekvenser for økonomi og borgere. Baseret på Finanslov 2026, DST og Folketinget.">
-<meta name="keywords" content="finanslov, statsbudget, danmark, politik, simulator, virtuel regering, åbne data">
+<meta name="description" content="Form et politisk parti, tag stilling til 40 politiske spørgsmål, stem på live-politikker og juster statsbudgettet. Baseret på åbne data fra Finanslov 2026, DST og Folketinget.">
+<meta name="keywords" content="politisk parti, finanslov, statsbudget, danmark, politik, simulator, virtuel regering, åbne data, politisk kompas">
 <meta name="author" content="Virtuel Regering">
 <meta name="robots" content="index, follow">
 
 <meta property="og:type" content="website">
-<meta property="og:title" content="Virtuel Regering — Bliv finansminister for en dag">
-<meta property="og:description" content="Juster det danske statsbudget og se konsekvenserne. Live data fra Finanslov 2026, Danmarks Statistik og Folketinget.">
+<meta property="og:title" content="Virtuel Regering — Form dit politiske parti">
+<meta property="og:description" content="Tag stilling til dansk politik, stem på partiets holdninger og juster statsbudgettet. Live data fra Finanslov 2026, Danmarks Statistik og Folketinget.">
 <meta property="og:image" content="/og-image.png">
 <meta property="og:locale" content="da_DK">
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Virtuel Regering">
-<meta name="twitter:description" content="Bliv finansminister for en dag. Datadreven budget-simulator baseret på åbne offentlige data.">
+<meta name="twitter:description" content="Form dit politiske parti. Tag stilling til 40 politiske spørgsmål og se hvor dit parti placerer sig på det politiske kompas.">
 
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="stylesheet" href="/css/app.css">
@@ -30,7 +30,7 @@
 <header class="site-header">
   <div>
     <h1>Virtuel Regering</h1>
-    <p class="sub">Bliv finansminister for en dag. Juster budgettet, ændr politikken, og se konsekvenserne for statens økonomi og borgerne.</p>
+    <p class="sub">Form et politisk parti, tag stilling til dansk politik, stem på partiets holdninger i realtid — og juster statsbudgettet.</p>
   </div>
   <div class="header-meta">
     <span class="year-badge" id="data-status">Henter data...</span>
@@ -51,32 +51,34 @@
 
 <nav class="tabs" role="tablist" aria-label="Vælg sektion">
   <button class="tab active" data-tab="overview" role="tab" aria-selected="true">Oversigt</button>
+  <button class="tab" data-tab="platform" role="tab">⭐ Mit Parti</button>
+  <button class="tab" data-tab="party" role="tab">🗳 Borgerstemmer</button>
+  <button class="tab" data-tab="policy" role="tab">Økonomi & Politik</button>
   <button class="tab" data-tab="spending" role="tab">Udgifter</button>
   <button class="tab" data-tab="revenue" role="tab">Indtægter</button>
-  <button class="tab" data-tab="policy" role="tab">Politiske valg</button>
   <button class="tab" data-tab="projection" role="tab">Fremskrivning</button>
   <button class="tab" data-tab="scenarios" role="tab">Scenarier</button>
   <button class="tab" data-tab="folketing" role="tab">Folketinget</button>
   <button class="tab" data-tab="demographics" role="tab">Demografi</button>
-  <button class="tab" data-tab="party" role="tab">🗳 VirtuelPartiet</button>
 </nav>
 
 <main>
   <div id="panel-overview" class="panel active"></div>
+  <div id="panel-platform" class="panel"></div>
+  <div id="panel-party" class="panel"></div>
+  <div id="panel-policy" class="panel"></div>
   <div id="panel-spending" class="panel"></div>
   <div id="panel-revenue" class="panel"></div>
-  <div id="panel-policy" class="panel"></div>
   <div id="panel-projection" class="panel"></div>
   <div id="panel-scenarios" class="panel"></div>
   <div id="panel-folketing" class="panel"></div>
   <div id="panel-demographics" class="panel"></div>
-  <div id="panel-party" class="panel"></div>
 </main>
 
 <div class="actions">
-  <button class="btn" id="btn-reset">↺ Nulstil til FL2026</button>
-  <button class="btn" id="btn-changes">Vis mine ændringer</button>
-  <button class="btn" id="btn-share">Del dit budget</button>
+  <button class="btn" id="btn-reset">↺ Nulstil budget</button>
+  <button class="btn" id="btn-changes">Mine ændringer</button>
+  <button class="btn" id="btn-share">Del budgettet</button>
   <button class="btn primary" id="btn-analyze">Analysér konsekvenser</button>
 </div>
 
@@ -91,9 +93,9 @@
       <p>Førsteordens-effekter. Modellen fanger ikke arbejdsudbudseffekter, Laffer-kurver, demografisk dynamik eller adfærdsændringer. For ægte makroøkonomisk analyse henvises til <a href="https://dreamgruppen.dk/makro/" target="_blank" rel="noopener">MAKRO-modellen</a>.</p>
     </div>
     <div>
-      <h3>Open source</h3>
-      <p>Dette er en åben prototype. Version 2.0 · <span id="version-info">indlæser...</span></p>
-      <p style="margin-top:6px">Ny i v2.0: <strong>🗳 VirtuelPartiet</strong> — stem på hvad partiet mener og form dansk politik i realtid.</p>
+      <h3>Om projektet</h3>
+      <p>Åben prototype. Version 2.0 · <span id="version-info">indlæser...</span></p>
+      <p style="margin-top:6px"><strong>⭐ Mit Parti</strong> — form dit eget politiske parti og se hvor du placerer dig. <strong>🗳 Borgerstemmer</strong> — stem på fælles politikker i realtid.</p>
     </div>
   </div>
 </footer>
@@ -117,6 +119,7 @@
 <script src="/js/share.js"></script>
 <script src="/js/party.js"></script>
 <script src="/js/demo.js"></script>
+<script src="/js/platform.js"></script>
 <script src="/js/app.js"></script>
 </body>
 </html>

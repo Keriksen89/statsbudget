@@ -205,6 +205,7 @@ VG.bootstrap = async function() {
     VG.party.load().then(() => VG.party.startPolling());
 
     VG.demo.load();
+    VG.platform.init();
   } catch (err) {
     console.error('Bootstrap error:', err);
     document.getElementById('data-status').textContent = 'Fejl ved indlæsning';
@@ -231,6 +232,9 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       if (VG.state.activeTab === 'demographics') {
         VG.demo.renderPanel();
+      }
+      if (VG.state.activeTab === 'platform') {
+        VG.platform.renderPanel();
       }
     });
   });
