@@ -1,39 +1,91 @@
-# Virtuel Regering 1.0
+# Virtuel Regering 2.1
 
-> Bliv finansminister for en dag. Datadreven simulator af det danske statsbudget.
+> Form et politisk parti, stem på live-politikker og juster statsbudgettet — med MAKRO-kalibrerede dynamiske effekter.
 
-En åben webapp der lader borgere justere statsbudgettet og se konsekvenserne for økonomi og samfund. Baseret på live data fra Finanslov 2026, Danmarks Statistik og Folketinget.
+En åben webapp der lader borgere forme et politisk parti, tage stilling til 40 politiske spørgsmål, stemme på fælles politikker i realtid og justere statsbudgettet. Baseret på åbne data fra Finanslov 2026, Danmarks Statistik, Folketinget og DREAM-gruppens MAKRO-model.
 
-## Funktioner
+[![Node.js](https://img.shields.io/badge/Node.js-18%2B-green)](https://nodejs.org) [![License: MIT](https://img.shields.io/badge/License-MIT-blue)](LICENSE) [![Data: FL2026](https://img.shields.io/badge/Data-Finanslov%202026-orange)](https://fm.dk)
 
-- **16 udgiftsposter** kalibreret mod Finanslov 2026 og DST nationalregnskab
-- **8 indtægtskategorier** med live skattedata
-- **9 politiske parametre** (pensionsalder, topskat, asyl, forsvar, CO2-afgift m.fl.) med offentliggjorte elasticiteter
-- **6 færdige scenarier** (borgerlig reform, rødt scenarie, LA 2035, kriseplan m.fl.)
-- **Statsgældsfremskrivning** 2026-2034 + EU-budgetregler-tjek
-- **Live data** fra DST Statistikbank og Folketingets ODA-API
-- **Del dit budget** via URL — alle valg encodes i et delbart link
-- **Light/dark mode** + mobile-responsive
-- **GDPR-venligt** — ingen tracking, ingen cookies, ingen tredjepartsskripts
+---
+
+## Hvad kan man?
+
+### ⭐ Mit Parti — Politisk kompas
+Tag stilling til **40 politiske positioner** på tværs af 8 politikområder og se præcis, hvor dit parti placerer sig på det politiske kompas — sammenlignet med de 11 rigtige danske partier (Ø, F, Å, A, B, M, C, V, I, O, D). Partiets navn og farve er valgfri. Gemmes lokalt i browseren.
+
+### 🗳 Borgerstemmer — Live demokrati
+Stem på **24 konkrete politikforslag** på tværs af 7 kategorier (økonomi, klima, velfærd, indvandring m.fl.). Se hvad andre danskere mener i realtid. IP-baseret ratelimiting og localStorage forhindrer dobbeltstemmer.
+
+### 💰 Økonomi & Politik — MAKRO-kalibreret budgetsimulator
+Justér **11 politiske parametre** (pensionsalder, topskat, selskabsskat, asyl, forsvar, CO2-afgift m.fl.) og se øjeblikkelig budgeteffekt. For hvert ændret parameter vises:
+- **Statisk effekt** (1. ordensestimat)
+- **⚡ MAKRO-dynamisk effekt** — selvfinansieringsgrad og adfærdsrespons kalibreret mod [DREAM's MAKRO-model](https://github.com/DREAM-DK/MAKRO)
+- **SMILE fordelingseffekt** — progressiv/regressiv/neutral baseret på DREAM's mikrosimuleringsmodel
+- **Netto budgeteffekt**
+
+### 📊 Fremskrivning — DREAM holdbarhed
+Statsgælds-prognose 2026–2034 + **DREAM holdbarhedsindikator** der sammenligner det strukturelle overskud mod det demografiske udgiftspres (~2,5% af BNP frem mod 2040) fra DREAM's OLG-model (overlappende generationer).
+
+### 🧑‍🤝‍🧑 Demografi — Detaljeret befolkningsdata
+Befolkningspyramide, projektion 2026–2070, fertilitetstrendkort, regioner, indvandreroriginer, beskæftigelse og **fiskalt pres-analyse** for 2040. Data fra DST FOLK1A og FRDK117.
+
+### 🏛 Folketinget — Live afstemninger
+De 15 seneste afstemninger i Folketingssalen direkte fra Folkentingets ODA-API.
+
+---
+
+## DREAM-integration
+
+Modellen er kalibreret mod tre DREAM-modeller:
+
+| DREAM-model | Anvendelse i Virtuel Regering |
+|-------------|-------------------------------|
+| **[MAKRO](https://github.com/DREAM-DK/MAKRO)** | Selvfinansieringsgrader for alle 11 politikparametre (topskattesats 25%, selskabsskat 35%, moms 5%, pensionsalder -43% forstærkning m.fl.) |
+| **[GREU](https://github.com/DREAM-DK/GREU)** | CO2-afgift provenubase eroderer ~2-3%/år under grøn omstilling |
+| **DREAM OLG** | Holdbarhedsindikator: demografisk pres 2026–2040 |
+| **SMILE** | Fordelingseffekter pr. politikparameter (progressiv/regressiv-badges) |
+
+> Modellen er pædagogisk og statisk i sin kerne — DREAM's modeller bruges til kalibrering og dynamiske korrektionstillæg, ikke som fuld CGE-model.
+
+---
 
 ## Teknisk arkitektur
 
 ```
-Browser ←→ Nginx (HTTPS) ←→ Node.js/Express ←→ DST API
-                                              ←→ Folketinget ODA API
+Browser ←→ Node.js/Express ←→ DST Statistikbank API
+                            ←→ Folketingets ODA-API
+                            ←→ /api/party  (in-memory + votes.json)
+                            ←→ /api/demographics
 ```
 
-- **Frontend:** Vanilla JS, ingen frameworks. 5 moduler (state, api, render, chart, share, app)
-- **Backend:** Node.js 18+ med Express. API-proxy med in-memory caching (6h TTL for data, 24h for metadata)
-- **Sikkerhed:** Helmet CSP, ingen inline scripts, validated input på proxy-endpoints
-- **Performance:** Gzip, HTTP caching, lazy-loaded live data
+- **Frontend:** Vanilla JS, ingen frameworks. 9 moduler (state, api, render, chart, share, party, demo, platform, app)
+- **Backend:** Node.js 18+ / Express. API-proxy med in-memory caching
+- **Afstemninger:** IP-baseret ratelimiting + fil-persistens (`server/data/votes.json`)
+- **Sikkerhed:** Helmet CSP, ingen inline scripts
+- **Tema:** Light/dark mode + mobile-responsive
+
+---
+
+## API-endpoints
+
+| Endpoint | Beskrivelse | Cache |
+|----------|-------------|-------|
+| `GET /api/budget/baseline` | Budgetmodel v2.1 med MAKRO/SMILE-data | 10 min |
+| `GET /api/dst/keyfigures` | BNP, befolkning, ledighed (live DST) | 6 t |
+| `GET /api/oda/recent-votes` | Seneste 20 Folketing-afstemninger | 3 t |
+| `GET /api/party/proposals` | 24 borgerforslagsforslag med live stemmer | — |
+| `POST /api/party/vote` | Afgiv stemme (IP-ratelimited) | — |
+| `GET /api/party/platform` | Vedtagne forslag + samlet budgeteffekt | — |
+| `GET /api/demographics/summary` | Fuld demografirapport (DST-baseret) | — |
+
+---
 
 ## Lokal udvikling
 
 Krav: Node.js 18+ og npm.
 
 ```bash
-git clone <repo>
+git clone https://github.com/keriksen89/virtuel-regering
 cd virtuel-regering
 npm install
 npm run dev
@@ -41,92 +93,55 @@ npm run dev
 
 Åbn `http://localhost:3000`.
 
+---
+
 ## Projekt-struktur
 
 ```
 virtuel-regering/
 ├── server/
 │   ├── index.js              # Express app + middleware
+│   ├── data/
+│   │   └── votes.json        # Persisterede borgerstemmer (committed til git)
 │   ├── lib/
 │   │   ├── cache.js          # In-memory TTL cache
 │   │   └── fetch.js          # HTTP client med timeout
 │   └── routes/
-│       ├── budget.js         # Baseline + scenarier
+│       ├── budget.js         # Budgetmodel v2.1 (MAKRO+SMILE kalibreret)
+│       ├── party.js          # Borgerstemmer — 24 forslag, IP-voting
+│       ├── demographics.js   # Demografidata (DST FOLK1A + FRDK117)
 │       ├── dst.js            # DST Statistikbank proxy
 │       └── oda.js            # Folketinget ODA proxy
-├── public/
-│   ├── index.html
-│   ├── favicon.svg
-│   ├── robots.txt
-│   ├── css/app.css
-│   └── js/
-│       ├── state.js          # Global state + helpers
-│       ├── api.js            # API client
-│       ├── render.js         # Panel renderers
-│       ├── chart.js          # Canvas debt chart
-│       ├── share.js          # URL state encoding
-│       └── app.js            # Bootstrap + event handlers
-├── deploy/
-│   ├── virtuel-regering.service   # systemd unit
-│   └── nginx.conf            # nginx reverse proxy
-├── Dockerfile
-├── docker-compose.yml
-├── DEPLOY.md                 # Production deployment guide
-└── package.json
+└── public/
+    ├── index.html
+    ├── css/app.css
+    └── js/
+        ├── state.js          # Global state + helpers
+        ├── api.js            # API client
+        ├── render.js         # Panel renderers (inkl. MAKRO + holdbarhed)
+        ├── chart.js          # Canvas: gæld, alderspyramide, projektion, TFR, kompas
+        ├── share.js          # URL state encoding
+        ├── party.js          # Borgerstemmer frontend
+        ├── demo.js           # Demografipanel
+        ├── platform.js       # Mit Parti — politisk kompas
+        └── app.js            # Bootstrap + event handlers
 ```
 
-## API endpoints
-
-| Endpoint | Beskrivelse | Cache |
-|----------|-------------|-------|
-| `GET /api/health` | Health check | — |
-| `GET /api/budget/baseline` | Hele budget-modellen + scenarier | 10 min |
-| `GET /api/dst/keyfigures` | BNP, befolkning, ledighed (live) | 6 t |
-| `POST /api/dst/data/:tableId` | Generisk DST-tabel proxy | 6 t |
-| `GET /api/dst/tableinfo/:tableId` | DST tabel-metadata | 24 t |
-| `GET /api/oda/recent-votes` | Seneste 20 afstemninger i Folketinget | 3 t |
-| `GET /api/oda/parties` | Danske partier | 24 t |
-| `GET /api/oda/recent-bills` | Seneste lovforslag (valgfrit topic-filter) | 3 t |
-
-## Deployment
-
-Se [DEPLOY.md](DEPLOY.md) for komplet guide til at hoste på egen server med nginx + systemd, eller Docker.
-
-## Modelbegrænsninger
-
-Dette er en pædagogisk simulator, ikke et makroøkonomisk værktøj. Den fanger førsteordens-effekter — direkte budgetimpact af politiske valg — men IKKE:
-
-- Arbejdsudbudseffekter (lavere topskat → mere arbejde → mere skat)
-- Laffer-kurver (høj skat → adfærdsændring → lavere provenu)
-- Demografisk dynamik (pensionsalder → arbejdsstyrke 20 år frem)
-- Adfærdsændringer (grænsehandel, kapital-udflytning, m.m.)
-
-For ægte makroanalyse henvises til Finansministeriets [MAKRO-model](https://dreamgruppen.dk/makro/) (offentlig kode siden marts 2023).
-
-## Roadmap
-
-**v1.1** Fordelingseffekter via DST indkomstdeciler ("dine valg betyder X for en LO-familie")
-
-**v1.2** Folketingsmatch ("dine valg matcher SF 64%, K 28%")
-
-**v1.3** MAKRO-multiplikatorer indbygget for realistiske skatte-elasticiteter
-
-**v2.0** Domæne-udvidelse: klima-impact (Energi Data Service), sundhedseffekter (eSundhed), kommunale visninger (Open Data DK)
+---
 
 ## Datakilder
 
-- [Finanslov 2026](https://fm.dk/) — Finansministeriet
-- [Danmarks Statistik](https://www.dst.dk/da/Statistik/hjaelp-til-statistikbanken/api) — Statistikbank API
-- [Folketingets ODA-API](https://www.ft.dk/dokumenter/aabne_data) — Afstemninger og lovforslag
-- [Regeringens 2035-plan](https://regeringen.dk/) — Mellem- og langfristede mål
-- [DREAM-gruppen MAKRO](https://dreamgruppen.dk/makro/) — Elasticiteter (publiceret)
+- [Finanslov 2026](https://fm.dk/) — Finansministeriet (budgettal)
+- [Danmarks Statistik](https://www.dst.dk/da/Statistik/hjaelp-til-statistikbanken/api) — FOLK1A, NAN1, FRDK117
+- [Folketingets ODA-API](https://www.ft.dk/dokumenter/aabne_data) — Afstemninger
+- [DREAM MAKRO](https://github.com/DREAM-DK/MAKRO) — Elasticiteter og selvfinansieringsgrader
+- [DREAM GREU](https://github.com/DREAM-DK/GREU) — Grøn omstillingsdynamik
+- Klimarådet — CO2-afgift provenuanalyse
 
 Alle data under CC-BY 4.0 eller tilsvarende åbne licenser.
 
+---
+
 ## Licens
 
-MIT. Du må frit kopiere, modificere, kommercielt anvende og redistribuere. Kildeangivelse for de offentlige data kræves dog under deres respektive licenser.
-
-## Bidrag
-
-Pull requests velkomne. Ved kalibrering af tal eller elasticiteter, vedlæg kildehenvisning i `server/routes/budget.js`.
+MIT. Frit at kopiere, modificere og anvende kommercielt. Kildeangivelse for offentlige data kræves under deres respektive licenser.
