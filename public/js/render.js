@@ -1,0 +1,258 @@
+VG.render = {};
+
+VG.render.summary = function() {
+  const rev = VG.sumRev(), exp = VG.sumExp(), bal = rev - exp;
+  const dRev = rev - VG.baseRev(), dExp = exp - VG.baseExp();
+  const BNP = VG.state.baseline.gdp;
+
+  document.getElementById('s-rev').textContent = VG.fmt(rev);
+  document.getElementById('s-exp').textContent = VG.fmt(exp);
+  document.getElementById('s-bal').textContent = VG.fmtSigned(bal);
+
+  const dRevEl = document.getElementById('s-rev-d');
+  const dExpEl = document.getElementById('s-exp-d');
+  if (Math.abs(dRev) < 0.05) { dRevEl.textContent = 'basis'; dRevEl.className = 'stat-delta'; }
+  else { dRevEl.textContent = VG.fmtSigned(dRev) + ' vs basis'; dRevEl.className = 'stat-delta ' + (dRev > 0 ? 'neg' : 'pos'); }
+  if (Math.abs(dExp) < 0.05) { dExpEl.textContent = 'basis'; dExpEl.className = 'stat-delta'; }
+  else { dExpEl.textContent = VG.fmtSigned(dExp) + ' vs basis'; dExpEl.className = 'stat-delta ' + (dExp > 0 ? 'pos' : 'neg'); }
+
+  document.getElementById('s-bal-d').textContent = VG.ppct(bal / BNP * 100) + ' af BNP';
+  document.getElementById('s-bal-card').classList.toggle('alert', bal < -BNP * 0.01);
+
+  const debt2030 = VG.state.baseline.debtStartRatio - (bal * 4) / BNP;
+  document.getElementById('s-debt').textContent = VG.ppct(Math.max(0, debt2030) * 100);
+  document.getElementById('s-debt-card').classList.toggle('alert', debt2030 > 0.6);
+};
+
+VG.render.liveIndicators = function() {
+  const live = VG.state.live;
+  const container = document.getElementById('live-indicators');
+  const items = [];
+  if (live.population) {
+    items.push(`<div class="live-indicator"><span class="live-dot"></span><span class="label">Befolkning</span><span class="value">${live.population.value.toLocaleString('da-DK')}</span><span class="label">(${live.population.period})</span></div>`);
+  }
+  if (live.gdp) {
+    items.push(`<div class="live-indicator"><span class="live-dot"></span><span class="label">BNP, kvt</span><span class="value">${VG.fmt(live.gdp.value / 1000)}</span><span class="label">(${live.gdp.period})</span></div>`);
+  }
+  if (live.unemployment) {
+    items.push(`<div class="live-indicator"><span class="live-dot"></span><span class="label">Ledige</span><span class="value">${live.unemployment.value.toLocaleString('da-DK')}</span><span class="label">(${live.unemployment.period})</span></div>`);
+  }
+  if (!items.length) {
+    items.push('<div class="live-indicator"><span class="label">Live data fra DST henter...</span></div>');
+  }
+  container.innerHTML = items.join('');
+};
+
+VG.render.overview = function() {
+  const exp = [...Object.entries(VG.state.current.expense)].sort((a, b) => b[1].val - a[1].val);
+  const rev = [...Object.entries(VG.state.current.revenue)].sort((a, b) => b[1].val - a[1].val);
+  const totalExp = VG.sumExp(), totalRev = VG.sumRev();
+
+  const expRows = exp.map(([k, v]) => {
+    const w = (v.val / totalExp * 100).toFixed(1);
+    const d = v.val - VG.state.baseline.expense[k].val;
+    const dHtml = Math.abs(d) > 0.1
+      ? `<span style="color:${d > 0 ? 'var(--pos)' : 'var(--neg)'};font-size:11px;font-weight:400"> ${d > 0 ? '+' : ''}${d.toFixed(1)}</span>`
+      : '';
+    return `<div class="bar-container"><div class="bar-row"><span class="bar-name">${v.name}</span><span class="bar-val">${VG.fmt(v.val)}${dHtml}</span></div><div class="bar-track"><div class="bar-fill exp" style="width:${w}%"></div></div></div>`;
+  }).join('');
+
+  const revRows = rev.map(([k, v]) => {
+    const w = (v.val / totalRev * 100).toFixed(1);
+    const d = v.val - VG.state.baseline.revenue[k].val;
+    const dHtml = Math.abs(d) > 0.1
+      ? `<span style="color:${d > 0 ? 'var(--neg)' : 'var(--pos)'};font-size:11px;font-weight:400"> ${d > 0 ? '+' : ''}${d.toFixed(1)}</span>`
+      : '';
+    return `<div class="bar-container"><div class="bar-row"><span class="bar-name">${v.name}</span><span class="bar-val">${VG.fmt(v.val)}${dHtml}</span></div><div class="bar-track"><div class="bar-fill rev" style="width:${w}%"></div></div></div>`;
+  }).join('');
+
+  return `<div class="grid-2">
+    <div class="card"><h2>Hvor pengene bruges</h2><p class="intro">Statslige, regionale og kommunale udgifter — i alt ${VG.fmt(totalExp)} kr/år</p>${expRows}</div>
+    <div class="card"><h2>Hvor pengene kommer fra</h2><p class="intro">Skatter, afgifter og andre offentlige indtægter — i alt ${VG.fmt(totalRev)} kr/år</p>${revRows}</div>
+  </div>`;
+};
+
+VG.render.sliders = function(bucketKey) {
+  const bucket = VG.state.current[bucketKey];
+  const items = Object.entries(bucket);
+  const rows = items.map(([k, item]) => {
+    const baseItem = VG.state.baseline[bucketKey][k];
+    const base = baseItem.val;
+    const d = item.val - base;
+    const pctDiff = base > 0 ? (d / base * 100) : 0;
+    const deltaClass = Math.abs(d) < 0.05 ? '' : (
+      bucketKey === 'revenue' ? (d > 0 ? 'neg' : 'pos') : (d > 0 ? 'pos' : 'neg')
+    );
+    const deltaText = Math.abs(d) < 0.05 ? '—' : ((d > 0 ? '+' : '') + pctDiff.toFixed(0) + '%');
+    const sourceHtml = baseItem.source ? `<div class="row-source">Kilde: ${baseItem.source}</div>` : '';
+    return `<div class="row">
+      <div><div class="row-name">${item.name}</div><div class="row-info">${item.info || ''}</div>${sourceHtml}</div>
+      <input type="range" min="${item.min}" max="${item.max}" step="0.5" value="${item.val}" data-bucket="${bucketKey}" data-key="${k}" aria-label="${item.name}">
+      <div class="row-val">${VG.fmt(item.val)}</div>
+      <div class="row-delta ${deltaClass}">${deltaText}</div>
+    </div>`;
+  }).join('');
+  const title = bucketKey === 'expense' ? 'Juster udgifter' : 'Juster indtægter';
+  const intro = bucketKey === 'expense'
+    ? 'Skub sliderne for at ændre, hvor meget der bruges på hver post. Røde tal = højere end FL2026.'
+    : 'Skub sliderne for at ændre indtægterne. Grønne tal = højere provenu end FL2026.';
+  return `<div class="card"><h2>${title}</h2><p class="intro">${intro}</p>${rows}</div>`;
+};
+
+VG.render.policy = function() {
+  const items = Object.entries(VG.state.current.policy);
+  const html = items.map(([pk, p]) => {
+    const b = VG.state.baseline.policy[pk];
+    const diff = p.val - b.val;
+    const impact = diff * p.elasticity;
+    let impactStr, impactClass = '';
+    if (Math.abs(impact) < 0.05) {
+      impactStr = 'Ingen ændring';
+    } else {
+      const direction = p.direction === 'revenue' ? 'indtægter' : 'udgifter';
+      impactStr = `${impact > 0 ? '+' : ''}${impact.toFixed(1)} mia til ${direction}`;
+      impactClass = p.direction === 'revenue' ? (impact > 0 ? 'neg' : 'pos') : (impact > 0 ? 'pos' : 'neg');
+    }
+    const step = p.unit === 'pers' ? 100 : 0.1;
+    return `<div class="policy-card">
+      <div class="policy-head">
+        <span class="policy-name">${p.name}</span>
+        <span class="policy-val">${p.val.toLocaleString('da-DK')} ${p.unit}</span>
+      </div>
+      <p class="policy-desc">${p.info}</p>
+      <div class="policy-row">
+        <input type="range" min="${p.min}" max="${p.max}" step="${step}" value="${p.val}" data-policy="${pk}" aria-label="${p.name}">
+        <div class="policy-impact ${impactClass}">${impactStr}</div>
+      </div>
+    </div>`;
+  }).join('');
+  return `<div><p class="intro" style="color:var(--text-2);font-size:13px;margin-bottom:16px">Træk sliderne for at ændre politiske parametre. Modellen omregner automatisk til budgetimpact via offentliggjorte elasticiteter.</p>${html}</div>`;
+};
+
+VG.render.projection = function() {
+  const bal = VG.sumRev() - VG.sumExp();
+  const BNP = VG.state.baseline.gdp;
+  let debt = BNP * VG.state.baseline.debtStartRatio, gdpY = BNP;
+  const pts = [{ y: 2026, ratio: debt / gdpY * 100 }];
+  for (let y = 2027; y <= 2034; y++) {
+    debt -= bal;
+    gdpY *= 1.02;
+    pts.push({ y, ratio: Math.max(0, debt / gdpY * 100) });
+  }
+  const years = [2027, 2030, 2034];
+  const yearStats = years.map(y => {
+    const p = pts.find(pt => pt.y === y);
+    return `<div class="year-stat"><div class="year-stat-y">${y}</div><div class="year-stat-v">${p.ratio.toFixed(1)}%</div></div>`;
+  }).join('');
+  const balPct = bal / BNP * 100;
+  const okSaldo = balPct >= -3;
+  const okStrukt = balPct >= -1;
+  const pills = `<span class="pill ${okSaldo ? 'ok' : 'fail'}">${okSaldo ? '✓' : '✗'} Saldo > -3% (EU Stabilitetspagt)</span><span class="pill ${okStrukt ? 'ok' : 'fail'}">${okStrukt ? '✓' : '✗'} Strukturel saldo > -1% (Budgetlov)</span>`;
+  return `<div class="card">
+    <h2>Statsgæld 2026–2034</h2>
+    <p class="intro">Hvis dit nuværende budget fastholdes hvert år. Starter på 30% af BNP. BNP-vækst 2%/år.</p>
+    <div class="chart-container"><canvas id="debt-chart"></canvas></div>
+    <div class="year-grid">${yearStats}</div>
+    <h2 style="margin-top:24px">EU-budgetregler</h2>
+    <p class="intro">Danmark er bundet af både EU's Stabilitetspagt og den danske Budgetlov.</p>
+    <div class="eu-pills">${pills}</div>
+  </div>`;
+};
+
+VG.render.scenarios = function() {
+  const scenarios = VG.state.baseline.scenarios;
+  const cards = Object.entries(scenarios).map(([k, s]) =>
+    `<div class="scenario" data-scenario="${k}"><div class="scenario-title">${s.title}</div><div class="scenario-desc">${s.desc}</div></div>`
+  ).join('');
+  return `<div class="card"><h2>Færdige politiske scenarier</h2><p class="intro">Klik for at indlæse et færdigt scenarie. Du kan herefter justere videre på det.</p><div class="scenarios">${cards}</div></div>`;
+};
+
+VG.render.folketing = function() {
+  const votes = VG.state.live.votes;
+  if (!votes || !votes.length) {
+    const loaded = VG.state.live.votesLoaded;
+    const msg = loaded
+      ? 'Live data fra Folketinget er midlertidigt utilgængeligt. Prøv at genindlæse om et øjeblik.'
+      : 'Henter live data fra Folketingets ODA-API...';
+    return `<div class="card"><h2>Folketinget — seneste afstemninger</h2><div class="loading">${msg}</div></div>`;
+  }
+  const html = votes.slice(0, 15).map(v => {
+    const status = v.vedtaget ? 'passed' : 'failed';
+    const label = v.vedtaget ? 'Vedtaget' : 'Forkastet';
+    const title = v.sagTitel || v.konklusion || 'Afstemning #' + v.nummer;
+    const date = v.dato ? new Date(v.dato).toLocaleDateString('da-DK') : '';
+    return `<div class="vote-card">
+      <div class="vote-head">
+        <div class="vote-title">${title}</div>
+        <span class="vote-status ${status}">${label}</span>
+      </div>
+      <div class="vote-meta">Afstemning #${v.nummer} · ${date}</div>
+    </div>`;
+  }).join('');
+  return `<div class="card">
+    <h2>Folketinget — seneste afstemninger</h2>
+    <p class="intro">Live data fra <a href="https://oda.ft.dk/" target="_blank" rel="noopener">Folketingets ODA-API</a>. Viser de 15 seneste afstemninger i Folketingssalen.</p>
+    ${html}
+  </div>`;
+};
+
+VG.render.all = function() {
+  VG.applyPolicy();
+  VG.render.summary();
+  VG.render.liveIndicators();
+
+  document.getElementById('panel-overview').innerHTML = VG.render.overview();
+  document.getElementById('panel-spending').innerHTML = VG.render.sliders('expense');
+  document.getElementById('panel-revenue').innerHTML = VG.render.sliders('revenue');
+  document.getElementById('panel-policy').innerHTML = VG.render.policy();
+  document.getElementById('panel-projection').innerHTML = VG.render.projection();
+  document.getElementById('panel-scenarios').innerHTML = VG.render.scenarios();
+  document.getElementById('panel-folketing').innerHTML = VG.render.folketing();
+
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + VG.state.activeTab));
+
+  if (VG.state.activeTab === 'projection') {
+    setTimeout(() => VG.chart.drawDebt(), 0);
+  }
+
+  VG.bindControls();
+};
+
+VG.bindControls = function() {
+  document.querySelectorAll('input[type=range][data-bucket]').forEach(inp => {
+    inp.addEventListener('input', e => {
+      const b = e.target.dataset.bucket, k = e.target.dataset.key;
+      VG.state.current[b][k].val = parseFloat(e.target.value);
+      VG.render.all();
+    });
+  });
+  document.querySelectorAll('input[type=range][data-policy]').forEach(inp => {
+    inp.addEventListener('input', e => {
+      VG.state.current.policy[e.target.dataset.policy].val = parseFloat(e.target.value);
+      VG.render.all();
+    });
+  });
+  document.querySelectorAll('.scenario').forEach(el => {
+    el.addEventListener('click', () => {
+      const key = el.dataset.scenario;
+      VG.loadScenario(key);
+    });
+  });
+};
+
+VG.loadScenario = function(key) {
+  const s = VG.state.baseline.scenarios[key];
+  if (!s) return;
+  for (const k in VG.state.baseline.policy) {
+    VG.state.current.policy[k].val = VG.state.baseline.policy[k].val;
+  }
+  for (const k in s.changes) {
+    if (VG.state.current.policy[k]) {
+      VG.state.current.policy[k].val = s.changes[k];
+    }
+  }
+  VG.state.activeTab = 'overview';
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === 'overview'));
+  VG.render.all();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+};

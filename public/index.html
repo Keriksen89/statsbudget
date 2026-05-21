@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Virtuel Regering — Bliv finansminister for en dag</title>
+
+<meta name="description" content="Datadreven simulator af det danske statsbudget. Juster udgifter, ændr politiske valg, og se konsekvenser for økonomi og borgere. Baseret på Finanslov 2026, DST og Folketinget.">
+<meta name="keywords" content="finanslov, statsbudget, danmark, politik, simulator, virtuel regering, åbne data">
+<meta name="author" content="Virtuel Regering">
+<meta name="robots" content="index, follow">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Virtuel Regering — Bliv finansminister for en dag">
+<meta property="og:description" content="Juster det danske statsbudget og se konsekvenserne. Live data fra Finanslov 2026, Danmarks Statistik og Folketinget.">
+<meta property="og:image" content="/og-image.png">
+<meta property="og:locale" content="da_DK">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Virtuel Regering">
+<meta name="twitter:description" content="Bliv finansminister for en dag. Datadreven budget-simulator baseret på åbne offentlige data.">
+
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+
+<div class="app">
+
+<header class="site-header">
+  <div>
+    <h1>Virtuel Regering</h1>
+    <p class="sub">Bliv finansminister for en dag. Juster budgettet, ændr politikken, og se konsekvenserne for statens økonomi og borgerne.</p>
+  </div>
+  <div class="header-meta">
+    <span class="year-badge" id="data-status">Henter data...</span>
+    <button class="btn-icon" id="theme-toggle" title="Skift mellem lyst og mørkt tema" aria-label="Skift tema">
+      <span id="theme-icon">◐</span>
+    </button>
+  </div>
+</header>
+
+<div class="live-indicators" id="live-indicators"></div>
+
+<div class="summary" id="summary">
+  <div class="stat"><div class="stat-label">Indtægter</div><div class="stat-num" id="s-rev">—</div><div class="stat-delta" id="s-rev-d">basis</div></div>
+  <div class="stat"><div class="stat-label">Udgifter</div><div class="stat-num" id="s-exp">—</div><div class="stat-delta" id="s-exp-d">basis</div></div>
+  <div class="stat" id="s-bal-card"><div class="stat-label">Budgetsaldo</div><div class="stat-num" id="s-bal">—</div><div class="stat-delta" id="s-bal-d">% af BNP</div></div>
+  <div class="stat" id="s-debt-card"><div class="stat-label">Gæld 2030</div><div class="stat-num" id="s-debt">—</div><div class="stat-delta">% af BNP, hvis fortsat</div></div>
+</div>
+
+<nav class="tabs" role="tablist" aria-label="Vælg sektion">
+  <button class="tab active" data-tab="overview" role="tab" aria-selected="true">Oversigt</button>
+  <button class="tab" data-tab="spending" role="tab">Udgifter</button>
+  <button class="tab" data-tab="revenue" role="tab">Indtægter</button>
+  <button class="tab" data-tab="policy" role="tab">Politiske valg</button>
+  <button class="tab" data-tab="projection" role="tab">Fremskrivning</button>
+  <button class="tab" data-tab="scenarios" role="tab">Scenarier</button>
+  <button class="tab" data-tab="folketing" role="tab">Folketinget</button>
+</nav>
+
+<main>
+  <div id="panel-overview" class="panel active"></div>
+  <div id="panel-spending" class="panel"></div>
+  <div id="panel-revenue" class="panel"></div>
+  <div id="panel-policy" class="panel"></div>
+  <div id="panel-projection" class="panel"></div>
+  <div id="panel-scenarios" class="panel"></div>
+  <div id="panel-folketing" class="panel"></div>
+</main>
+
+<div class="actions">
+  <button class="btn" id="btn-reset">↺ Nulstil til FL2026</button>
+  <button class="btn" id="btn-changes">Vis mine ændringer</button>
+  <button class="btn" id="btn-share">Del dit budget</button>
+  <button class="btn primary" id="btn-analyze">Analysér konsekvenser</button>
+</div>
+
+<footer class="site-footer">
+  <div class="footer-grid">
+    <div>
+      <h3>Datakilder</h3>
+      <p>Finanslov 2026 fra <a href="https://fm.dk" target="_blank" rel="noopener">Finansministeriet</a>. Live tal fra <a href="https://www.dst.dk" target="_blank" rel="noopener">Danmarks Statistik</a> og <a href="https://www.ft.dk/dokumenter/aabne_data" target="_blank" rel="noopener">Folketingets ODA-API</a>. Alle data offentligt tilgængelige under CC-BY 4.0.</p>
+    </div>
+    <div>
+      <h3>Modelbegrænsninger</h3>
+      <p>Førsteordens-effekter. Modellen fanger ikke arbejdsudbudseffekter, Laffer-kurver, demografisk dynamik eller adfærdsændringer. For ægte makroøkonomisk analyse henvises til <a href="https://dreamgruppen.dk/makro/" target="_blank" rel="noopener">MAKRO-modellen</a>.</p>
+    </div>
+    <div>
+      <h3>Open source</h3>
+      <p>Dette er en åben prototype. Version 1.0 · <span id="version-info">indlæser...</span></p>
+    </div>
+  </div>
+</footer>
+
+</div>
+
+<div class="modal-backdrop" id="modal-backdrop">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <button class="modal-close" id="modal-close" aria-label="Luk">×</button>
+    <h3 id="modal-title">Analyse</h3>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="/js/state.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/render.js"></script>
+<script src="/js/chart.js"></script>
+<script src="/js/share.js"></script>
+<script src="/js/app.js"></script>
+</body>
+</html>

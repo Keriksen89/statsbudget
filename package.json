@@ -1,0 +1,24 @@
+{
+  "name": "virtuel-regering",
+  "version": "1.0.0",
+  "description": "Bliv finansminister for en dag — datadreven simulator af det danske statsbudget",
+  "main": "server/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "prefetch": "node server/lib/prefetch.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "compression": "^1.7.4",
+    "express": "^4.19.2",
+    "helmet": "^7.1.0",
+    "morgan": "^1.10.0"
+  },
+  "keywords": ["danmark", "finanslov", "budget", "simulator", "open-data"],
+  "license": "MIT",
+  "author": "Virtuel Regering"
+}
