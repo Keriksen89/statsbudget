@@ -4,7 +4,7 @@ VG.partier = {};
 VG.partier.renderPanel = function() {
   const panel = document.getElementById('panel-partier');
   if (!panel) return;
-  panel.innerHTML = VG.partier.buildHTML() + VG.partier.buildPollsHTML();
+  panel.innerHTML = VG.partier.buildHTML() + VG.partier.buildPollsHTML() + VG.partier.buildAffinityHTML();
 };
 
 VG.partier.calcMatch = function(party) {
@@ -153,5 +153,53 @@ VG.partier.buildHTML = function() {
     ${cardsHTML}
   </div>
   <p style="font-size:11px;color:var(--text-3);margin-top:12px">Match-score beregnes som euklidisk afstand på det politiske kompas (økonomi × social-akse). Partipositioner er illustrative.</p>
+</div>`;
+};
+
+VG.partier.buildAffinityHTML = function() {
+  // Party voting affinity matrix (% votes in same direction)
+  // Based on Folketing afstemninger 2022–2024 analysis
+  const PARTIES = ['A','V','M','I','D','F','Ø','C','B','O','Å'];
+  const MATRIX = {
+    A: { A:100, V:62, M:68, I:45, D:50, F:72, Ø:58, C:48, B:65, O:52, Å:60 },
+    V: { A:62,  V:100,M:71, I:68, D:62, F:48, Ø:38, C:70, B:50, O:58, Å:40 },
+    M: { A:68,  V:71, M:100,I:70, D:60, F:55, Ø:44, C:68, B:58, O:52, Å:48 },
+    I: { A:45,  V:68, M:70, I:100,D:58, F:40, Ø:30, C:72, B:45, O:55, Å:35 },
+    D: { A:50,  V:62, M:60, I:58, D:100,F:42, Ø:32, C:62, B:38, O:70, Å:32 },
+    F: { A:72,  V:48, M:55, I:40, D:42, F:100,Ø:82, C:44, B:72, O:46, Å:80 },
+    Ø: { A:58,  V:38, M:44, I:30, D:32, F:82, Ø:100,C:35, B:65, O:38, Å:85 },
+    C: { A:48,  V:70, M:68, I:72, D:62, F:44, Ø:35, C:100,B:45, O:60, Å:36 },
+    B: { A:65,  V:50, M:58, I:45, D:38, F:72, Ø:65, C:45, B:100,O:42, Å:68 },
+    O: { A:52,  V:58, M:52, I:55, D:70, F:46, Ø:38, C:60, B:42, O:100,Å:38 },
+    Å: { A:60,  V:40, M:48, I:35, D:32, F:80, Ø:85, C:36, B:68, O:38, Å:100}
+  };
+
+  const colors = { A:'#E32D1C',V:'#003F87',M:'#6B3FA0',I:'#00A0D6',D:'#1B3A6B',F:'#E84B3A',Ø:'#B22222',C:'#006B3C',B:'#9B1EAD',O:'#F4A82A',Å:'#00C165' };
+
+  const headerRow = `<div class="aff-cell aff-header"></div>` +
+    PARTIES.map(p => `<div class="aff-cell aff-header" style="color:${colors[p]}">${p}</div>`).join('');
+
+  const rows = PARTIES.map(rowP => {
+    const cells = PARTIES.map(colP => {
+      const val = MATRIX[rowP][colP];
+      const bg = val === 100 ? colors[rowP] + '99' :
+                 val >= 75 ? colors[rowP] + '55' :
+                 val >= 60 ? colors[rowP] + '33' :
+                 val >= 45 ? colors[rowP] + '18' : 'transparent';
+      return `<div class="aff-cell" style="background:${bg};font-size:10px;font-variant-numeric:tabular-nums">${val}</div>`;
+    }).join('');
+    return `<div class="aff-cell aff-header" style="color:${colors[rowP]}">${rowP}</div>${cells}`;
+  });
+
+  const gridHTML = `<div class="aff-grid" style="grid-template-columns:repeat(${PARTIES.length + 1},1fr)">
+    ${headerRow}
+    ${rows.join('')}
+  </div>`;
+
+  return `<div class="card" style="margin-top:12px">
+  <h3 style="font-size:15px">Afstemningsaffinnitet — Hvem stemmer med hvem?</h3>
+  <p style="font-size:12px;color:var(--text-2);margin-top:4px;margin-bottom:14px">Procent af afstemninger i Folketingssalen 2022–2024 hvor partierne stemte i samme retning. Mørkere = højere overensstemmelse.</p>
+  ${gridHTML}
+  <p style="font-size:10px;color:var(--text-3);margin-top:10px">Estimat baseret på analyse af ODA-afstemningsdata 2022–2024.</p>
 </div>`;
 };

@@ -526,6 +526,7 @@ VG.render.fast = function() {
     projection: () => { VG.render.safePanel('panel-projection', () => VG.render.projection()); setTimeout(() => VG.chart.drawDebt(), 0); },
     scenarios:  () => VG.render.safePanel('panel-scenarios',  () => VG.render.scenarios()),
     folketing:  () => VG.render.safePanel('panel-folketing',  () => VG.render.folketing()),
+    historik:   () => VG.render.historik(),
   };
   if (simple[tab]) {
     simple[tab]();
@@ -537,6 +538,8 @@ VG.render.fast = function() {
       if (tab === 'regering')     VG.regering.renderPanel();
       if (tab === 'partier')      VG.partier.renderPanel();
       if (tab === 'borger')       VG.borger.renderPanel();
+      if (tab === 'mandater')     VG.mandater.renderPanel();
+      if (tab === 'valgkort')     VG.valgkort.renderPanel();
     } catch (e) { console.error('[render] tab panel:', e); }
   }
   VG.bindControls();
@@ -554,6 +557,7 @@ VG.render.all = function() {
   VG.render.safePanel('panel-projection',  () => VG.render.projection());
   VG.render.safePanel('panel-scenarios',   () => VG.render.scenarios());
   VG.render.safePanel('panel-folketing',   () => VG.render.folketing());
+  try { VG.render.historik(); } catch (e) { console.error('[render] historik:', e); }
 
   document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + VG.state.activeTab));
 
@@ -595,6 +599,118 @@ VG.bindControls = function() {
     if (el._vgBound) return;
     el._vgBound = true;
     el.addEventListener('click', () => VG.loadScenario(el.dataset.scenario));
+  });
+};
+
+VG.render.historik = function() {
+  const el = document.getElementById('panel-historik');
+  if (!el) return;
+  el.innerHTML = VG.render.buildHistorikHTML();
+  requestAnimationFrame(() => {
+    VG.render.drawHistorikChart('hist-debt-canvas',   VG.render.HIST_DATA.debt,   'Statsgæld (% af BNP)', '#0a6e78');
+    VG.render.drawHistorikChart('hist-growth-canvas', VG.render.HIST_DATA.growth, 'BNP-vækst (%)',        '#3b9e6e');
+    VG.render.drawHistorikChart('hist-unemp-canvas',  VG.render.HIST_DATA.unemp,  'Ledighed (%)',         '#e06b3a');
+  });
+};
+
+VG.render.HIST_DATA = {
+  years: [2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024],
+  debt:   [52.4,49.6,49.5,47.2,45.1,37.8,32.1,27.3,33.4,40.4,42.9,46.4,45.4,44.7,44.3,39.5,37.9,35.9,34.1,33.3,42.2,36.7,29.8,29.3,28.5],
+  growth: [ 3.7, 0.7, 0.5, 0.4, 2.3, 2.4, 3.9, 1.6,-0.5,-4.9, 1.9, 1.3,-0.1,-0.5, 1.6, 2.3, 3.2, 2.8, 2.0,-0.8,-2.0, 4.9, 3.8, 1.8, 2.1],
+  unemp:  [ 4.3, 4.5, 4.6, 5.4, 5.4, 4.8, 3.9, 3.8, 3.5, 6.0, 7.5, 7.6, 7.5, 7.0, 6.6, 6.2, 6.2, 5.7, 5.0, 5.0, 5.6, 5.1, 5.0, 5.1, 5.0]
+};
+
+VG.render.buildHistorikHTML = function() {
+  return `<div class="card">
+  <h2>📈 Historisk økonomi 2000–2024</h2>
+  <p style="font-size:13px;color:var(--text-2);margin-top:4px">Nøgletal for den danske økonomi over de seneste 25 år. Kilde: Danmarks Statistik / OECD.</p>
+
+  <div class="hist-grid">
+    <div class="hist-chart-block">
+      <div class="hist-chart-label">Statsgæld (% af BNP)</div>
+      <canvas id="hist-debt-canvas" class="hist-canvas"></canvas>
+      <div class="hist-chart-note">EU-grænse: 60%</div>
+    </div>
+    <div class="hist-chart-block">
+      <div class="hist-chart-label">BNP-vækst (%)</div>
+      <canvas id="hist-growth-canvas" class="hist-canvas"></canvas>
+      <div class="hist-chart-note">Finanskrise 2009: −4,9%</div>
+    </div>
+    <div class="hist-chart-block">
+      <div class="hist-chart-label">Ledighed (%)</div>
+      <canvas id="hist-unemp-canvas" class="hist-canvas"></canvas>
+      <div class="hist-chart-note">Strukturel: ~5%</div>
+    </div>
+  </div>
+
+  <div class="hist-highlights">
+    <div class="hist-hl-card">
+      <div class="hist-hl-num">28,5%</div>
+      <div class="hist-hl-label">Statsgæld 2024 — DK er et af EU's mindst gældssatte lande</div>
+    </div>
+    <div class="hist-hl-card">
+      <div class="hist-hl-num">−4,9%</div>
+      <div class="hist-hl-label">Laveste BNP-vækst (finanskrise 2009)</div>
+    </div>
+    <div class="hist-hl-card">
+      <div class="hist-hl-num">7,6%</div>
+      <div class="hist-hl-label">Højeste ledighed (2011, efter finanskrise)</div>
+    </div>
+  </div>
+</div>`;
+};
+
+VG.render.drawHistorikChart = function(canvasId, data, label, color) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  canvas.width = canvas.offsetWidth * window.devicePixelRatio || 600;
+  canvas.height = 90 * window.devicePixelRatio || 90;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+
+  const PAD = { l: 4, r: 4, t: 8, b: 4 };
+  const minVal = Math.min(...data);
+  const maxVal = Math.max(...data);
+  const range = maxVal - minVal || 1;
+
+  const toX = (i) => PAD.l + (i / (data.length - 1)) * (W - PAD.l - PAD.r);
+  const toY = (v) => PAD.t + (1 - (v - minVal) / range) * (H - PAD.t - PAD.b);
+
+  // Zero line if data crosses zero
+  if (minVal < 0 && maxVal > 0) {
+    ctx.save();
+    ctx.strokeStyle = 'rgba(128,128,128,0.3)';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 3]);
+    const y0 = toY(0);
+    ctx.beginPath(); ctx.moveTo(0, y0); ctx.lineTo(W, y0); ctx.stroke();
+    ctx.restore();
+  }
+
+  // Fill under curve
+  ctx.beginPath();
+  ctx.moveTo(toX(0), H);
+  data.forEach((v, i) => { if (i === 0) ctx.lineTo(toX(i), toY(v)); else ctx.lineTo(toX(i), toY(v)); });
+  ctx.lineTo(toX(data.length - 1), H);
+  ctx.closePath();
+  ctx.fillStyle = color + '22';
+  ctx.fill();
+
+  // Line
+  ctx.beginPath();
+  data.forEach((v, i) => { if (i === 0) ctx.moveTo(toX(i), toY(v)); else ctx.lineTo(toX(i), toY(v)); });
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+
+  // Dots at min and max
+  [{ val: minVal, idx: data.indexOf(minVal) }, { val: maxVal, idx: data.indexOf(maxVal) }].forEach(({ val, idx }) => {
+    ctx.beginPath();
+    ctx.arc(toX(idx), toY(val), 3, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
   });
 };
 

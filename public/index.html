@@ -78,6 +78,9 @@
   <div id="panel-folketing" class="panel"></div>
   <div id="panel-demographics" class="panel"></div>
   <div id="panel-borger" class="panel"></div>
+  <div id="panel-mandater" class="panel"></div>
+  <div id="panel-valgkort" class="panel"></div>
+  <div id="panel-historik" class="panel"></div>
 </main>
 
 <div class="actions">
@@ -129,6 +132,63 @@
 <script src="/js/partier.js"></script>
 <script src="/js/borger.js"></script>
 <script src="/js/livedata.js"></script>
+<script src="/js/onboarding.js"></script>
+<script src="/js/mandater.js"></script>
+<script src="/js/valgkort.js"></script>
 <script src="/js/app.js"></script>
+
+<div class="onboarding-overlay" id="onboarding-overlay">
+  <div class="onboarding-card">
+    <button class="onboarding-skip" onclick="VG.onboarding.hide()">Spring over ×</button>
+
+    <div class="onboarding-step" id="ob-step-1">
+      <div class="onboarding-logo">🇩🇰</div>
+      <h2>Virtuel Regering</h2>
+      <p class="onboarding-sub">Tag stilling til dansk politik, se hvem der bestemmer — og prøv at styre Danmarks økonomi.</p>
+      <div class="onboarding-features">
+        <div class="ob-feature"><span>⭐</span><span>Se dit politiske ståsted på kompasset</span></div>
+        <div class="ob-feature"><span>💰</span><span>Justér statsbudgettet og se konsekvenserne</span></div>
+        <div class="ob-feature"><span>🏛</span><span>Byg din egen koalition og beregn mandater</span></div>
+        <div class="ob-feature"><span>🗳</span><span>Stem på politiske forslag med andre borgere</span></div>
+      </div>
+      <button class="btn primary onboarding-next" onclick="document.getElementById('ob-step-1').style.display='none';document.getElementById('ob-step-2').style.display='block'">Hvad vil du starte med? →</button>
+    </div>
+
+    <div class="onboarding-step" id="ob-step-2" style="display:none">
+      <h2>Hvad interesserer dig mest?</h2>
+      <p class="onboarding-sub">Vælg et startpunkt — du kan altid skifte fane bagefter.</p>
+      <div class="onboarding-choices">
+        <button class="ob-choice" onclick="VG.onboarding.hide('parti')">
+          <div class="ob-choice-icon">⭐</div>
+          <div class="ob-choice-text">
+            <strong>Mit politiske ståsted</strong>
+            <span>Tag stilling til 40 spørgsmål og se dit kompas-placering</span>
+          </div>
+        </button>
+        <button class="ob-choice" onclick="VG.onboarding.hide('budget')">
+          <div class="ob-choice-icon">💰</div>
+          <div class="ob-choice-text">
+            <strong>Statsbudgettet</strong>
+            <span>Juster skatter, udgifter og se den samfundsmæssige effekt</span>
+          </div>
+        </button>
+        <button class="ob-choice" onclick="VG.onboarding.hide('folketing')">
+          <div class="ob-choice-icon">🏛</div>
+          <div class="ob-choice-text">
+            <strong>Folketing & Regering</strong>
+            <span>Byg koalitioner, beregn mandater, se valgkortet</span>
+          </div>
+        </button>
+        <button class="ob-choice" onclick="VG.onboarding.hide('demokrati')">
+          <div class="ob-choice-icon">🗳</div>
+          <div class="ob-choice-text">
+            <strong>Din stemme</strong>
+            <span>Borgerforslag, demokratiguide og skatteberegner</span>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>

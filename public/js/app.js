@@ -253,23 +253,26 @@ document.addEventListener('DOMContentLoaded', () => {
   VG.bootstrap();
 
   const GROUPS = {
-    oversigt:  { label: 'Oversigt',      tabs: [{ id: 'overview',     label: 'Oversigt' }] },
-    parti:     { label: '⭐ Mit Parti',  tabs: [
+    oversigt:  { label: 'Oversigt', tabs: [{ id: 'overview', label: 'Oversigt' }] },
+    parti:     { label: '⭐ Mit Parti', tabs: [
       { id: 'platform',    label: '⭐ Mit Parti' },
       { id: 'party',       label: '🗳 Borgerstemmer' },
       { id: 'partier',     label: '📊 Partier' }
     ]},
-    budget:    { label: '💰 Budget',     tabs: [
-      { id: 'policy',      label: 'Økonomi & Politik' },
-      { id: 'spending',    label: 'Udgifter' },
-      { id: 'revenue',     label: 'Indtægter' },
-      { id: 'projection',  label: 'Fremskrivning' },
-      { id: 'scenarios',   label: 'Scenarier' }
+    budget: { label: '💰 Budget', tabs: [
+      { id: 'policy',     label: 'Økonomi & Politik' },
+      { id: 'spending',   label: 'Udgifter' },
+      { id: 'revenue',    label: 'Indtægter' },
+      { id: 'projection', label: 'Fremskrivning' },
+      { id: 'historik',   label: '📈 Historik' },
+      { id: 'scenarios',  label: 'Scenarier' }
     ]},
-    folketing: { label: '🏛 Folketing',  tabs: [
-      { id: 'regering',    label: 'Regering' },
-      { id: 'folketing',   label: 'Folketing' },
-      { id: 'demographics',label: 'Demografi' }
+    folketing: { label: '🏛 Folketing', tabs: [
+      { id: 'regering',     label: 'Regering' },
+      { id: 'folketing',    label: 'Folketing' },
+      { id: 'mandater',     label: '🧮 Mandater' },
+      { id: 'valgkort',     label: '🗺 Valgkort' },
+      { id: 'demographics', label: 'Demografi' }
     ]},
     demokrati: { label: '🇩🇰 Demokrati', tabs: [{ id: 'borger', label: 'Din stemme' }] }
   };
@@ -324,6 +327,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Initialise: show overview group
   switchGroup('oversigt');
+  window.__switchGroup = switchGroup; // allow onboarding to navigate
+  VG.onboarding.init();
 
   document.getElementById('btn-reset').addEventListener('click', () => {
     VG.reset();

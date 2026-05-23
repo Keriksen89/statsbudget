@@ -1632,3 +1632,96 @@ canvas { display: block; max-width: 100%; }
 .poll-bar-wrap { height: 6px; background: var(--surface-3); border-radius: 3px; overflow: hidden; position: relative; }
 .poll-bar-fill { height: 100%; border-radius: 3px; }
 .poll-pct  { font-size: 12px; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* ── Onboarding overlay ────────────────────────────── */
+.onboarding-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.72);
+  z-index: 1000; display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.25s;
+}
+.onboarding-overlay.show { opacity: 1; pointer-events: auto; }
+.onboarding-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 40px 36px;
+  max-width: 500px; width: calc(100% - 32px); position: relative;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.4);
+}
+.onboarding-skip {
+  position: absolute; top: 16px; right: 16px;
+  background: none; border: none; color: var(--text-3); font-size: 13px;
+  cursor: pointer; padding: 4px 8px;
+}
+.onboarding-skip:hover { color: var(--text); }
+.onboarding-logo { font-size: 40px; margin-bottom: 12px; }
+.onboarding-card h2 { font-size: 24px; font-weight: 800; margin-bottom: 8px; letter-spacing: -0.5px; }
+.onboarding-sub { color: var(--text-2); font-size: 14px; margin-bottom: 24px; line-height: 1.5; }
+.onboarding-features { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+.ob-feature { display: flex; gap: 12px; align-items: center; font-size: 14px; color: var(--text-2); }
+.ob-feature span:first-child { font-size: 18px; flex-shrink: 0; }
+.onboarding-next { width: 100%; justify-content: center; }
+.onboarding-choices { display: flex; flex-direction: column; gap: 10px; margin-bottom: 8px; }
+.ob-choice {
+  display: flex; gap: 14px; align-items: center;
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 14px 16px; cursor: pointer;
+  text-align: left; transition: border-color 0.15s, background 0.15s;
+}
+.ob-choice:hover { border-color: var(--accent); background: var(--surface-3); }
+.ob-choice-icon { font-size: 22px; flex-shrink: 0; }
+.ob-choice-text { display: flex; flex-direction: column; gap: 3px; }
+.ob-choice-text strong { font-size: 14px; font-weight: 700; }
+.ob-choice-text span { font-size: 12px; color: var(--text-2); line-height: 1.4; }
+
+/* ── Mandatberegner ────────────────────────────────── */
+.mandater-sliders { display: flex; flex-direction: column; gap: 6px; }
+.mandater-row { display: grid; grid-template-columns: 10px 26px 1fr 44px 28px; gap: 8px; align-items: center; }
+.mandater-party-dot { width: 10px; height: 10px; border-radius: 50%; }
+.mandater-party-abbr { font-size: 11px; font-weight: 700; color: var(--text-2); }
+.mandater-pct { font-size: 11px; font-variant-numeric: tabular-nums; color: var(--text-2); text-align: right; }
+.mandater-seats { font-size: 13px; text-align: right; min-width: 22px; }
+.coal-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.coal-chip {
+  border: 1.5px solid var(--border); border-radius: 20px;
+  padding: 4px 10px; font-size: 12px; font-weight: 700; cursor: pointer;
+  background: var(--surface-2); transition: all 0.12s;
+}
+.coal-chip span { font-weight: 400; margin-left: 3px; }
+.coal-chip.active { color: #fff; }
+.coal-bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; margin-top: 10px; }
+.coal-bar-seg { height: 100%; }
+
+/* ── Valgkort ──────────────────────────────────────── */
+.valgkort-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 20px; align-items: start; }
+@media (max-width: 640px) { .valgkort-layout { grid-template-columns: 1fr; } }
+.valgkort-svg-wrap { max-width: 320px; }
+.valgkort-svg { width: 100%; height: auto; }
+.vk-region { transition: fill-opacity 0.15s; }
+.vk-region.active { filter: drop-shadow(0 0 4px rgba(0,0,0,0.3)); }
+.valgkort-detail { min-height: 120px; }
+.vk-bars { display: flex; flex-direction: column; gap: 5px; }
+.vk-bar-row { display: grid; grid-template-columns: 20px 1fr 38px; gap: 8px; align-items: center; }
+.vk-bar-abbr { font-size: 11px; font-weight: 800; }
+.vk-bar-wrap { height: 6px; background: var(--surface-3); border-radius: 3px; overflow: hidden; }
+.vk-bar-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+.vk-bar-pct { font-size: 11px; font-variant-numeric: tabular-nums; color: var(--text-2); text-align: right; }
+.valgkort-legend { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border); }
+.vk-leg-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-2); }
+.vk-leg-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── Historisk ─────────────────────────────────────── */
+.hist-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 20px; }
+@media (max-width: 640px) { .hist-grid { grid-template-columns: 1fr; } }
+.hist-chart-block { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px; }
+.hist-chart-label { font-size: 11px; font-weight: 700; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 8px; }
+.hist-canvas { width: 100%; height: 90px; display: block; }
+.hist-chart-note { font-size: 10px; color: var(--text-3); margin-top: 5px; }
+.hist-highlights { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
+@media (max-width: 640px) { .hist-highlights { grid-template-columns: 1fr; } }
+.hist-hl-card { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; text-align: center; }
+.hist-hl-num { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--text); }
+.hist-hl-label { font-size: 11px; color: var(--text-2); margin-top: 4px; line-height: 1.4; }
+
+/* ── Afstemningsaffinnitet ─────────────────────────── */
+.aff-grid { display: grid; gap: 2px; margin-top: 8px; }
+.aff-cell { padding: 4px 3px; text-align: center; font-size: 11px; font-weight: 600; border-radius: 2px; min-width: 0; }
+.aff-header { font-weight: 800; font-size: 11px; }
