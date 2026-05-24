@@ -97,12 +97,29 @@ VG.render.overview = function() {
   const balSign = bal >= 0 ? '+' : '';
 
   const hasChanges = VG.getChanges().length > 0;
-  const introCard = hasChanges ? '' : `<div class="onboarding-card">
-    <div class="onboarding-steps">
-      <div class="onboarding-step"><div class="step-num">1</div><div><strong>⭐ Mit Parti</strong><p>Tag stilling til 40 politiske spørgsmål og se dit partis placering på det politiske kompas.</p></div></div>
-      <div class="onboarding-step"><div class="step-num">2</div><div><strong>Økonomi & Politik</strong><p>Justér skatter, pensionsalder og velfærdsniveau. Se øjeblikkelig budgeteffekt + MAKRO-dynamik.</p></div></div>
-      <div class="onboarding-step"><div class="step-num">3</div><div><strong>🗳 Borgerstemmer</strong><p>Stem på fælles politikker og se hvad andre danskere mener i realtid.</p></div></div>
-      <div class="onboarding-step"><div class="step-num">4</div><div><strong>Demografi</strong><p>Forstå befolkningsudviklingen og det demografiske pres på statsbudgettet frem mod 2070.</p></div></div>
+  const introCard = hasChanges ? '' : `<div class="overview-welcome">
+    <p class="ov-heading">Hvad vil du udforske?</p>
+    <div class="ov-features">
+      <button class="ov-feature" onclick="window.__switchGroup('parti')">
+        <span class="ov-icon">⭐</span>
+        <strong>Mit Parti</strong>
+        <span>Tag stilling til 40 politiske spørgsmål og find dit kompas-placering.</span>
+      </button>
+      <button class="ov-feature" onclick="window.__switchGroup('budget')">
+        <span class="ov-icon">💰</span>
+        <strong>Økonomi &amp; Politik</strong>
+        <span>Justér skatter og udgifter — se budgeteffekt og MAKRO-dynamik i realtid.</span>
+      </button>
+      <button class="ov-feature" onclick="window.__switchGroup('folketing')">
+        <span class="ov-icon">🏛</span>
+        <strong>Folketing</strong>
+        <span>Byg koalitioner, beregn mandatfordeling og se valgkortet.</span>
+      </button>
+      <button class="ov-feature" onclick="window.__switchGroup('demokrati')">
+        <span class="ov-icon">🇩🇰</span>
+        <strong>Din stemme</strong>
+        <span>Stem på politiske forslag, sundhedsdata og forbrugertrends.</span>
+      </button>
     </div>
   </div>`;
 
