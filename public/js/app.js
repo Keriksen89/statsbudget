@@ -153,9 +153,15 @@ VG.theme.apply = function(mode) {
   try { localStorage.setItem('vg-theme', mode); } catch {}
 };
 
+VG.theme._isDark = function() {
+  const attr = document.documentElement.getAttribute('data-theme');
+  if (attr === 'dark')  return true;
+  if (attr === 'light') return false;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches;
+};
+
 VG.theme.toggle = function() {
-  const current = document.documentElement.getAttribute('data-theme');
-  const next = current === 'dark' ? 'light' : 'dark';
+  const next = VG.theme._isDark() ? 'light' : 'dark';
   VG.theme.apply(next);
   document.getElementById('theme-icon').textContent = next === 'dark' ? '☾' : '☀';
 };
@@ -165,8 +171,9 @@ VG.theme.init = function() {
   try { saved = localStorage.getItem('vg-theme'); } catch {}
   if (saved && saved !== 'system') {
     VG.theme.apply(saved);
-    document.getElementById('theme-icon').textContent = saved === 'dark' ? '☾' : '☀';
   }
+  // Always sync icon to effective theme (handles system dark mode on first visit)
+  document.getElementById('theme-icon').textContent = VG.theme._isDark() ? '☾' : '☀';
 };
 
 VG.bootstrap = async function() {
