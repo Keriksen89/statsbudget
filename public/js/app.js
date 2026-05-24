@@ -282,6 +282,9 @@ document.addEventListener('DOMContentLoaded', () => {
       { id: 'co2',            label: '🌿 CO₂ & Klima' },
       { id: 'kriminalitet',   label: '🚨 Kriminalitet' },
       { id: 'uddannelse',     label: '🎓 Uddannelse' },
+      { id: 'inflation',      label: '📈 Inflation' },
+      { id: 'udenrigshandel', label: '🌐 Udenrigshandel' },
+      { id: 'landbrug',       label: '🌾 Landbrug' },
     ]},
     politik: { label: '🏛 Politik', tabs: [
       { id: 'platform',         label: '⭐ Mit Parti' },
@@ -301,6 +304,9 @@ document.addEventListener('DOMContentLoaded', () => {
       { id: 'projection',       label: 'Fremskrivning' },
       { id: 'historik',         label: '📈 Historik' },
       { id: 'scenarios',        label: 'Scenarier' },
+      { id: 'statsgaeld',       label: '🏦 Statsgæld' },
+      { id: 'erhverv',          label: '🏢 Erhverv' },
+      { id: 'innovation',       label: '🔬 Innovation' },
     ]},
   };
 

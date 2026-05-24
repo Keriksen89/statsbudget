@@ -2417,3 +2417,160 @@ canvas { display: block; max-width: 100%; }
 .udd-extra-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:10px; margin-top:20px; }
 .udd-extra-stat { background:var(--surface-2); padding:12px 14px; border-radius:6px; }
 .elpris-eu-val { font-size: 12px; font-weight: 600; }
+
+/* ── Inflation panel ─────────────────────────────────────────────────── */
+.infl-hero-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(155px,1fr)); gap:12px; margin:16px 0 24px; }
+.infl-hero-stat { background:var(--surface-2); border-radius:8px; padding:14px 16px; }
+.infl-bar-chart { display:flex; align-items:flex-end; gap:2px; height:100px; padding:8px 0; border-bottom:1px solid var(--border); margin-bottom:20px; }
+.infl-bar-col { display:flex; flex-direction:column; align-items:center; gap:4px; flex:1; }
+.infl-bar-fill { width:100%; min-height:4px; border-radius:2px 2px 0 0; }
+.infl-bar-label { font-size:8px; color:var(--text-3); writing-mode:vertical-lr; transform:rotate(180deg); height:28px; }
+.infl-cats { display:flex; flex-direction:column; gap:7px; margin-bottom:24px; }
+.infl-cat-row { display:grid; grid-template-columns:160px 1fr 50px 44px; align-items:center; gap:8px; font-size:12px; }
+@media (max-width:640px) { .infl-cat-row { grid-template-columns:120px 1fr 44px; } .infl-cat-weight { display:none; } }
+.infl-cat-name { font-size:11px; color:var(--text-2); }
+.infl-cat-track { height:10px; background:var(--surface-3); border-radius:5px; overflow:hidden; }
+.infl-cat-bar { height:100%; border-radius:5px; }
+.infl-cat-val { font-weight:700; text-align:right; }
+.infl-cat-weight { font-size:10px; color:var(--text-3); text-align:right; }
+.infl-two-col { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:20px; }
+@media (max-width:640px) { .infl-two-col { grid-template-columns:1fr; } }
+.infl-nordic { display:flex; flex-direction:column; gap:7px; }
+.infl-nordic-row { display:grid; grid-template-columns:110px 1fr 44px; align-items:center; gap:8px; font-size:12px; padding:4px 8px; border-radius:5px; }
+.infl-nordic-row.highlight { background:var(--surface-2); }
+.infl-nordic-track { height:10px; background:var(--surface-3); border-radius:5px; overflow:hidden; }
+.infl-nordic-bar { height:100%; border-radius:5px; }
+.infl-impact-grid { display:flex; flex-direction:column; gap:8px; }
+.infl-impact-card { background:var(--surface-2); padding:10px 14px; border-radius:6px; }
+.infl-impact-label { font-size:11px; color:var(--text-3); margin-bottom:4px; }
+.infl-impact-val { font-size:14px; font-weight:700; color:var(--pos); }
+.infl-impact-pct { font-size:11px; color:var(--text-3); margin-top:2px; }
+
+/* ── Udenrigshandel panel ─────────────────────────────────────────────── */
+.uh-hero-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(155px,1fr)); gap:12px; margin:16px 0 24px; }
+.uh-hero-stat { background:var(--surface-2); border-radius:8px; padding:14px 16px; }
+.uh-trend { margin-bottom:24px; }
+.uh-trend-legend { display:flex; gap:16px; font-size:11px; margin-bottom:6px; }
+.uh-leg-exp { color:var(--accent); font-weight:600; }
+.uh-leg-imp { color:var(--text-3); font-weight:600; }
+.uh-trend-bars { display:flex; align-items:flex-end; gap:4px; height:100px; padding:8px 0; border-bottom:1px solid var(--border); }
+.uh-year-col { display:flex; flex-direction:column; align-items:center; gap:4px; flex:1; }
+.uh-year-bars { display:flex; align-items:flex-end; gap:1px; height:80px; }
+.uh-year-bar { min-height:4px; width:12px; border-radius:2px 2px 0 0; }
+.uh-year-bar.exp { background:var(--accent); }
+.uh-year-bar.imp { background:var(--text-3); opacity:0.6; }
+.uh-year-label { font-size:10px; color:var(--text-3); }
+.uh-two-col { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:20px; }
+@media (max-width:640px) { .uh-two-col { grid-template-columns:1fr; } }
+.uh-partner-header { display:grid; grid-template-columns:24px 90px 55px 55px 65px; font-size:10px; color:var(--text-3); gap:8px; padding:0 4px; margin-bottom:4px; }
+.uh-partners { display:flex; flex-direction:column; gap:5px; }
+.uh-partner-row { display:grid; grid-template-columns:24px 90px 55px 55px 65px; align-items:center; gap:8px; font-size:12px; padding:5px 4px; background:var(--surface-2); border-radius:5px; }
+.uh-partner-flag { font-size:16px; text-align:center; }
+.uh-partner-name { font-size:11px; }
+.uh-partner-exp,.uh-partner-imp { font-weight:600; text-align:right; font-size:11px; }
+.uh-partner-bal { font-weight:700; text-align:right; font-size:11px; }
+.uh-cats { display:flex; flex-direction:column; gap:7px; }
+.uh-cat-row { display:grid; grid-template-columns:130px 1fr 55px 38px; align-items:center; gap:8px; font-size:11px; }
+.uh-cat-name { color:var(--text-2); }
+.uh-cat-track { height:10px; background:var(--surface-3); border-radius:5px; overflow:hidden; }
+.uh-cat-bar { height:100%; background:var(--accent); border-radius:5px; }
+.uh-cat-val { font-weight:600; text-align:right; }
+.uh-cat-pct { color:var(--text-3); text-align:right; }
+
+/* ── Landbrug panel ───────────────────────────────────────────────────── */
+.la-hero-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(155px,1fr)); gap:12px; margin:16px 0 24px; }
+.la-hero-stat { background:var(--surface-2); border-radius:8px; padding:14px 16px; }
+.la-two-col { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin:20px 0; }
+@media (max-width:640px) { .la-two-col { grid-template-columns:1fr; } }
+.la-sectors { display:flex; flex-direction:column; gap:7px; }
+.la-sector-row { display:grid; grid-template-columns:140px 1fr 60px 52px; align-items:center; gap:8px; font-size:12px; }
+.la-sector-name { font-size:11px; color:var(--text-2); }
+.la-sector-track { height:10px; background:var(--surface-3); border-radius:5px; overflow:hidden; }
+.la-sector-bar { height:100%; background:var(--accent); border-radius:5px; }
+.la-sector-val { font-weight:600; text-align:right; }
+.la-sector-trend { font-weight:700; text-align:right; }
+.la-bar-chart { display:flex; align-items:flex-end; gap:4px; height:90px; padding:8px 0; border-bottom:1px solid var(--border); margin-bottom:12px; }
+.la-bar-col { display:flex; flex-direction:column; align-items:center; gap:4px; flex:1; }
+.la-bar-fill { width:100%; min-height:4px; border-radius:2px 2px 0 0; background:var(--accent); opacity:0.8; }
+.la-bar-year { font-size:10px; color:var(--text-3); }
+.la-sub-stats { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.la-sub-stat { background:var(--surface-2); padding:8px 12px; border-radius:5px; display:flex; flex-direction:column; gap:2px; font-size:11px; color:var(--text-3); }
+.la-sub-stat strong { font-size:13px; font-weight:700; color:var(--text); }
+.la-water { margin-top:16px; }
+.la-water-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:10px; margin-top:8px; }
+.la-water-stat { background:var(--surface-2); padding:10px 14px; border-radius:6px; display:flex; flex-direction:column; gap:3px; font-size:11px; color:var(--text-3); }
+.la-water-stat strong { font-size:13px; font-weight:700; color:var(--text); }
+
+/* ── Statsgæld panel ─────────────────────────────────────────────────── */
+.sg-hero-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(155px,1fr)); gap:12px; margin:16px 0 24px; }
+.sg-hero-stat { background:var(--surface-2); border-radius:8px; padding:14px 16px; }
+.sg-legend { display:flex; gap:16px; font-size:11px; margin-bottom:6px; }
+.sg-leg-gross { color:var(--accent); font-weight:600; }
+.sg-leg-net { color:var(--warn); font-weight:600; }
+.sg-bar-chart { display:flex; align-items:flex-end; gap:3px; height:100px; padding:8px 0; border-bottom:1px solid var(--border); margin-bottom:20px; }
+.sg-bar-col { display:flex; flex-direction:column; align-items:center; gap:4px; flex:1; }
+.sg-bar-pair { display:flex; align-items:flex-end; gap:2px; height:80px; }
+.sg-bar-gross { min-height:4px; width:14px; border-radius:2px 2px 0 0; background:var(--accent); }
+.sg-bar-net { min-height:4px; width:8px; border-radius:2px 2px 0 0; background:var(--warn); }
+.sg-bar-year { font-size:9px; color:var(--text-3); }
+.sg-two-col { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:20px; }
+@media (max-width:640px) { .sg-two-col { grid-template-columns:1fr; } }
+.sg-eu { display:flex; flex-direction:column; gap:6px; }
+.sg-eu-row { display:grid; grid-template-columns:110px 1fr 50px; align-items:center; gap:8px; font-size:12px; padding:4px 8px; border-radius:5px; }
+.sg-eu-row.highlight { background:var(--surface-2); }
+.sg-eu-track { height:10px; background:var(--surface-3); border-radius:5px; overflow:hidden; }
+.sg-eu-bar { height:100%; border-radius:5px; }
+.sg-mat { display:flex; flex-direction:column; gap:7px; margin-bottom:16px; }
+.sg-mat-row { display:grid; grid-template-columns:80px 1fr 40px; align-items:center; gap:8px; font-size:12px; }
+.sg-mat-track { height:10px; background:var(--surface-3); border-radius:5px; overflow:hidden; }
+.sg-mat-bar { height:100%; border-radius:5px; }
+.sg-extra-stat { background:var(--surface-2); padding:10px 14px; border-radius:6px; display:flex; justify-content:space-between; align-items:center; font-size:12px; }
+.sg-extra-stat strong { font-weight:700; }
+
+/* ── Erhverv panel ────────────────────────────────────────────────────── */
+.erh-hero-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(155px,1fr)); gap:12px; margin:16px 0 24px; }
+.erh-hero-stat { background:var(--surface-2); border-radius:8px; padding:14px 16px; }
+.erh-sector-header { display:grid; grid-template-columns:150px 1fr 50px 60px 52px; font-size:10px; color:var(--text-3); gap:8px; padding:0 4px; margin-bottom:4px; }
+.erh-sectors { display:flex; flex-direction:column; gap:6px; margin-bottom:24px; }
+.erh-sector-row { display:grid; grid-template-columns:150px 1fr 50px 60px 52px; align-items:center; gap:8px; font-size:12px; padding:5px 4px; }
+.erh-sector-name { font-size:11px; color:var(--text-2); }
+.erh-sector-track { height:10px; background:var(--surface-3); border-radius:5px; overflow:hidden; }
+.erh-sector-bar { height:100%; background:var(--accent); border-radius:5px; }
+.erh-sector-emp,.erh-sector-gdp { font-weight:600; text-align:right; font-size:11px; }
+.erh-sector-growth { font-weight:700; text-align:right; font-size:11px; }
+.erh-two-col { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+@media (max-width:640px) { .erh-two-col { grid-template-columns:1fr; } }
+.erh-employers { display:flex; flex-direction:column; gap:6px; }
+.erh-emp-row { display:flex; justify-content:space-between; align-items:center; padding:7px 10px; background:var(--surface-2); border-radius:5px; font-size:12px; gap:8px; }
+.erh-emp-name { font-weight:600; flex:1; }
+.erh-emp-sector { color:var(--text-3); font-size:11px; }
+.erh-emp-count { font-size:11px; font-weight:600; }
+.erh-sme-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.erh-sme-stat { background:var(--surface-2); padding:10px 12px; border-radius:6px; display:flex; flex-direction:column; gap:2px; font-size:11px; color:var(--text-3); }
+.erh-sme-stat strong { font-size:14px; font-weight:700; color:var(--text); }
+
+/* ── Innovation panel ────────────────────────────────────────────────── */
+.inn-hero-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(155px,1fr)); gap:12px; margin:16px 0 24px; }
+.inn-hero-stat { background:var(--surface-2); border-radius:8px; padding:14px 16px; }
+.inn-trend-chart { display:flex; align-items:flex-end; gap:4px; height:90px; padding:8px 0; border-bottom:1px solid var(--border); margin-bottom:8px; }
+.inn-trend-col { display:flex; flex-direction:column; align-items:center; gap:4px; flex:1; }
+.inn-trend-bar { width:100%; min-height:4px; border-radius:2px 2px 0 0; background:var(--accent); }
+.inn-trend-year { font-size:9px; color:var(--text-3); }
+.inn-target { font-size:11px; color:var(--neg); font-weight:600; margin-bottom:20px; }
+.inn-two-col { display:grid; grid-template-columns:1fr 1fr; gap:24px; margin-top:20px; }
+@media (max-width:640px) { .inn-two-col { grid-template-columns:1fr; } }
+.inn-rd-sectors { display:flex; flex-direction:column; gap:7px; }
+.inn-rd-row { display:grid; grid-template-columns:150px 1fr 55px 38px; align-items:center; gap:8px; font-size:11px; }
+.inn-rd-name { color:var(--text-2); }
+.inn-rd-track { height:10px; background:var(--surface-3); border-radius:5px; overflow:hidden; }
+.inn-rd-bar { height:100%; background:var(--accent); border-radius:5px; }
+.inn-rd-bn { font-weight:600; text-align:right; }
+.inn-rd-pct { color:var(--text-3); text-align:right; }
+.inn-unis { display:flex; flex-direction:column; gap:6px; margin-bottom:16px; }
+.inn-uni-row { display:grid; grid-template-columns:60px 80px 1fr; align-items:center; gap:8px; font-size:12px; padding:6px 10px; background:var(--surface-2); border-radius:5px; }
+.inn-uni-name { font-weight:700; }
+.inn-uni-rank { font-size:11px; color:var(--text-3); }
+.inn-uni-rd { font-size:11px; }
+.inn-green { background:color-mix(in srgb, var(--accent) 8%, var(--surface-2)); border:1px solid color-mix(in srgb, var(--accent) 30%, transparent); border-radius:6px; padding:10px 14px; }
+.inn-green-label { font-size:12px; font-weight:700; margin-bottom:4px; }
+.inn-green-val { font-size:11px; color:var(--text-2); margin-top:2px; }

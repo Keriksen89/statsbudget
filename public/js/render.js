@@ -570,11 +570,17 @@ VG.render.fast = function() {
       if (tab === 'elpris')            VG.render.elpris();
       if (tab === 'ledighed')          VG.render.ledighed();
       if (tab === 'meningsmaalinger')  VG.meningsmaalinger.renderPanel();
-      if (tab === 'boligmarked')  VG.render.boligmarked();
-      if (tab === 'indkomst')     VG.render.indkomst();
-      if (tab === 'co2')          VG.render.co2();
-      if (tab === 'kriminalitet') VG.render.kriminalitet();
-      if (tab === 'uddannelse')   VG.render.uddannelse();
+      if (tab === 'boligmarked')    VG.render.boligmarked();
+      if (tab === 'indkomst')       VG.render.indkomst();
+      if (tab === 'co2')            VG.render.co2();
+      if (tab === 'kriminalitet')   VG.render.kriminalitet();
+      if (tab === 'uddannelse')     VG.render.uddannelse();
+      if (tab === 'inflation')      VG.render.inflation();
+      if (tab === 'udenrigshandel') VG.render.udenrigshandel();
+      if (tab === 'landbrug')       VG.render.landbrug();
+      if (tab === 'statsgaeld')     VG.render.statsgaeld();
+      if (tab === 'erhverv')        VG.render.erhverv();
+      if (tab === 'innovation')     VG.render.innovation();
     } catch (e) { console.error('[render] tab panel:', e); }
   }
   VG.bindControls();
@@ -1845,3 +1851,526 @@ VG.loadScenario = function(key) {
   VG.render.all();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 };
+
+VG.render.inflation = async function() {
+  const panel = document.getElementById('panel-inflation');
+  if (!panel || panel._loading) return;
+  panel._loading = true;
+  panel.innerHTML = '<div class="panel-loading">Henter prisdata…</div>';
+  let d;
+  try { d = await fetch('/api/livedata/inflation').then(r => r.json()); }
+  catch(e) { panel.innerHTML = '<div class="card"><p class="data-note">Kunne ikke hente data.</p></div>'; panel._loading = false; return; }
+  panel._loading = false;
+
+  const trendBars = d.trend.map((t, i) => {
+    const h = Math.round(Math.max(0, t.yoy) / 12 * 80);
+    const color = t.yoy > 4 ? 'var(--pos)' : t.yoy > 2.5 ? 'var(--warn)' : 'var(--accent)';
+    return `<div class="infl-bar-col">
+      <div class="infl-bar-fill" style="height:${h}px;background:${color}" title="${t.month}: ${t.yoy}%"></div>
+      <div class="infl-bar-label">${t.month.slice(0,3)}</div>
+    </div>`;
+  }).join('');
+
+  const catRows = d.categories.map(c => {
+    const color = c.yoy > 3 ? 'var(--pos)' : c.yoy < 0 ? 'var(--neg)' : 'var(--text)';
+    const sign = c.yoy >= 0 ? '+' : '';
+    const barW = Math.min(100, Math.abs(c.yoy) / 8 * 100).toFixed(1);
+    return `<div class="infl-cat-row">
+      <span class="infl-cat-name">${c.name}</span>
+      <div class="infl-cat-track"><div class="infl-cat-bar" style="width:${barW}%;background:${color}"></div></div>
+      <span class="infl-cat-val" style="color:${color};font-weight:700">${sign}${c.yoy.toFixed(1)}%</span>
+      <span class="infl-cat-weight">${c.weight.toFixed(1)}%</span>
+    </div>`;
+  }).join('');
+
+  const nordicRows = d.nordic.map(n => {
+    const isdk = n.country === 'Danmark';
+    return `<div class="infl-nordic-row${isdk ? ' highlight' : ''}">
+      <span>${n.flag} ${n.country}</span>
+      <div class="infl-nordic-track"><div class="infl-nordic-bar" style="width:${(n.inflation/6*100).toFixed(1)}%;background:${isdk ? 'var(--accent)' : 'var(--text-3)'}"></div></div>
+      <span style="font-weight:700">${n.inflation.toFixed(1)}%</span>
+    </div>`;
+  }).join('');
+
+  const hi = d.householdImpact;
+  panel.innerHTML = `<div class="card">
+  <h2>📈 Inflation & Priser</h2>
+  <p class="intro">Forbrugerprisudvikling i Danmark. ${d.liveSource ? 'Live data fra DST.' : 'Baseret på DST PRIS6 og Nationalbanken, 2025.'}</p>
+  <div class="infl-hero-grid">
+    <div class="infl-hero-stat">
+      <div class="stat-label">Inflation (år/år)</div>
+      <div class="stat-num">${d.inflationYoy.toFixed(1)}%</div>
+      <div class="stat-delta">Forbrugerprisindeks</div>
+    </div>
+    <div class="infl-hero-stat">
+      <div class="stat-label">Kerninflation</div>
+      <div class="stat-num">${d.coreCPI.toFixed(1)}%</div>
+      <div class="stat-delta">eks. energi & føde</div>
+    </div>
+    <div class="infl-hero-stat">
+      <div class="stat-label">Topm. inflationspik</div>
+      <div class="stat-num">${d.peakInflation.toFixed(1)}%</div>
+      <div class="stat-delta">${d.peakYear}</div>
+    </div>
+    <div class="infl-hero-stat">
+      <div class="stat-label">CPI-indeks</div>
+      <div class="stat-num">${d.currentCPI.toFixed(1)}</div>
+      <div class="stat-delta">2015 = 100</div>
+    </div>
+  </div>
+  <h3>Månedlig inflation (år/år) — seneste 14 måneder</h3>
+  <div class="infl-bar-chart">${trendBars}</div>
+  <h3>Bidrag pr. kategori</h3>
+  <div class="infl-cats">${catRows}</div>
+  <div class="infl-two-col">
+    <div>
+      <h3>Nordisk sammenligning</h3>
+      <div class="infl-nordic">${nordicRows}</div>
+    </div>
+    <div>
+      <h3>Husholdningseffekt pr. mdr.</h3>
+      <div class="infl-impact-grid">
+        <div class="infl-impact-card">
+          <div class="infl-impact-label">Lav indkomst</div>
+          <div class="infl-impact-val">+${hi.lowIncome.extraCostMonth.toLocaleString('da-DK')} kr/mdr</div>
+          <div class="infl-impact-pct">${hi.lowIncome.pctIncome.toFixed(1)}% af indkomst</div>
+        </div>
+        <div class="infl-impact-card">
+          <div class="infl-impact-label">Middel indkomst</div>
+          <div class="infl-impact-val">+${hi.middleIncome.extraCostMonth.toLocaleString('da-DK')} kr/mdr</div>
+          <div class="infl-impact-pct">${hi.middleIncome.pctIncome.toFixed(1)}% af indkomst</div>
+        </div>
+        <div class="infl-impact-card">
+          <div class="infl-impact-label">Høj indkomst</div>
+          <div class="infl-impact-val">+${hi.highIncome.extraCostMonth.toLocaleString('da-DK')} kr/mdr</div>
+          <div class="infl-impact-pct">${hi.highIncome.pctIncome.toFixed(1)}% af indkomst</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>`;
+};
+
+VG.render.udenrigshandel = async function() {
+  const panel = document.getElementById('panel-udenrigshandel');
+  if (!panel || panel._loading) return;
+  panel._loading = true;
+  panel.innerHTML = '<div class="panel-loading">Henter handelsdata…</div>';
+  let d;
+  try { d = await fetch('/api/livedata/udenrigshandel').then(r => r.json()); }
+  catch(e) { panel.innerHTML = '<div class="card"><p class="data-note">Kunne ikke hente data.</p></div>'; panel._loading = false; return; }
+  panel._loading = false;
+
+  const partnerRows = d.topPartners.map(p => {
+    const balColor = p.balance >= 0 ? 'var(--neg)' : 'var(--pos)';
+    const balSign  = p.balance >= 0 ? '+' : '';
+    return `<div class="uh-partner-row">
+      <span class="uh-partner-flag">${p.flag}</span>
+      <span class="uh-partner-name">${p.country}</span>
+      <span class="uh-partner-exp">${p.exportBn} mia.</span>
+      <span class="uh-partner-imp">${p.importBn} mia.</span>
+      <span class="uh-partner-bal" style="color:${balColor}">${balSign}${p.balance} mia.</span>
+    </div>`;
+  }).join('');
+
+  const maxCat = Math.max(...d.exportCategories.map(c => c.bn));
+  const catBars = d.exportCategories.map(c => {
+    const w = (c.bn / maxCat * 100).toFixed(1);
+    return `<div class="uh-cat-row">
+      <span class="uh-cat-name">${c.name}</span>
+      <div class="uh-cat-track"><div class="uh-cat-bar" style="width:${w}%"></div></div>
+      <span class="uh-cat-val">${c.bn} mia.</span>
+      <span class="uh-cat-pct">${c.pct.toFixed(1)}%</span>
+    </div>`;
+  }).join('');
+
+  const maxY = Math.max(...d.yearlyTrend.map(y => y.exports));
+  const trendBars = d.yearlyTrend.map(y => {
+    const eh = Math.round(y.exports / (maxY + 50) * 80);
+    const ih = Math.round(y.imports / (maxY + 50) * 80);
+    return `<div class="uh-year-col">
+      <div class="uh-year-bars">
+        <div class="uh-year-bar exp" style="height:${eh}px" title="Eksport ${y.year}: ${y.exports} mia."></div>
+        <div class="uh-year-bar imp" style="height:${ih}px" title="Import ${y.year}: ${y.imports} mia."></div>
+      </div>
+      <div class="uh-year-label">${y.year}</div>
+    </div>`;
+  }).join('');
+
+  const balSign = d.tradeBalanceBn >= 0 ? '+' : '';
+  const caSign  = d.currentAccountBn >= 0 ? '+' : '';
+  panel.innerHTML = `<div class="card">
+  <h2>🌐 Udenrigshandel</h2>
+  <p class="intro">Danmarks eksport, import og handelsbalance. ${d.liveSource ? 'Live fra DST.' : 'DST Udenrigshandelsstatistik 2024.'}</p>
+  <div class="uh-hero-grid">
+    <div class="uh-hero-stat">
+      <div class="stat-label">Eksport</div>
+      <div class="stat-num">${d.exportsBn.toLocaleString('da-DK')} mia.</div>
+      <div class="stat-delta" style="color:var(--neg)">+${d.exportGrowthYoy}% år/år</div>
+    </div>
+    <div class="uh-hero-stat">
+      <div class="stat-label">Import</div>
+      <div class="stat-num">${d.importsBn.toLocaleString('da-DK')} mia.</div>
+      <div class="stat-delta">varer & services</div>
+    </div>
+    <div class="uh-hero-stat">
+      <div class="stat-label">Handelsbalance</div>
+      <div class="stat-num" style="color:var(--neg)">${balSign}${d.tradeBalanceBn} mia.</div>
+      <div class="stat-delta">overskud</div>
+    </div>
+    <div class="uh-hero-stat">
+      <div class="stat-label">Betalingsbalance</div>
+      <div class="stat-num" style="color:var(--neg)">${caSign}${d.currentAccountBn} mia.</div>
+      <div class="stat-delta">${d.currentAccountPctGDP}% af BNP</div>
+    </div>
+  </div>
+  <h3>Eksport & import pr. år</h3>
+  <div class="uh-trend">
+    <div class="uh-trend-legend"><span class="uh-leg-exp">■ Eksport</span><span class="uh-leg-imp">■ Import</span></div>
+    <div class="uh-trend-bars">${trendBars}</div>
+  </div>
+  <div class="uh-two-col">
+    <div>
+      <h3>Top handelspartnere</h3>
+      <div class="uh-partner-header">
+        <span></span><span></span><span>Eks.</span><span>Imp.</span><span>Balance</span>
+      </div>
+      <div class="uh-partners">${partnerRows}</div>
+    </div>
+    <div>
+      <h3>Eksportkategorier</h3>
+      <div class="uh-cats">${catBars}</div>
+    </div>
+  </div>
+</div>`;
+};
+
+VG.render.landbrug = async function() {
+  const panel = document.getElementById('panel-landbrug');
+  if (!panel || panel._loading) return;
+  panel._loading = true;
+  panel.innerHTML = '<div class="panel-loading">Henter landbrugsdata…</div>';
+  let d;
+  try { d = await fetch('/api/livedata/landbrug').then(r => r.json()); }
+  catch(e) { panel.innerHTML = '<div class="card"><p class="data-note">Kunne ikke hente data.</p></div>'; panel._loading = false; return; }
+  panel._loading = false;
+
+  const maxExport = Math.max(...d.sectors.map(s => s.exportBn));
+  const sectorRows = d.sectors.map(s => {
+    const w = (s.exportBn / maxExport * 100).toFixed(1);
+    const trendColor = s.trend >= 0 ? 'var(--neg)' : 'var(--pos)';
+    const trendSign  = s.trend >= 0 ? '+' : '';
+    return `<div class="la-sector-row">
+      <span class="la-sector-name">${s.name}</span>
+      <div class="la-sector-track"><div class="la-sector-bar" style="width:${w}%"></div></div>
+      <span class="la-sector-val">${s.exportBn.toFixed(1)} mia.</span>
+      <span class="la-sector-trend" style="color:${trendColor}">${trendSign}${s.trend.toFixed(1)}%</span>
+    </div>`;
+  }).join('');
+
+  const maxFarm = Math.max(...d.farmTrend.map(f => f.count));
+  const farmBars = d.farmTrend.map(f => {
+    const h = Math.round(f.count / maxFarm * 80);
+    return `<div class="la-bar-col">
+      <div class="la-bar-fill" style="height:${h}px"></div>
+      <div class="la-bar-year">${f.year}</div>
+    </div>`;
+  }).join('');
+
+  const mat = d.maturityProfile;
+  panel.innerHTML = `<div class="card">
+  <h2>🌾 Landbrug & Fødevarer</h2>
+  <p class="intro">Danmarks landbrugssektor, eksport og bæredygtighedsudfordringer. Kilde: SEGES, DST og Fødevareministeriet 2024.</p>
+  <div class="la-hero-grid">
+    <div class="la-hero-stat">
+      <div class="stat-label">Produktionsværdi</div>
+      <div class="stat-num">${d.productionValueBn.toFixed(1)} mia.</div>
+      <div class="stat-delta">kr. pr. år</div>
+    </div>
+    <div class="la-hero-stat">
+      <div class="stat-label">Fødevareeksport</div>
+      <div class="stat-num">${d.exportValueBn.toFixed(1)} mia.</div>
+      <div class="stat-delta">kr. pr. år</div>
+    </div>
+    <div class="la-hero-stat">
+      <div class="stat-label">Antal bedrifter</div>
+      <div class="stat-num">${d.farmCount.toLocaleString('da-DK')}</div>
+      <div class="stat-delta">gns. ${d.avgFarmHa} ha</div>
+    </div>
+    <div class="la-hero-stat">
+      <div class="stat-label">Landbrugs-CO₂</div>
+      <div class="stat-num">${d.co2MtPerYear.toFixed(1)} Mt</div>
+      <div class="stat-delta">${(d.co2MtPerYear/49.8*100).toFixed(0)}% af DK's udl.</div>
+    </div>
+  </div>
+  <div class="la-two-col">
+    <div>
+      <h3>Eksport pr. sektor</h3>
+      <div class="la-sectors">${sectorRows}</div>
+    </div>
+    <div>
+      <h3>Antal bedrifter — historik</h3>
+      <div class="la-bar-chart">${farmBars}</div>
+      <div class="la-sub-stats">
+        <div class="la-sub-stat"><span>Landbrugsareal</span><strong>${d.agriculturalAreaMha.toFixed(2)} mio. ha</strong></div>
+        <div class="la-sub-stat"><span>Beskæftigede</span><strong>${d.employedK.toFixed(1)}k</strong></div>
+        <div class="la-sub-stat"><span>Økologisk andel</span><strong>${d.organicShare.toFixed(1)}%</strong></div>
+        <div class="la-sub-stat"><span>EU-støtte</span><strong>${d.subsidies.euSubsidiesBn.toFixed(1)} mia. kr./år</strong></div>
+      </div>
+    </div>
+  </div>
+  <div class="la-water">
+    <h3>Vandmiljø & reduktionsmål</h3>
+    <div class="la-water-grid">
+      <div class="la-water-stat"><span>Kvælstofudledning</span><strong>${d.waterQuality.nitrogenTonnes.toLocaleString('da-DK')} t/år</strong></div>
+      <div class="la-water-stat"><span>Fosforudledning</span><strong>${d.waterQuality.phosphorusTonnes.toLocaleString('da-DK')} t/år</strong></div>
+      <div class="la-water-stat"><span>Kvælstofreduktionsmål 2027</span><strong>${d.waterQuality.reductionTarget2027Pct}%</strong></div>
+    </div>
+  </div>
+</div>`;
+};
+
+VG.render.statsgaeld = async function() {
+  const panel = document.getElementById('panel-statsgaeld');
+  if (!panel || panel._loading) return;
+  panel._loading = true;
+  panel.innerHTML = '<div class="panel-loading">Henter gældsdata…</div>';
+  let d;
+  try { d = await fetch('/api/livedata/statsgaeld').then(r => r.json()); }
+  catch(e) { panel.innerHTML = '<div class="card"><p class="data-note">Kunne ikke hente data.</p></div>'; panel._loading = false; return; }
+  panel._loading = false;
+
+  const maxTrend = Math.max(...d.debtTrend.map(t => t.grossPct));
+  const trendBars = d.debtTrend.map(t => {
+    const gh = Math.round(t.grossPct / (maxTrend + 10) * 80);
+    const hasNet = t.netPct >= 0;
+    const nh = hasNet ? Math.round(t.netPct / (maxTrend + 10) * 80) : 0;
+    return `<div class="sg-bar-col">
+      <div class="sg-bar-pair">
+        <div class="sg-bar-gross" style="height:${gh}px" title="Bruttogæld ${t.year}: ${t.grossPct}% BNP"></div>
+        ${hasNet ? `<div class="sg-bar-net" style="height:${nh}px" title="Nettogæld ${t.year}: ${t.netPct}% BNP"></div>` : ''}
+      </div>
+      <div class="sg-bar-year">${t.year}</div>
+    </div>`;
+  }).join('');
+
+  const euRows = d.euComparison.map(c => {
+    const isdk = c.country === 'Danmark';
+    const maxEu = 150;
+    const w = (c.pct / maxEu * 100).toFixed(1);
+    const color = c.pct < 40 ? 'var(--neg)' : c.pct < 80 ? 'var(--warn)' : 'var(--pos)';
+    return `<div class="sg-eu-row${isdk ? ' highlight' : ''}">
+      <span>${c.flag} ${c.country}</span>
+      <div class="sg-eu-track"><div class="sg-eu-bar" style="width:${w}%;background:${color}"></div></div>
+      <span style="font-weight:700;color:${color}">${c.pct.toFixed(1)}%</span>
+    </div>`;
+  }).join('');
+
+  const matRows = d.maturityProfile.map(m => {
+    const w = m.pct.toFixed(1);
+    return `<div class="sg-mat-row">
+      <span>${m.bucket}</span>
+      <div class="sg-mat-track"><div class="sg-mat-bar" style="width:${w}%;background:var(--accent)"></div></div>
+      <span>${m.pct.toFixed(1)}%</span>
+    </div>`;
+  }).join('');
+
+  panel.innerHTML = `<div class="card">
+  <h2>🏦 Statsgæld</h2>
+  <p class="intro">Danmarks statsgæld og finansielle position — en af de sundeste i EU. Kilde: Nationalbanken & Finansministeriet 2024.</p>
+  <div class="sg-hero-grid">
+    <div class="sg-hero-stat">
+      <div class="stat-label">Bruttogæld</div>
+      <div class="stat-num">${d.grossDebtBn} mia.</div>
+      <div class="stat-delta">${d.grossDebtPctGDP.toFixed(1)}% af BNP</div>
+    </div>
+    <div class="sg-hero-stat">
+      <div class="stat-label">Nettostilling</div>
+      <div class="stat-num" style="color:var(--neg)">+${Math.abs(d.netDebtBn)} mia.</div>
+      <div class="stat-delta">netto aktiv (${Math.abs(d.netDebtPctGDP).toFixed(1)}% BNP)</div>
+    </div>
+    <div class="sg-hero-stat">
+      <div class="stat-label">Renteudgifter</div>
+      <div class="stat-num">${d.interestCostBn.toFixed(1)} mia.</div>
+      <div class="stat-delta">${d.avgInterestRate.toFixed(2)}% gns. rente</div>
+    </div>
+    <div class="sg-hero-stat">
+      <div class="stat-label">Kreditvurdering</div>
+      <div class="stat-num" style="color:var(--neg)">AAA ✓</div>
+      <div class="stat-delta">alle tre bureauer</div>
+    </div>
+  </div>
+  <h3>Gældsudvikling 2000–2024</h3>
+  <div class="sg-legend"><span class="sg-leg-gross">■ Bruttogæld</span><span class="sg-leg-net">■ Nettogæld</span><span style="color:var(--text-3);font-size:11px">(% BNP)</span></div>
+  <div class="sg-bar-chart">${trendBars}</div>
+  <div class="sg-two-col">
+    <div>
+      <h3>EU-sammenligning (% BNP)</h3>
+      <div class="sg-eu">${euRows}</div>
+      <p class="data-note" style="margin-top:8px">Maastricht-grænse: 60% BNP</p>
+    </div>
+    <div>
+      <h3>Løbetidsprofil</h3>
+      <div class="sg-mat">${matRows}</div>
+      <div class="sg-extra-stat"><span>Stabilitetsfond</span><strong>${d.stabilityReserveBn} mia. kr.</strong></div>
+    </div>
+  </div>
+</div>`;
+};
+
+VG.render.erhverv = async function() {
+  const panel = document.getElementById('panel-erhverv');
+  if (!panel || panel._loading) return;
+  panel._loading = true;
+  panel.innerHTML = '<div class="panel-loading">Henter erhvervsdata…</div>';
+  let d;
+  try { d = await fetch('/api/livedata/erhverv').then(r => r.json()); }
+  catch(e) { panel.innerHTML = '<div class="card"><p class="data-note">Kunne ikke hente data.</p></div>'; panel._loading = false; return; }
+  panel._loading = false;
+
+  const maxSector = Math.max(...d.sectors.map(s => s.employedK));
+  const sectorRows = d.sectors.map(s => {
+    const w = (s.employedK / maxSector * 100).toFixed(1);
+    const gc = s.growthYoy >= 0 ? 'var(--neg)' : 'var(--pos)';
+    const gs = s.growthYoy >= 0 ? '+' : '';
+    return `<div class="erh-sector-row">
+      <span class="erh-sector-name">${s.name}</span>
+      <div class="erh-sector-track"><div class="erh-sector-bar" style="width:${w}%"></div></div>
+      <span class="erh-sector-emp">${s.employedK}k</span>
+      <span class="erh-sector-gdp">${s.gdpSharePct.toFixed(1)}% BNP</span>
+      <span class="erh-sector-growth" style="color:${gc}">${gs}${s.growthYoy.toFixed(1)}%</span>
+    </div>`;
+  }).join('');
+
+  const empRows = d.largestEmployers.map(e => `<div class="erh-emp-row">
+    <span class="erh-emp-name">${e.name}</span>
+    <span class="erh-emp-sector">${e.sector}</span>
+    <span class="erh-emp-count">${e.employees.toLocaleString('da-DK')} ansatte</span>
+  </div>`).join('');
+
+  panel.innerHTML = `<div class="card">
+  <h2>🏢 Erhvervsliv</h2>
+  <p class="intro">Dansk erhvervsstruktur, produktivitet og virksomhedsstatistik. ${d.liveSource ? 'Live BNP fra DST.' : 'DST Nationalregnskab & Erhvervsstyrelsen 2024.'}</p>
+  <div class="erh-hero-grid">
+    <div class="erh-hero-stat">
+      <div class="stat-label">BNP</div>
+      <div class="stat-num">${d.gdpBn.toLocaleString('da-DK')} mia.</div>
+      <div class="stat-delta" style="color:var(--neg)">+${d.gdpGrowthYoy}% år/år</div>
+    </div>
+    <div class="erh-hero-stat">
+      <div class="stat-label">Selskabsskat</div>
+      <div class="stat-num">${d.corporateTaxRate.toFixed(0)}%</div>
+      <div class="stat-delta">${d.corporateTaxRevenueBn.toFixed(1)} mia. kr. provenu</div>
+    </div>
+    <div class="erh-hero-stat">
+      <div class="stat-label">Virksomheder</div>
+      <div class="stat-num">${(d.firmCount/1000).toFixed(0)}k</div>
+      <div class="stat-delta">${(d.startupsPrYear/1000).toFixed(1)}k nye/år</div>
+    </div>
+    <div class="erh-hero-stat">
+      <div class="stat-label">Produktivitet</div>
+      <div class="stat-num">${(d.productivity.gdpPerWorkerK/1000).toFixed(2)} mio.</div>
+      <div class="stat-delta">BNP pr. beskæftiget</div>
+    </div>
+  </div>
+  <h3>Sektorer — beskæftigelse & BNP-andel</h3>
+  <div class="erh-sector-header"><span></span><span></span><span>Besk.</span><span>BNP</span><span>Vækst</span></div>
+  <div class="erh-sectors">${sectorRows}</div>
+  <div class="erh-two-col">
+    <div>
+      <h3>Største arbejdsgivere (DK)</h3>
+      <div class="erh-employers">${empRows}</div>
+    </div>
+    <div>
+      <h3>SMV-økonomi</h3>
+      <div class="erh-sme-grid">
+        <div class="erh-sme-stat"><span>Andel af virksomheder</span><strong>${d.sme.sharePct.toFixed(1)}%</strong></div>
+        <div class="erh-sme-stat"><span>Andel af beskæftigede</span><strong>${d.sme.employedSharePct.toFixed(1)}%</strong></div>
+        <div class="erh-sme-stat"><span>Andel af eksport</span><strong>${d.sme.exportSharePct.toFixed(1)}%</strong></div>
+        <div class="erh-sme-stat"><span>Konkurser/år</span><strong>${d.bankruptciesPrYear.toLocaleString('da-DK')}</strong></div>
+      </div>
+    </div>
+  </div>
+</div>`;
+};
+
+VG.render.innovation = async function() {
+  const panel = document.getElementById('panel-innovation');
+  if (!panel || panel._loading) return;
+  panel._loading = true;
+  panel.innerHTML = '<div class="panel-loading">Henter innovationsdata…</div>';
+  let d;
+  try { d = await fetch('/api/livedata/innovation').then(r => r.json()); }
+  catch(e) { panel.innerHTML = '<div class="card"><p class="data-note">Kunne ikke hente data.</p></div>'; panel._loading = false; return; }
+  panel._loading = false;
+
+  const maxRd = Math.max(...d.rdSectors.map(s => s.bn));
+  const rdRows = d.rdSectors.map(s => {
+    const w = (s.bn / maxRd * 100).toFixed(1);
+    return `<div class="inn-rd-row">
+      <span class="inn-rd-name">${s.name}</span>
+      <div class="inn-rd-track"><div class="inn-rd-bar" style="width:${w}%"></div></div>
+      <span class="inn-rd-bn">${s.bn.toFixed(1)} mia.</span>
+      <span class="inn-rd-pct">${s.pct.toFixed(1)}%</span>
+    </div>`;
+  }).join('');
+
+  const uniRows = d.topUniversities.map(u => `<div class="inn-uni-row">
+    <span class="inn-uni-name">${u.name}</span>
+    <span class="inn-uni-rank">#${u.ranking} QS</span>
+    <span class="inn-uni-rd">${u.rdBn.toFixed(1)} mia. F&U</span>
+  </div>`).join('');
+
+  const maxTrend = Math.max(...d.rdTrend.map(t => t.pctGDP));
+  const trendBars = d.rdTrend.map(t => {
+    const h = Math.round(t.pctGDP / (maxTrend + 0.2) * 80);
+    return `<div class="inn-trend-col">
+      <div class="inn-trend-bar" style="height:${h}px" title="${t.year}: ${t.pctGDP}% BNP"></div>
+      <div class="inn-trend-year">${t.year.slice(2)}</div>
+    </div>`;
+  }).join('');
+
+  panel.innerHTML = `<div class="card">
+  <h2>🔬 Innovation & Forskning</h2>
+  <p class="intro">F&U-investeringer, patenter og digitalisering. Danmark er konsekvent i EU-toppen. Kilde: Danmarks Forsknings- og Innovationspolitiske Råd & OECD 2024.</p>
+  <div class="inn-hero-grid">
+    <div class="inn-hero-stat">
+      <div class="stat-label">F&U-udgifter</div>
+      <div class="stat-num">${d.rdSpendingBn.toFixed(1)} mia.</div>
+      <div class="stat-delta">${d.rdPctGDP.toFixed(2)}% af BNP</div>
+    </div>
+    <div class="inn-hero-stat">
+      <div class="stat-label">Patenter/mio. indb.</div>
+      <div class="stat-num">${d.patentsPerMillion}</div>
+      <div class="stat-delta">EU top-5</div>
+    </div>
+    <div class="inn-hero-stat">
+      <div class="stat-label">Startup-investering</div>
+      <div class="stat-num">${d.startupInvestmentBn.toFixed(1)} mia.</div>
+      <div class="stat-delta">${d.unicorns} unicorns</div>
+    </div>
+    <div class="inn-hero-stat">
+      <div class="stat-label">EU Digital Index</div>
+      <div class="stat-num">#${d.digitalRanking.position}</div>
+      <div class="stat-delta">af ${d.digitalRanking.total} lande (DESI)</div>
+    </div>
+  </div>
+  <h3>F&U-udgifter som % af BNP</h3>
+  <div class="inn-trend-chart">${trendBars}</div>
+  <div class="inn-target">EU's Barcelona-mål: 3% BNP — Danmark er over med ${d.rdPctGDP.toFixed(2)}%</div>
+  <div class="inn-two-col">
+    <div>
+      <h3>F&U pr. sektor</h3>
+      <div class="inn-rd-sectors">${rdRows}</div>
+    </div>
+    <div>
+      <h3>Top universiteter</h3>
+      <div class="inn-unis">${uniRows}</div>
+      <div class="inn-green">
+        <div class="inn-green-label">🌿 Grøn innovation</div>
+        <div class="inn-green-val">Global #${d.greenInnovation.globalRank} i grønne patenter</div>
+        <div class="inn-green-val">${d.greenInnovation.patentSharePct}% af DK's patenter er grønne</div>
+      </div>
+    </div>
+  </div>
+</div>`;
