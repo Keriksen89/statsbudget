@@ -374,6 +374,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialise: show samfund group (overview is the first tab there)
   switchGroup('samfund');
   window.__switchGroup = switchGroup; // allow onboarding to navigate
+  window.__switchTab = switchTab;
   VG.onboarding.init();
 
   document.getElementById('btn-reset').addEventListener('click', () => {

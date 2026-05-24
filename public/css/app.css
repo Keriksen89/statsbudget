@@ -2803,3 +2803,34 @@ canvas { display: block; max-width: 100%; }
 .for-bar-fill { height:100%; border-radius:4px; transition:width .4s; }
 .for-bar-val { font-size:12px; font-weight:600; text-align:right; }
 .for-greenland-box { background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; font-size:13px; margin-top:16px; line-height:1.5; }
+
+/* ── Danmarksmaskinen ─────────────────────────────────────────────────── */
+.mk-wrap { background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius); padding:20px 16px 16px; margin-bottom:20px; }
+.mk-header { text-align:center; margin-bottom:12px; }
+.mk-header h2 { font-size:18px; font-weight:700; margin:0 0 4px; }
+.mk-sub { font-size:12px; color:var(--text-2); margin:0; }
+.mk-svg { width:100%; height:auto; display:block; }
+.mk-edge { fill:none; stroke:var(--border); stroke-width:1.5; opacity:0.6; }
+.mk-node { cursor:pointer; }
+.mk-node:hover .mk-ring { stroke-width:2.5; fill-opacity:0.3; }
+.mk-emoji { font-size:16px; }
+.mk-label { font-size:9px; fill:var(--text); font-family:inherit; }
+.mk-cluster-tag { font-size:8.5px; font-weight:700; letter-spacing:.06em; font-family:inherit; opacity:.75; }
+.mk-hint { font-size:11px; color:var(--text-2); text-align:center; margin:10px 0 0; padding:0; }
+
+/* ── Health strip ─────────────────────────────────────────────────────── */
+.health-strip { display:flex; gap:8px; flex-wrap:wrap; padding:10px 0; margin-bottom:4px; }
+.hs-item { display:flex; align-items:center; gap:8px; background:var(--surface-2); border:1px solid var(--border); border-radius:var(--radius); padding:8px 12px; flex:1; min-width:130px; cursor:default; }
+.hs-emoji { font-size:18px; flex-shrink:0; }
+.hs-body { flex:1; min-width:0; }
+.hs-row { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:3px; }
+.hs-label { font-size:11px; color:var(--text-2); font-weight:500; }
+.hs-score { font-size:13px; font-weight:700; }
+.hs-track { background:var(--border); border-radius:3px; height:5px; overflow:hidden; }
+.hs-fill { height:100%; border-radius:3px; transition:width .6s ease; }
+
+/* ── Connection strip ─────────────────────────────────────────────────── */
+.mk-conn-strip { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-top:20px; padding-top:14px; border-top:1px solid var(--border); }
+.mk-conn-lbl { font-size:11px; color:var(--text-2); font-weight:600; margin-right:4px; white-space:nowrap; }
+.mk-chip { background:var(--surface-2); border:1px solid var(--border); border-radius:20px; padding:4px 12px; font-size:12px; cursor:pointer; color:var(--text); transition:background .15s,border-color .15s; }
+.mk-chip:hover { background:var(--accent); border-color:var(--accent); color:#fff; }
