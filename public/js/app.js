@@ -277,6 +277,11 @@ document.addEventListener('DOMContentLoaded', () => {
       { id: 'ventetider',       label: '⏳ Ventetider' },
       { id: 'dsb',              label: '🚂 Transport' },
       { id: 'aeldrepleje',      label: '👴 Ældrepleje' },
+      { id: 'boligmarked',    label: '🏗 Boligmarked' },
+      { id: 'indkomst',       label: '💰 Indkomst' },
+      { id: 'co2',            label: '🌿 CO₂ & Klima' },
+      { id: 'kriminalitet',   label: '🚨 Kriminalitet' },
+      { id: 'uddannelse',     label: '🎓 Uddannelse' },
     ]},
     politik: { label: '🏛 Politik', tabs: [
       { id: 'platform',         label: '⭐ Mit Parti' },
