@@ -2217,3 +2217,69 @@ canvas { display: block; max-width: 100%; }
 .section-header { margin-bottom: 20px; }
 .section-header h2 { margin-bottom: 6px; }
 .section-desc { font-size: 13px; color: var(--text-2); }
+
+/* ── Meningsmålinger ───────────────────────────────────────────────────── */
+.poll-bloc-row { display: flex; align-items: center; gap: 16px; margin: 16px 0 24px; justify-content: center; flex-wrap: wrap; }
+.poll-bloc { background: var(--surface-2); border: 1.5px solid var(--border); border-radius: 10px; padding: 16px 24px; text-align: center; min-width: 160px; }
+.poll-bloc-label { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+.poll-bloc-pct { font-size: 28px; font-weight: 800; color: var(--accent); }
+.poll-bloc-seats { font-size: 13px; color: var(--text-2); margin-top: 4px; }
+.poll-bloc-note { font-size: 12px; color: var(--neg); font-weight: 600; margin-top: 2px; }
+.poll-bloc-vs { font-size: 18px; color: var(--text-3); font-weight: 700; }
+.poll-list { display: flex; flex-direction: column; gap: 8px; }
+.poll-row { display: grid; grid-template-columns: 32px 1fr 200px 48px 60px 1fr; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 6px; background: var(--surface-2); }
+@media (max-width: 700px) { .poll-row { grid-template-columns: 28px 1fr 80px 40px; } .poll-trend-badge, .poll-seats-col { display: none; } }
+.poll-below { opacity: 0.5; }
+.poll-letter { font-size: 14px; font-weight: 800; text-align: center; }
+.poll-name { font-size: 13px; font-weight: 500; }
+.poll-bar-wrap { position: relative; }
+.poll-bar-track { height: 10px; background: var(--surface-3); border-radius: 5px; overflow: hidden; }
+.poll-bar-fill { height: 100%; border-radius: 5px; transition: width 0.5s; }
+.poll-pct { font-size: 14px; font-weight: 700; text-align: right; }
+.poll-trend-badge { font-size: 11px; font-weight: 600; text-align: center; }
+.poll-trend-up { color: var(--neg); }
+.poll-trend-down { color: var(--pos); }
+.poll-trend-flat { color: var(--text-3); }
+.poll-seats-col { font-size: 12px; color: var(--text-2); }
+.poll-below-thresh { font-size: 11px; color: var(--text-3); font-style: italic; }
+.poll-sparklines { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 8px; }
+.poll-sparkline-item { display: flex; flex-direction: column; gap: 4px; }
+.poll-spark-label { font-size: 11px; font-weight: 600; }
+.poll-month-labels { display: flex; justify-content: space-between; font-size: 10px; color: var(--text-3); max-width: 120px; margin-bottom: 4px; }
+
+/* ── Ledighed panel ────────────────────────────────────────────────────── */
+.led-hero-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 16px 0 24px; }
+.led-hero-stat { background: var(--surface-2); border-radius: 8px; padding: 14px 16px; }
+.led-bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 100px; padding: 8px 0; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+.led-bar-col { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
+.led-bar-fill { background: var(--accent); border-radius: 2px 2px 0 0; width: 100%; min-height: 4px; transition: height 0.4s; }
+.led-bar-month { font-size: 9px; color: var(--text-3); }
+.led-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 20px; }
+@media (max-width: 640px) { .led-two-col { grid-template-columns: 1fr; } }
+.led-regions, .led-sectors { display: flex; flex-direction: column; gap: 8px; }
+.led-region-row { display: grid; grid-template-columns: 1fr 120px 48px; align-items: center; gap: 8px; font-size: 13px; }
+.led-region-name { font-size: 12px; color: var(--text-2); }
+.led-region-bar-track { height: 8px; background: var(--surface-3); border-radius: 4px; overflow: hidden; }
+.led-region-bar { height: 100%; background: var(--accent); border-radius: 4px; }
+.led-region-pct { font-size: 13px; font-weight: 600; text-align: right; }
+.led-sector-row { display: flex; justify-content: space-between; font-size: 13px; padding: 6px 10px; background: var(--surface-2); border-radius: 6px; }
+
+/* ── El-priser panel ───────────────────────────────────────────────────── */
+.elpris-hero-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 16px 0 24px; }
+.elpris-hero-stat { background: var(--surface-2); border-radius: 8px; padding: 14px 16px; }
+.elpris-comps { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+.elpris-comp-row { display: grid; grid-template-columns: 1fr 160px 180px; align-items: center; gap: 10px; font-size: 13px; }
+@media (max-width: 640px) { .elpris-comp-row { grid-template-columns: 1fr; } }
+.elpris-comp-name { font-size: 13px; color: var(--text-2); }
+.elpris-comp-track { height: 10px; background: var(--surface-3); border-radius: 5px; overflow: hidden; }
+.elpris-comp-fill { height: 100%; background: var(--accent); border-radius: 5px; }
+.elpris-comp-val { font-size: 12px; font-weight: 600; color: var(--text-2); }
+.elpris-eu { display: flex; flex-direction: column; gap: 8px; }
+.elpris-eu-row { display: grid; grid-template-columns: 100px 1fr 120px; align-items: center; gap: 10px; font-size: 13px; }
+.elpris-eu-highlight { font-weight: 700; }
+.elpris-eu-country { font-size: 12px; color: var(--text-2); }
+.elpris-eu-highlight .elpris-eu-country { color: var(--text); }
+.elpris-eu-track { height: 10px; background: var(--surface-3); border-radius: 5px; overflow: hidden; }
+.elpris-eu-fill { height: 100%; background: var(--accent); border-radius: 5px; }
+.elpris-eu-highlight .elpris-eu-fill { background: var(--warn); }
+.elpris-eu-val { font-size: 12px; font-weight: 600; }

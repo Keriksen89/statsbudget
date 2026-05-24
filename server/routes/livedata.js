@@ -610,4 +610,125 @@ router.get('/aeldrepleje', (req, res) => {
   res.json(result);
 });
 
+router.get('/ledighed', async (req, res) => {
+  const cacheKey = 'livedata:ledighed';
+  const cached = cache.get(cacheKey);
+  if (cached) { res.setHeader('X-Cache', 'HIT'); return res.json(cached); }
+
+  let data;
+  try {
+    // DST: Bruttoledige (registered unemployed)
+    const dst = await fetchJSON('https://api.statbank.dk/v1/data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        table: 'AULBM02', format: 'JSON-STAT2',
+        variables: [
+          { code: 'ALDER', values: ['TOT','Y15T29'] },
+          { code: 'Tid',   values: ['-6'] }
+        ]
+      })
+    });
+    // Parse JSON-STAT2 — get latest values
+    const vals = dst.value;
+    const national = parseFloat(vals[vals.length - 2]);
+    const youth    = parseFloat(vals[vals.length - 1]);
+    data = buildLedighedData(isNaN(national) ? null : national, isNaN(youth) ? null : youth);
+  } catch (e) {
+    console.warn('[livedata/ledighed] DST failed:', e.message);
+    data = buildLedighedData(null, null);
+  }
+
+  cache.set(cacheKey, data, 6 * 3600);
+  res.setHeader('X-Cache', 'MISS');
+  res.json(data);
+});
+
+function buildLedighedData(national, youth) {
+  return {
+    national:      national ?? 5.0,
+    youth:         youth    ?? 10.3,
+    liveSource:    national != null,
+    byRegion: [
+      { name: 'Hovedstaden',  pct: 4.6 },
+      { name: 'Midtjylland',  pct: 4.3 },
+      { name: 'Syddanmark',   pct: 5.1 },
+      { name: 'Sjælland',     pct: 5.8 },
+      { name: 'Nordjylland',  pct: 6.2 },
+    ],
+    bySector: [
+      { name: 'Privat sektor',       pct: 4.2 },
+      { name: 'Offentlig sektor',    pct: 2.8 },
+      { name: 'Selvstændige',        pct: 3.5 },
+    ],
+    trend12m: [
+      { month: 'Jun 25', pct: 5.4 },
+      { month: 'Jul 25', pct: 5.3 },
+      { month: 'Aug 25', pct: 5.2 },
+      { month: 'Sep 25', pct: 5.1 },
+      { month: 'Okt 25', pct: 5.0 },
+      { month: 'Nov 25', pct: 5.0 },
+      { month: 'Dec 25', pct: 4.9 },
+      { month: 'Jan 26', pct: 5.1 },
+      { month: 'Feb 26', pct: 5.0 },
+      { month: 'Mar 26', pct: 5.0 },
+      { month: 'Apr 26', pct: 4.9 },
+      { month: 'Maj 26', pct: national ?? 5.0 },
+    ],
+    context: {
+      euAvg:    6.1,
+      peak2009: 7.6,
+      low2022:  4.4,
+    }
+  };
+}
+
+router.get('/elpris', async (req, res) => {
+  const cacheKey = 'livedata:elpris';
+  const cached = cache.get(cacheKey);
+  if (cached) { res.setHeader('X-Cache', 'HIT'); return res.json(cached); }
+
+  let spotPrice = null;
+  try {
+    const energi = await fetchJSON(
+      'https://api.energidataservice.dk/v1/dataset/Elspotprices?limit=24&filter={"PriceArea":"DK2"}&sort=HourDK desc',
+      { headers: { 'Accept': 'application/json' } }
+    );
+    if (energi.records && energi.records.length > 0) {
+      const recent = energi.records.slice(0, 12);
+      const avg = recent.reduce((s, r) => s + (r.SpotPriceDKK || 0), 0) / recent.length;
+      spotPrice = Math.round(avg / 10) / 100; // øre/kWh → kr/kWh
+    }
+  } catch (e) {
+    console.warn('[livedata/elpris] energidata failed:', e.message);
+  }
+
+  const spot = spotPrice ?? 0.82;
+  const data = {
+    spotKwh:        spot,
+    netKwh:         0.56,
+    taxKwh:         1.85,
+    totalKwh:       parseFloat((spot + 0.56 + 1.85).toFixed(2)),
+    liveSpot:       spotPrice != null,
+    components: [
+      { name: 'Spotpris (marked)',     kr: spot,  pct: Math.round(spot / (spot+0.56+1.85) * 100) },
+      { name: 'Nettarif',              kr: 0.56,  pct: Math.round(0.56 / (spot+0.56+1.85) * 100) },
+      { name: 'Afgifter & PSO',        kr: 1.85,  pct: Math.round(1.85 / (spot+0.56+1.85) * 100) },
+    ],
+    euComparison: [
+      { country: 'Danmark',    kr: parseFloat((spot + 0.56 + 1.85).toFixed(2)) },
+      { country: 'Tyskland',   kr: 3.45 },
+      { country: 'Sverige',    kr: 2.10 },
+      { country: 'Norge',      kr: 1.80 },
+      { country: 'EU-snit',    kr: 2.85 },
+    ],
+    monthlyHousehold: Math.round((spot + 0.56 + 1.85) * 350), // 350 kWh/mdr average
+    annualHousehold:  Math.round((spot + 0.56 + 1.85) * 4200),
+  };
+
+  cache.set(cacheKey, data, 30 * 60);
+  res.setHeader('X-Cache', 'MISS');
+  res.json(data);
+});
+
 export default router;
