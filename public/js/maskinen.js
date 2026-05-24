@@ -236,7 +236,8 @@ VG.maskinen.showNodeCard = function(id, event) {
   `;
 
   // Wire up all buttons via delegation (no inline onclick, CSP-safe)
-  card.addEventListener('click', function handler(ev) {
+  // Use .onclick to replace any prior listener (card element is reused)
+  card.onclick = function(ev) {
     const closeBtn = ev.target.closest('[data-action="close"]');
     if (closeBtn) { VG.maskinen.hideNodeCard(); return; }
     const navBtn = ev.target.closest('[data-navid]');
@@ -250,7 +251,7 @@ VG.maskinen.showNodeCard = function(id, event) {
         VG.maskinen.showNodeCard(navId, ev);
       }
     }
-  });
+  };
 
   card.classList.remove('show');
   void card.offsetWidth;
