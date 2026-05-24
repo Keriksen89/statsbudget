@@ -1990,26 +1990,25 @@ canvas { display: block; max-width: 100%; }
 .conf-forslag    { background: var(--accent)22; color: var(--accent); border-color: var(--accent)55; }
 .conf-vedtaget   { background: var(--neg)22; color: var(--neg); border-color: var(--neg)55; }
 
-.rygte-expand-btn {
-  margin-left: auto;
-  padding: 3px 10px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface-2);
-  color: var(--text-2);
-  font-size: 11px;
-  cursor: pointer;
-  transition: background 0.12s;
-}
-.rygte-expand-btn:hover { background: var(--surface-3); color: var(--text); }
 
-/* DREAM analysis box */
+/* DREAM analysis box — always visible, prominent */
 .dream-box {
-  margin-top: 12px;
-  padding: 12px 14px;
+  margin-top: 14px;
+  padding: 14px 16px;
   background: var(--surface-2);
-  border: 1px solid var(--border);
+  border: 1.5px solid var(--accent);
   border-radius: var(--radius);
+}
+.dream-box-header {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
 }
 .dream-stats {
   display: grid;
@@ -2022,26 +2021,79 @@ canvas { display: block; max-width: 100%; }
 .dream-stat-val { font-size: 13px; font-weight: 600; color: var(--text); }
 .dream-na { color: var(--text-3); font-style: italic; font-weight: 400; }
 
-.dream-gdp, .dream-emp {
-  font-size: 14px;
-  font-weight: 700;
-}
+.dream-gdp, .dream-emp { font-size: 14px; font-weight: 700; }
 .dream-gdp.pos, .dream-emp.pos { color: var(--neg); }
 .dream-gdp.neg, .dream-emp.neg { color: var(--pos); }
+
+.dream-gini { font-size: 13px; font-weight: 600; }
+.dream-gini.eq   { color: var(--neg); }
+.dream-gini.uneq { color: var(--warn); }
+
+.dream-compass-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.dream-compass-label-txt { font-size: 10px; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; }
+.dream-compass-wrap { flex: 1; min-width: 100px; }
+.dream-compass { width: 100%; }
+.dream-compass-labels { display: flex; justify-content: space-between; font-size: 9px; color: var(--text-3); margin-bottom: 3px; }
+.dream-compass-track { position: relative; height: 8px; background: linear-gradient(to right, var(--neg), var(--surface-3) 50%, var(--pos)); border-radius: 4px; }
+.dream-compass-marker { position: absolute; top: -3px; width: 14px; height: 14px; background: var(--text); border-radius: 50%; border: 2px solid var(--surface); transform: translateX(-50%); }
 
 .dream-bar-wrap { display: flex; flex-direction: column; gap: 4px; }
 .dream-bar-track { height: 8px; background: var(--surface-3); border-radius: 4px; overflow: hidden; }
 .dream-bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s; min-width: 4px; }
 .dream-bar-label { font-size: 11px; font-weight: 600; }
 
-.dream-compass-wrap { min-width: 120px; }
-.dream-compass { width: 100%; }
-.dream-compass-labels { display: flex; justify-content: space-between; font-size: 9px; color: var(--text-3); margin-bottom: 3px; }
-.dream-compass-track { position: relative; height: 8px; background: linear-gradient(to right, var(--neg), var(--surface-3) 50%, var(--pos)); border-radius: 4px; }
-.dream-compass-marker { position: absolute; top: -3px; width: 14px; height: 14px; background: var(--text); border-radius: 50%; border: 2px solid var(--surface); transform: translateX(-50%); }
-
-.dream-explanation { font-size: 12px; color: var(--text-2); line-height: 1.55; margin-bottom: 8px; }
+.dream-explanation { font-size: 12px; color: var(--text-2); line-height: 1.6; margin-bottom: 8px; border-top: 1px solid var(--border); padding-top: 10px; }
 .dream-disclaimer { font-size: 10px; color: var(--text-3); font-style: italic; }
+
+/* ── Rygter scenario section ───────────────────────────────────────────── */
+.rygter-scenarios { margin-bottom: 8px; }
+.rygter-sc-intro { font-size: 14px; color: var(--text-2); margin: 8px 0 16px; line-height: 1.5; }
+.rygter-sc-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 10px;
+}
+@media (max-width: 900px) { .rygter-sc-grid { grid-template-columns: 1fr; } }
+.rygter-sc-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.rygter-sc-head { display: flex; align-items: center; gap: 10px; }
+.rygter-sc-emoji { font-size: 26px; line-height: 1; flex-shrink: 0; }
+.rygter-sc-name { font-size: 15px; font-weight: 700; line-height: 1.2; }
+.rygter-sc-sub { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+.rygter-sc-desc { font-size: 12px; color: var(--text-2); line-height: 1.5; margin: 0; }
+.rygter-sc-impacts {
+  background: var(--surface-2);
+  border-radius: 6px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.rygter-sc-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.rygter-sc-rlabel { font-size: 11px; color: var(--text-3); white-space: nowrap; }
+.rygter-sc-rval { font-size: 12px; font-weight: 700; text-align: right; }
+.rygter-sc-details { font-size: 12px; }
+.rygter-sc-details summary { cursor: pointer; font-weight: 600; color: var(--accent); padding: 2px 0; list-style: none; }
+.rygter-sc-details summary::-webkit-details-marker { display: none; }
+.rygter-sc-details summary::before { content: '▸ '; font-size: 10px; }
+.rygter-sc-details[open] summary::before { content: '▾ '; }
+.rygter-sc-details-body { padding: 8px 0 4px; }
+.rygter-sc-details-head { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-3); margin: 8px 0 3px; }
+.rygter-sc-list { margin: 0; padding-left: 16px; color: var(--text-2); line-height: 1.7; }
+.sc-related { margin-top: 2px; }
+.sc-related-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--text-3); margin-bottom: 4px; }
+.sc-related-item { display: block; font-size: 11px; color: var(--text-2); text-decoration: none; padding: 3px 0; border-top: 1px solid var(--border); line-height: 1.4; }
+.sc-related-item:hover { color: var(--accent); }
+.sc-related-src { font-weight: 700; font-size: 10px; text-transform: uppercase; color: var(--text-3); margin-right: 4px; }
+.rygter-sc-disclaimer { font-size: 11px; color: var(--text-3); font-style: italic; }
 
 /* ── Bolig panel ───────────────────────────────────── */
 .bolig-inputs {

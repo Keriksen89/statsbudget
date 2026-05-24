@@ -169,25 +169,60 @@ function buildImpact(rule, category, confidence, title) {
 }
 
 function generateExplanation(category, rule, title) {
-  const { fiscalBn, gdpPct, employmentK } = rule;
+  const { fiscalBn, gdpPct, employmentK, giniDelta } = rule;
+  const parts = [];
 
-  const fiscalText = fiscalBn == null ? null :
-    fiscalBn > 0
-      ? `Ifølge DREAM-parametre estimeres tiltaget at koste staten ca. ${Math.abs(fiscalBn).toFixed(1).replace('.', ',')} mia. kr. om året.`
-      : `Tiltaget forventes at spare ca. ${Math.abs(fiscalBn).toFixed(1).replace('.', ',')} mia. kr. om året på de offentlige finanser.`;
-
-  const employText = employmentK == null ? null :
-    Math.abs(employmentK) < 0.5 ? null :
-    employmentK > 0
-      ? `Beskæftigelseseffekten vurderes positiv med op til ${Math.abs(employmentK).toFixed(0)} tusinde ekstra job.`
-      : `Beskæftigelsen kan falde med op til ${Math.abs(employmentK).toFixed(0)} tusinde over en årrække.`;
-
-  const parts = [fiscalText, employText].filter(Boolean);
-
-  if (parts.length === 0) {
-    return getCategoryDefault(category);
+  if (fiscalBn != null) {
+    const abs = Math.abs(fiscalBn).toFixed(1).replace('.', ',');
+    if (fiscalBn > 0) {
+      parts.push(`Tiltaget forbedrer de offentlige finanser med anslået ${abs} mia. kr. om året — under antagelse om fuld indfasning over 3–4 år og en selvfinansieringsgrad på ca. 15–25%.`);
+    } else {
+      parts.push(`Tiltaget belaster de offentlige finanser med ca. ${abs} mia. kr. om året. Antager at udgiften er fuldt finansieret over finansloven og indfases over 2–3 år.`);
+    }
   }
-  return parts.join(' ');
+
+  if (gdpPct != null && Math.abs(gdpPct) >= 0.04) {
+    const dir = gdpPct > 0 ? 'positivt' : 'negativt';
+    parts.push(`BNP-effekten vurderes ${dir} på ca. ${Math.abs(gdpPct).toFixed(2).replace('.', ',')}% set over en 5-årig modelhorisont.`);
+  }
+
+  if (employmentK != null && Math.abs(employmentK) >= 0.5) {
+    if (employmentK > 0) {
+      parts.push(`DREAM-parametrene indikerer op til ${employmentK.toFixed(0)}k ekstra fuldtidsjob som følge af øget arbejdsudbud eller ny aktivitet.`);
+    } else {
+      parts.push(`Beskæftigelsen kan falde med op til ${Math.abs(employmentK).toFixed(0)}k fuldtidspersoner via lavere arbejdsudbud eller efterspørgselsfald.`);
+    }
+  }
+
+  if (giniDelta != null && Math.abs(giniDelta) >= 0.1) {
+    if (giniDelta > 0) {
+      parts.push(`Indkomstfordelingen vil sandsynligvis blive mere ulige (Gini +${giniDelta.toFixed(1)} point).`);
+    } else {
+      parts.push(`Tiltaget har en udligningseffekt på indkomstfordelingen (Gini ${giniDelta.toFixed(1)} point).`);
+    }
+  }
+
+  const assumption = getCategoryAssumptions(category);
+  if (assumption) parts.push(assumption);
+
+  return parts.length > 0 ? parts.join(' ') : getCategoryDefault(category);
+}
+
+function getCategoryAssumptions(cat) {
+  const map = {
+    Skat:           'Elasticitetsantagelse: topskattens arbejdsudbudseffekt sat til 0,2 (DREAM); selvfinansieringsgrad ~20% via dynamiske effekter.',
+    Velfærd:        'DREAM-arbejdsudbudsmodel: overførsler reducerer arbejdsudbud med 0,1–0,3 fuldtidspersoner pr. modtager ved marginale ændringer.',
+    Klima:          'IEA/DMI-parametre: 1 mia. kr. klimainvestering = ca. 0,6–0,8 mia. BNP og 150–200 nye job i grøn sektor på 5-årshorisont.',
+    Forsvar:        'NATO-baseline: fra ca. 1,4% til 2% af BNP koster ~10 mia. kr./år ekstra. Forsvarsudgifter har multiplikator på ~0,7 mod ~1,2 for civil investering.',
+    Bolig:          'Boligmarkedsmodel: ændringer i grundskyld kapitaliseres delvist i priser inden for 3–5 år; ikke-neutral for lejer vs. ejer.',
+    Pension:        'AE-rådsestimater: 1 år ekstra pensionsalder = ~7 mia. kr./år i reduceret pension + øget skatteindtægt fra fortsat beskæftigelse.',
+    Sundhed:        'Produktivitetskommissionen: 1 kr. investeret i sundhedskapacitet giver ~0,5–0,8 kr. retur via lavere sygefravær og øget erhvervsdeltagelse.',
+    Uddannelse:     'Uddannelsesinvesteringer: afkastet er 7–9% pr. år men viser sig tidligst 10–15 år frem i BNP — kortsigtet udgift, langsigtet gevinst.',
+    Arbejdsmarked:  'Flexicurity-parametre: konjunkturafhængig effekt; normalt 1–3 mia. kr. i udgiftsændring pr. 10.000 fuldtidspersoner.',
+    Immigration:    'DST-statistik: nettobidrag varierer kraftigt — veluddannede +300k kr./år, ikke-vestlige uden erhvervsuddannelse ca. −150k kr./år (2023-tal).',
+    Øvrig:          'Estimat baseret på gennemsnitlige DREAM/MAKRO-elasticiteter for åben, lille økonomi som Danmarks.',
+  };
+  return map[cat] || map['Øvrig'];
 }
 
 function getCategoryDefault(cat) {
@@ -291,6 +326,116 @@ router.get('/feed', async (req, res) => {
   const result = analyzed.length > 0 ? analyzed : getMockRygter();
 
   cache.set(cacheKey, result, 30 * 60); // 30 minutes
+  res.setHeader('X-Cache', 'MISS');
+  res.json(result);
+});
+
+// ── Scenario definitions ──────────────────────────────────────────────────
+
+const SCENARIOS = [
+  {
+    id: 'blaa',
+    name: 'Blåt forlig',
+    emoji: '🔵',
+    subtitle: 'Centerhøjre-koalition',
+    description: 'Lavere topskat, forsvarsopbygning, strammere dagpengeregler og pensionsalder op til 69. Finansieret via besparelser på overførsler og strammet indvandring.',
+    policies: [
+      { name: 'Sænk/fjern topskatten', fiscalBn: -4.5, gdpPct: 0.08, employmentK: -3, giniDelta: 0.3 },
+      { name: 'Forsvarspakke: 2% af BNP inden 2030', fiscalBn: -10.0, gdpPct: 0.2, employmentK: 8, giniDelta: 0.0 },
+      { name: 'Stram dagpengeperiode (−6 mdr.)', fiscalBn: 2.5, gdpPct: 0.05, employmentK: 5, giniDelta: 0.3 },
+      { name: 'Pensionsalder til 69 år fra 2030', fiscalBn: 7.0, gdpPct: 0.4, employmentK: 15, giniDelta: 0.1 },
+      { name: 'SU-reform: kortere støtteperiode', fiscalBn: 1.5, gdpPct: -0.03, employmentK: 0, giniDelta: 0.2 },
+      { name: 'Stram indvandring & integration', fiscalBn: 1.5, gdpPct: -0.1, employmentK: -5, giniDelta: 0.1 },
+    ],
+    assumptions: [
+      'Topskattelettelse indfaset over 4 år; selvfinansieringsgrad antages 20–25% via øget arbejdsudbud',
+      'Forsvarsmål på 2% BNP nås i 2030 via ny flerårsaftale (fra nuværende ~1,4%)',
+      'Dagpengereform: perioden forkortes fra 2 til 1,5 år; øger arbejdsudbud ~5.000 pers. jf. DREAM',
+      'Pensionsalder +1 år fra 2030 per Velfærdskommissionens anbefaling; spar ~7 mia. kr./år',
+      'Immigrationsstramning reducerer nettotilstrømning af ikke-arbejdsmarkedsparate med ca. 20%',
+    ],
+    categories: ['Skat', 'Forsvar', 'Velfærd', 'Pension', 'Uddannelse', 'Immigration'],
+  },
+  {
+    id: 'roed',
+    name: 'Rødt forlig',
+    emoji: '🟤',
+    subtitle: 'Centervenstre-koalition',
+    description: 'Velfærdsløft, massive klimainvesteringer, styrket sundhed og folkeskole. Finansieret primært via hævet topskat og kapitalbeskatning.',
+    policies: [
+      { name: 'Hæv topskatten (+5 pct.point)', fiscalBn: 4.5, gdpPct: -0.08, employmentK: 3, giniDelta: -0.3 },
+      { name: 'Klimainvesteringer: 20 mia. kr.', fiscalBn: -5.0, gdpPct: 0.15, employmentK: 10, giniDelta: -0.1 },
+      { name: 'Sundhedsløft (+3 mia. kr./år)', fiscalBn: -3.0, gdpPct: 0.1, employmentK: 8, giniDelta: -0.2 },
+      { name: 'Folkeskolereform: styrk lærere', fiscalBn: -2.0, gdpPct: 0.08, employmentK: 5, giniDelta: -0.2 },
+      { name: 'Løft kontanthjælp til 15.000 kr./mdr.', fiscalBn: -2.0, gdpPct: 0.03, employmentK: -1, giniDelta: -0.3 },
+      { name: 'Moderat forsvarsløft (1,7% BNP)', fiscalBn: -5.0, gdpPct: 0.1, employmentK: 4, giniDelta: 0.0 },
+    ],
+    assumptions: [
+      'Topskat +5 pct.point (til 20%) på indkomst > 611.500 kr.; DØR-estimat: 4,5 mia. kr./år',
+      'Klimainvesteringer delfinansieret via EU\'s Klimafond (antager ~30% EU-medfinansiering)',
+      'Sundhedsudgifter baseret på Sundhedskommissionens 2024-anbefalinger om 10.000 ekstra sygeplejersker',
+      'Kontanthjælp til 15.000 kr./mdr. koster ca. 2 mia. kr./år netto (inkl. aktiveringsmodvirkning)',
+      'Forsvar til 1,7% BNP som etape mod NATO-krav; fuld opfyldelse er betinget af flertalsaftale',
+    ],
+    categories: ['Klima', 'Sundhed', 'Velfærd', 'Uddannelse', 'Skat', 'Forsvar'],
+  },
+  {
+    id: 'center',
+    name: 'Centerforlig',
+    emoji: '⚪',
+    subtitle: 'Bred midterkoalition',
+    description: 'Pragmatisk kompromis: delvis forsvarsvækst, grøn arbejdsmarkedsreform, boligskattereform og pensionsalder til 68. Tilnærmet budgetbalance.',
+    policies: [
+      { name: 'Forsvarspakke: 1,7% BNP i 2028', fiscalBn: -7.0, gdpPct: 0.15, employmentK: 6, giniDelta: 0.0 },
+      { name: 'Grøn arbejdsmarkedsreform', fiscalBn: -2.5, gdpPct: 0.12, employmentK: 8, giniDelta: -0.1 },
+      { name: 'Boligreform: grundskyldrevision', fiscalBn: 3.0, gdpPct: -0.05, employmentK: 0, giniDelta: -0.2 },
+      { name: 'Sundhedsoptimering (fokusinvestering)', fiscalBn: -1.5, gdpPct: 0.05, employmentK: 4, giniDelta: -0.1 },
+      { name: 'Pensionsalder til 68 (kompromis)', fiscalBn: 3.5, gdpPct: 0.2, employmentK: 7, giniDelta: 0.05 },
+    ],
+    assumptions: [
+      'Forsvarsmål afpasset til 1,7% BNP som etapemål; resten via NATO-samarbejde og materielinvesteringer',
+      'Grundskyldrevision: omfordeling fra boligejere til erhvervslejere; ikke nettostigende samlet',
+      'Grøn reform kombinerer VE-investeringer med omskoling af 40.000 arbejdere over 5 år',
+      'Bred parlamentarisk aftale giver hurtigere implementering (2–3 år vs. typisk 4–5 år)',
+      'Pensionskompromis på 68 år fra 2029: balancerer rød og blå bloks positioner',
+    ],
+    categories: ['Forsvar', 'Klima', 'Bolig', 'Sundhed', 'Pension', 'Arbejdsmarked'],
+  },
+];
+
+router.get('/scenarios', async (req, res) => {
+  const cacheKey = 'rygter:scenarios';
+  const cached = cache.get(cacheKey);
+  if (cached) {
+    res.setHeader('X-Cache', 'HIT');
+    return res.json(cached);
+  }
+
+  // Try to correlate with cached news
+  const feedItems = cache.get('rygter:feed') || [];
+
+  const result = SCENARIOS.map(scenario => {
+    const combined = scenario.policies.reduce((acc, p) => ({
+      fiscalBn:    acc.fiscalBn    + (p.fiscalBn    || 0),
+      gdpPct:      acc.gdpPct      + (p.gdpPct      || 0),
+      employmentK: acc.employmentK + (p.employmentK || 0),
+      giniDelta:   acc.giniDelta   + (p.giniDelta   || 0),
+    }), { fiscalBn: 0, gdpPct: 0, employmentK: 0, giniDelta: 0 });
+
+    combined.fiscalBn    = Math.round(combined.fiscalBn    * 10) / 10;
+    combined.gdpPct      = Math.round(combined.gdpPct      * 100) / 100;
+    combined.employmentK = Math.round(combined.employmentK);
+    combined.giniDelta   = Math.round(combined.giniDelta   * 10) / 10;
+
+    const relatedNews = feedItems
+      .filter(item => item.impact && scenario.categories.includes(item.impact.category))
+      .slice(0, 3)
+      .map(item => ({ title: item.title, source: item.source, link: item.link }));
+
+    return { ...scenario, combined, relatedNews };
+  });
+
+  cache.set(cacheKey, result, 30 * 60);
   res.setHeader('X-Cache', 'MISS');
   res.json(result);
 });

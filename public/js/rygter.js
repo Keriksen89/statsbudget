@@ -1,10 +1,11 @@
 VG.rygter = {};
 
-VG.rygter._data = null;
-VG.rygter._filter = 'Alle';
-VG.rygter._sort = 'nyeste';
+VG.rygter._data      = null;
+VG.rygter._scenarios = null;
+VG.rygter._filter    = 'Alle';
+VG.rygter._sort      = 'nyeste';
 
-// Category color map (all using CSS vars — NO party colors)
+// Category color map (all neutral — NO party colors)
 VG.rygter.CAT_COLORS = {
   Skat:          'var(--warn)',
   Velfærd:       'var(--neg)',
@@ -20,21 +21,31 @@ VG.rygter.CAT_COLORS = {
 };
 
 VG.rygter.CONFIDENCE_LABELS = {
-  rygte:        { label: 'Rygte', cls: 'conf-rygte' },
-  forhandling:  { label: 'Forhandling', cls: 'conf-forhandling' },
-  forslag:      { label: 'Forslag', cls: 'conf-forslag' },
-  vedtaget:     { label: 'Vedtaget', cls: 'conf-vedtaget' },
+  rygte:        { label: 'Rygte',        cls: 'conf-rygte' },
+  forhandling:  { label: 'Forhandling',  cls: 'conf-forhandling' },
+  forslag:      { label: 'Forslag',      cls: 'conf-forslag' },
+  vedtaget:     { label: 'Vedtaget',     cls: 'conf-vedtaget' },
 };
 
-const ALL_CATEGORIES = ['Alle', 'Skat', 'Velfærd', 'Klima', 'Bolig', 'Forsvar', 'Uddannelse', 'Sundhed', 'Arbejdsmarked', 'Immigration', 'Pension', 'Øvrig'];
+const ALL_CATEGORIES = ['Alle','Skat','Velfærd','Klima','Bolig','Forsvar','Uddannelse','Sundhed','Arbejdsmarked','Immigration','Pension','Øvrig'];
 
 VG.rygter.load = async function() {
   try {
     const data = await fetch('/api/rygter/feed').then(r => r.json());
     VG.rygter._data = Array.isArray(data) ? data : [];
   } catch (e) {
-    console.warn('[rygter] load failed', e);
+    console.warn('[rygter] feed load failed', e);
     VG.rygter._data = [];
+  }
+};
+
+VG.rygter.loadScenarios = async function() {
+  try {
+    const data = await fetch('/api/rygter/scenarios').then(r => r.json());
+    VG.rygter._scenarios = Array.isArray(data) ? data : null;
+  } catch (e) {
+    console.warn('[rygter] scenarios load failed', e);
+    VG.rygter._scenarios = null;
   }
 };
 
@@ -44,7 +55,7 @@ VG.rygter.renderPanel = async function() {
 
   if (!VG.rygter._data) {
     panel.innerHTML = '<div class="panel-loading">Henter politiske nyheder og analyserer økonomi…</div>';
-    await VG.rygter.load();
+    await Promise.all([VG.rygter.load(), VG.rygter.loadScenarios()]);
   }
 
   VG.rygter._renderContent(panel);
@@ -68,25 +79,27 @@ VG.rygter._renderContent = function(panel) {
     });
   }
 
-  // Build filter buttons
   const filterBtns = ALL_CATEGORIES.map(cat => {
     const active = VG.rygter._filter === cat ? ' active' : '';
     return `<button class="rygte-btn${active}" data-filter="${cat}">${cat}</button>`;
   }).join('');
 
-  // Sort buttons
   const sortNewActive  = VG.rygter._sort === 'nyeste' ? ' active' : '';
   const sortFiscActive = VG.rygter._sort === 'fiscal' ? ' active' : '';
 
-  // Card HTML
   const cards = filtered.length === 0
     ? '<div class="rygte-empty">Ingen nyheder i denne kategori.</div>'
     : filtered.map(item => VG.rygter._renderCard(item)).join('');
 
+  const scenariosHtml = VG.rygter._scenarios
+    ? VG.rygter._renderScenarios(VG.rygter._scenarios)
+    : '';
+
   panel.innerHTML = `
 <div class="card">
-  <h2>📰 Politiske rygter & nyheder</h2>
-  <p class="intro">Seneste politiske nyheder fra DR og TV2, analyseret med DREAM/MAKRO-inspirerede parametre for at estimere den mulige samfundsøkonomiske effekt.</p>
+  ${scenariosHtml}
+  <h2 style="margin-top:${scenariosHtml ? '32px' : '0'}">📰 Nyheder med DREAM-analyse</h2>
+  <p class="intro" style="margin-bottom:16px">Politiske nyheder fra DR og TV2, analyseret med DREAM/MAKRO-inspirerede parametre. Klik på et nyhedskort for at se den fulde analyse.</p>
   <div class="rygte-toolbar">
     <div class="rygte-filters" id="rygte-filters">${filterBtns}</div>
     <div class="rygte-sort-wrap">
@@ -102,10 +115,88 @@ VG.rygter._renderContent = function(panel) {
   VG.rygter._bindEvents(panel);
 };
 
+VG.rygter._renderScenarios = function(scenarios) {
+  const cards = scenarios.map(s => {
+    const c = s.combined;
+
+    // Fiscal balance: positive = budget improves, negative = more deficit
+    const fiscalPos  = c.fiscalBn >= 0;
+    const fiscalColor = fiscalPos ? 'var(--neg)' : 'var(--pos)';
+    const fiscalLabel = fiscalPos
+      ? `+${c.fiscalBn.toFixed(1).replace('.', ',')} mia. kr./år bedre balance`
+      : `${c.fiscalBn.toFixed(1).replace('.', ',')} mia. kr./år mere underskud`;
+
+    const gdpSign  = c.gdpPct  >= 0 ? '+' : '';
+    const gdpColor = c.gdpPct  >= 0 ? 'var(--neg)' : 'var(--pos)';
+    const empSign  = c.employmentK >= 0 ? '+' : '';
+    const empColor = c.employmentK >= 0 ? 'var(--neg)' : 'var(--pos)';
+
+    const giniLabel = c.giniDelta < -0.05 ? 'Mere lighed' : c.giniDelta > 0.05 ? 'Mere ulighed' : 'Neutral';
+    const giniColor = c.giniDelta < -0.05 ? 'var(--neg)' : c.giniDelta > 0.05 ? 'var(--pos)' : 'var(--text-3)';
+    const giniSign  = c.giniDelta >= 0 ? '+' : '';
+
+    const policiesList = s.policies.map(p => `<li>${p.name}</li>`).join('');
+    const assumptionsList = s.assumptions.map(a => `<li>${a}</li>`).join('');
+
+    const relatedHtml = s.relatedNews && s.relatedNews.length > 0
+      ? `<div class="sc-related">
+          <div class="sc-related-label">Aktuelle nyheder</div>
+          ${s.relatedNews.map(n => `<a href="${n.link || '#'}" target="_blank" rel="noopener" class="sc-related-item"><span class="sc-related-src">${n.source}</span>${n.title}</a>`).join('')}
+        </div>`
+      : '';
+
+    return `<div class="rygter-sc-card">
+  <div class="rygter-sc-head">
+    <span class="rygter-sc-emoji">${s.emoji}</span>
+    <div>
+      <div class="rygter-sc-name">${s.name}</div>
+      <div class="rygter-sc-sub">${s.subtitle}</div>
+    </div>
+  </div>
+  <p class="rygter-sc-desc">${s.description}</p>
+  <div class="rygter-sc-impacts">
+    <div class="rygter-sc-row">
+      <span class="rygter-sc-rlabel">Finanspolitik</span>
+      <span class="rygter-sc-rval" style="color:${fiscalColor}">${fiscalLabel}</span>
+    </div>
+    <div class="rygter-sc-row">
+      <span class="rygter-sc-rlabel">BNP-effekt (5 år)</span>
+      <span class="rygter-sc-rval" style="color:${gdpColor}">${gdpSign}${c.gdpPct.toFixed(2).replace('.', ',')}% BNP</span>
+    </div>
+    <div class="rygter-sc-row">
+      <span class="rygter-sc-rlabel">Beskæftigelse</span>
+      <span class="rygter-sc-rval" style="color:${empColor}">${empSign}${c.employmentK}k fuldtidsjob</span>
+    </div>
+    <div class="rygter-sc-row">
+      <span class="rygter-sc-rlabel">Fordeling</span>
+      <span class="rygter-sc-rval" style="color:${giniColor}">${giniLabel} (Δgini ${giniSign}${c.giniDelta.toFixed(1)})</span>
+    </div>
+  </div>
+  <details class="rygter-sc-details">
+    <summary>Politikker &amp; modelantagelser</summary>
+    <div class="rygter-sc-details-body">
+      <div class="rygter-sc-details-head">Inkluderede politikker</div>
+      <ul class="rygter-sc-list">${policiesList}</ul>
+      <div class="rygter-sc-details-head">Modelantagelser</div>
+      <ul class="rygter-sc-list">${assumptionsList}</ul>
+    </div>
+  </details>
+  ${relatedHtml}
+</div>`;
+  }).join('');
+
+  return `<div class="rygter-scenarios">
+  <h2>🔭 Scenarieanalyse</h2>
+  <p class="rygter-sc-intro">Tre mulige politiske forlig — estimeret via kumulative DREAM/MAKRO-parametre. Effekterne er summen af alle inkluderede politikker og vises over en 5-årig modelhorisont.</p>
+  <div class="rygter-sc-grid">${cards}</div>
+  <p class="rygter-sc-disclaimer">Illustrative scenarier — ikke officielle analyser. Politikpakker konstrueret ud fra typiske danske koalitionsprofiler 2024–2026.</p>
+</div>`;
+};
+
 VG.rygter._renderCard = function(item) {
-  const impact = item.impact || {};
+  const impact   = item.impact || {};
   const catColor = VG.rygter.CAT_COLORS[impact.category] || 'var(--text-3)';
-  const conf = VG.rygter.CONFIDENCE_LABELS[impact.confidence] || VG.rygter.CONFIDENCE_LABELS.rygte;
+  const conf     = VG.rygter.CONFIDENCE_LABELS[impact.confidence] || VG.rygter.CONFIDENCE_LABELS.rygte;
 
   const dateStr = item.pubDate
     ? new Date(item.pubDate).toLocaleDateString('da-DK', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
@@ -113,25 +204,23 @@ VG.rygter._renderCard = function(item) {
 
   const sourceCls = item.source === 'DR' ? 'source-dr' : 'source-tv2';
 
-  // Fiscal impact bar
   const fiscalHtml = impact.fiscalBn != null
     ? VG.rygter._renderFiscalBar(impact.fiscalBn)
     : '<span class="dream-na">Ikke estimeret</span>';
 
-  // GDP arrow
   const gdpHtml = impact.gdpPct != null
     ? `<span class="dream-gdp ${impact.gdpPct >= 0 ? 'pos' : 'neg'}">${impact.gdpPct >= 0 ? '▲' : '▼'} ${Math.abs(impact.gdpPct).toFixed(2).replace('.', ',')}% BNP</span>`
     : '<span class="dream-na">—</span>';
 
-  // Employment
   const empHtml = impact.employmentK != null && Math.abs(impact.employmentK) >= 0.5
     ? `<span class="dream-emp ${impact.employmentK >= 0 ? 'pos' : 'neg'}">${impact.employmentK >= 0 ? '+' : ''}${impact.employmentK.toFixed(0)}k job</span>`
     : '<span class="dream-na">—</span>';
 
-  // Political compass
-  const compassHtml = VG.rygter._renderCompass(impact.politicalScore || 0);
+  const giniHtml = impact.giniDelta != null && Math.abs(impact.giniDelta) >= 0.05
+    ? `<span class="dream-gini ${impact.giniDelta < 0 ? 'eq' : 'uneq'}">${impact.giniDelta < 0 ? '↓ Mere lighed' : '↑ Mere ulighed'} (Δ${impact.giniDelta >= 0 ? '+' : ''}${impact.giniDelta.toFixed(1)})</span>`
+    : '<span class="dream-na">Neutral</span>';
 
-  const cardId = 'rygte-' + (item.guid || item.link || Math.random()).toString().replace(/[^a-z0-9]/gi, '').slice(0, 16);
+  const compassHtml = VG.rygter._renderCompass(impact.politicalScore || 0);
 
   return `<div class="rygte-card" style="border-left-color:${catColor}">
   <div class="rygte-header">
@@ -143,9 +232,9 @@ VG.rygter._renderCard = function(item) {
   <div class="rygte-badges">
     <span class="rygte-cat-badge" style="background:${catColor}22;color:${catColor};border:1px solid ${catColor}55">${impact.category || 'Øvrig'}</span>
     <span class="rygte-confidence ${conf.cls}">${conf.label}</span>
-    <button class="rygte-expand-btn" data-target="${cardId}-dream" aria-expanded="false">DREAM analyse ▾</button>
   </div>
-  <div class="dream-box" id="${cardId}-dream" style="display:none">
+  <div class="dream-box">
+    <div class="dream-box-header">📊 DREAM/MAKRO analyse</div>
     <div class="dream-stats">
       <div class="dream-stat">
         <div class="dream-stat-label">Finanspolitisk effekt</div>
@@ -160,9 +249,13 @@ VG.rygter._renderCard = function(item) {
         <div class="dream-stat-val">${empHtml}</div>
       </div>
       <div class="dream-stat">
-        <div class="dream-stat-label">Politisk placering</div>
-        <div class="dream-stat-val dream-compass-wrap">${compassHtml}</div>
+        <div class="dream-stat-label">Indkomstfordeling</div>
+        <div class="dream-stat-val">${giniHtml}</div>
       </div>
+    </div>
+    <div class="dream-compass-row">
+      <span class="dream-compass-label-txt">Politisk placering</span>
+      <div class="dream-compass-wrap">${compassHtml}</div>
     </div>
     <p class="dream-explanation">${impact.explanation || ''}</p>
     <p class="dream-disclaimer">Estimat baseret på DREAM/MAKRO-modelparametre. Ikke officiel analyse.</p>
@@ -171,14 +264,13 @@ VG.rygter._renderCard = function(item) {
 };
 
 VG.rygter._renderFiscalBar = function(fiscalBn) {
-  // Positive = cost (red), negative = saving (green)
-  const maxBn = 15;
-  const pct = Math.min(100, Math.abs(fiscalBn) / maxBn * 100).toFixed(1);
-  const isCost = fiscalBn > 0;
-  const color = isCost ? 'var(--pos)' : 'var(--neg)';
-  const label = isCost
-    ? `+${fiscalBn.toFixed(1).replace('.', ',')} mia. kr./år (udgift)`
-    : `${fiscalBn.toFixed(1).replace('.', ',')} mia. kr./år (besparelse)`;
+  const maxBn  = 15;
+  const pct    = Math.min(100, Math.abs(fiscalBn) / maxBn * 100).toFixed(1);
+  const isPos  = fiscalBn > 0;
+  const color  = isPos ? 'var(--neg)' : 'var(--pos)';
+  const label  = isPos
+    ? `+${fiscalBn.toFixed(1).replace('.', ',')} mia. kr./år (bedre balance)`
+    : `${fiscalBn.toFixed(1).replace('.', ',')} mia. kr./år (mere underskud)`;
   return `<div class="dream-bar-wrap">
     <div class="dream-bar-track">
       <div class="dream-bar-fill" style="width:${pct}%;background:${color}"></div>
@@ -188,8 +280,7 @@ VG.rygter._renderFiscalBar = function(fiscalBn) {
 };
 
 VG.rygter._renderCompass = function(score) {
-  // score: -100 (very left) to +100 (very right)
-  const pct = ((score + 100) / 200 * 100).toFixed(1);
+  const pct        = ((score + 100) / 200 * 100).toFixed(1);
   const markerLeft = Math.max(2, Math.min(98, parseFloat(pct)));
   return `<div class="dream-compass">
     <div class="dream-compass-labels"><span>Venstre</span><span>Højre</span></div>
@@ -204,7 +295,6 @@ VG.rygter._bindEvents = function(panel) {
   panel._vgBound = true;
 
   panel.addEventListener('click', e => {
-    // Filter buttons
     const filterBtn = e.target.closest('[data-filter]');
     if (filterBtn) {
       VG.rygter._filter = filterBtn.dataset.filter;
@@ -212,25 +302,10 @@ VG.rygter._bindEvents = function(panel) {
       return;
     }
 
-    // Sort buttons
     const sortBtn = e.target.closest('[data-sort]');
     if (sortBtn) {
       VG.rygter._sort = sortBtn.dataset.sort;
       VG.rygter._renderContent(panel);
-      return;
-    }
-
-    // Expand DREAM box
-    const expandBtn = e.target.closest('.rygte-expand-btn');
-    if (expandBtn) {
-      const targetId = expandBtn.dataset.target;
-      const box = document.getElementById(targetId);
-      if (box) {
-        const isOpen = box.style.display !== 'none';
-        box.style.display = isOpen ? 'none' : 'block';
-        expandBtn.setAttribute('aria-expanded', !isOpen);
-        expandBtn.textContent = isOpen ? 'DREAM analyse ▾' : 'DREAM analyse ▴';
-      }
     }
   });
 };
