@@ -327,6 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Pinned sub-tabs shown in the secondary bar (others go in "Alle ▾" dropdown)
   const PINNED_TABS = {
+    samfund:  ['overview', 'demographics', 'sundhed', 'ledighed', 'co2', 'boligmarked', 'uddannelse'],
     politik:  ['platform', 'party', 'partier', 'regering', 'folketing', 'meningsmaalinger'],
     oekonomi: ['laboratorium', 'policy', 'spending', 'revenue', 'projection', 'rygter'],
   };
@@ -372,12 +373,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.sub-tab').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.tab === tabId);
     });
-    // Samfund hub mode: show breadcrumb back button when inside a sub-panel
-    if (activeGroup === 'samfund') {
-      const secondary = document.getElementById('nav-secondary');
-      secondary.innerHTML = tabId === 'overview' ? '' :
-        `<button class="sub-tab sub-tab-back" data-tab="overview">← Oversigt</button>`;
-    }
     if (tabId === 'party') VG.party.load();
     VG.render.fast();
   }
@@ -393,11 +388,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const summaryEl = document.getElementById('summary');
     if (summaryEl) summaryEl.classList.toggle('summary-visible', groupKey === 'oekonomi');
     const secondary = document.getElementById('nav-secondary');
-    if (groupKey === 'samfund') {
-      // Hub mode: no sub-tab bar — navigation happens via the hub grid
-      secondary.innerHTML = '';
-      switchTab('overview');
-    } else if (PINNED_TABS[groupKey]) {
+    if (PINNED_TABS[groupKey]) {
       buildPinnedSecondary(secondary, group, PINNED_TABS[groupKey]);
       switchTab(PINNED_TABS[groupKey][0]);
     } else {
@@ -445,27 +436,18 @@ document.addEventListener('DOMContentLoaded', () => {
     for (const [gk, g] of Object.entries(GROUPS)) {
       if (g.tabs.some(t => t.id === panelId)) { targetGroup = gk; break; }
     }
-    if (targetGroup === 'samfund') {
-      // Hub mode: update primary nav highlight then switch tab directly
-      activeGroup = 'samfund';
-      document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.group === 'samfund');
-      });
-      switchTab(panelId);
-    } else {
-      switchGroup(targetGroup);
-      if (panelId !== GROUPS[targetGroup].tabs[0].id) {
-        setTimeout(() => {
-          const btn = document.querySelector(`.sub-tab[data-tab="${panelId}"]`);
-          if (btn) btn.click();
-          else {
-            // Panel is in the "Alle" overflow — navigate directly
-            const alleBtn = document.querySelector('.nav-alle-btn');
-            if (alleBtn) alleBtn.classList.add('nav-alle-active');
-            switchTab(panelId);
-          }
-        }, 30);
-      }
+    switchGroup(targetGroup);
+    if (panelId !== GROUPS[targetGroup].tabs[0].id) {
+      setTimeout(() => {
+        const btn = document.querySelector(`.sub-tab[data-tab="${panelId}"]`);
+        if (btn) btn.click();
+        else {
+          // Panel is in the "Alle ▾" overflow — mark overflow button active and navigate
+          const alleBtn = document.querySelector('.nav-alle-btn');
+          if (alleBtn) alleBtn.classList.add('nav-alle-active');
+          switchTab(panelId);
+        }
+      }, 30);
     }
   };
 
