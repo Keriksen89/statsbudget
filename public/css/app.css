@@ -2896,3 +2896,5 @@ canvas { display: block; max-width: 100%; }
   background-size:200% 100%;
   animation:today-shimmer 1.6s infinite;
 }
+.today-card-static { opacity:.88; }
+.today-card-static .today-src { opacity:.7; }

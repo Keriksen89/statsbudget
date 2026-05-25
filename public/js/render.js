@@ -586,11 +586,13 @@ VG.render.loadToday = function() {
       grid.innerHTML = items.map(n => {
         const stat = VG.render._todayStats[n.panel] || '';
         const srcClass = n.source === 'TV2' ? 'today-src-tv2' : 'today-src-dr';
-        return `<button class="today-card" onclick="window.__mkClick('${n.panel}')">
+        const ageBadge = n.age ? `<span class="today-age">${n.age}</span>` : '';
+        const isLive = !!n.link;
+        return `<button class="today-card${isLive ? '' : ' today-card-static'}" onclick="window.__mkClick('${n.panel}')">
           <div class="today-card-news">
             <div class="today-card-meta">
               <span class="today-src ${srcClass}">${n.source}</span>
-              <span class="today-age">${n.age}</span>
+              ${ageBadge}
             </div>
             <div class="today-headline">${n.headline}</div>
           </div>
