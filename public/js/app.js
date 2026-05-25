@@ -336,128 +336,182 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let activeGroup = null;
 
-  function buildPinnedSecondary(secondary, group, pinned) {
-    const pinnedSet  = new Set(pinned);
-    const pinnedTabs = group.tabs.filter(t => pinnedSet.has(t.id));
-    const extraTabs  = group.tabs.filter(t => !pinnedSet.has(t.id));
-    secondary.innerHTML = pinnedTabs.map((t, i) =>
-      `<button class="sub-tab${i === 0 ? ' active' : ''}" data-tab="${t.id}">${t.label}</button>`
-    ).join('') + (extraTabs.length ? `
-      <div class="nav-alle-wrap">
-        <button class="nav-alle-btn">Alle ▾</button>
-        <div class="nav-alle-drop">
-          ${group.tabs.map(t => `<button class="nav-alle-item" data-tab="${t.id}">${t.label}</button>`).join('')}
-        </div>
-      </div>` : '');
-    const alleBtn  = secondary.querySelector('.nav-alle-btn');
-    const alleDrop = secondary.querySelector('.nav-alle-drop');
-    if (alleBtn && alleDrop) {
-      alleBtn.addEventListener('click', e => {
+  // ── Sidebar navigation ──────────────────────────────────────────────────────
+
+  function buildSidebar() {
+    const nav = document.getElementById('sb-nav');
+    if (!nav) return;
+
+    let html = `
+      <a class="sb-item" data-sb="dashboard">
+        <span class="sb-item-icon">📌</span>
+        <span class="sb-item-label">Dashboard</span>
+      </a>
+      <a class="sb-item" data-sb="feed">
+        <span class="sb-item-icon">⚡</span>
+        <span class="sb-item-label">Nyheder & Indsigter</span>
+        <span class="sb-item-live"></span>
+      </a>
+      <div class="sb-section-label">Udforsk data</div>`;
+
+    for (const [gk, group] of Object.entries(GROUPS)) {
+      const parts = group.label.match(/^(\S+)\s+(.+)$/);
+      const icon  = parts ? parts[1] : '●';
+      const name  = parts ? parts[2] : group.label;
+      html += `
+        <div class="sb-group" data-sb-group="${gk}">
+          <button class="sb-group-btn">
+            <span class="sb-group-icon">${icon}</span>
+            <span class="sb-group-name">${name}</span>
+            <span class="sb-group-chevron">▾</span>
+          </button>
+          <div class="sb-group-items">
+            ${group.tabs.map(t => `<a class="sb-sub-item" data-sb="${t.id}">${t.label}</a>`).join('')}
+          </div>
+        </div>`;
+    }
+
+    nav.innerHTML = html;
+
+    nav.querySelectorAll('[data-sb]').forEach(el => {
+      el.addEventListener('click', e => { e.preventDefault(); navigateTo(el.dataset.sb); });
+    });
+
+    nav.querySelectorAll('.sb-group-btn').forEach(btn => {
+      btn.addEventListener('click', e => {
         e.stopPropagation();
-        const open = alleDrop.classList.toggle('open');
-        alleBtn.textContent = open ? 'Alle ▴' : 'Alle ▾';
-        if (open) {
-          const r = alleBtn.getBoundingClientRect();
-          alleDrop.style.top  = (r.bottom + 4) + 'px';
-          alleDrop.style.left = r.left + 'px';
+        const grp    = btn.closest('.sb-group');
+        const isOpen = grp.classList.toggle('open');
+        if (isOpen) {
+          nav.querySelectorAll('.sb-group.open').forEach(g => { if (g !== grp) g.classList.remove('open'); });
+          const firstId = GROUPS[grp.dataset.sbGroup]?.tabs[0]?.id;
+          if (firstId) navigateTo(firstId);
         }
       });
-      alleDrop.addEventListener('click', e => {
-        const item = e.target.closest('.nav-alle-item');
-        if (!item) return;
-        alleDrop.classList.remove('open');
-        alleBtn.textContent = 'Alle ▾';
-        secondary.querySelectorAll('.sub-tab').forEach(b => b.classList.remove('active'));
-        alleBtn.classList.add('nav-alle-active');
-        switchTab(item.dataset.tab);
-      });
+    });
+  }
+
+  function navigateTo(panelId) {
+    // Lazy-load panel-specific modules
+    if (panelId === 'party')     VG.party     && VG.party.load();
+    if (panelId === 'dashboard') VG.dashboard && VG.dashboard.load();
+    if (panelId === 'feed')      VG.feed      && VG.feed.load();
+
+    // Determine owning group
+    let owningGroup = null;
+    for (const [gk, g] of Object.entries(GROUPS)) {
+      if (g.tabs.some(t => t.id === panelId)) { owningGroup = gk; break; }
     }
+    activeGroup = owningGroup;
+
+    // Budget KPI bar only in Økonomi
+    const summaryEl = document.getElementById('summary');
+    if (summaryEl) summaryEl.classList.toggle('summary-visible', owningGroup === 'oekonomi');
+
+    switchTab(panelId);
+    _updateSidebarActive(panelId, owningGroup);
+    _updateBreadcrumb(panelId, owningGroup);
+    _closeMobileSidebar();
   }
 
   function switchTab(tabId) {
     VG.state.activeTab = tabId;
     document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + tabId));
-    document.querySelectorAll('.sub-tab').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.tab === tabId);
-    });
-    if (tabId === 'party')     VG.party.load();
-    if (tabId === 'dashboard') VG.dashboard && VG.dashboard.load();
     VG.render.fast();
   }
 
+  // Keep switchGroup callable by external code (e.g. old hub links)
   function switchGroup(groupKey) {
-    activeGroup = groupKey;
-    const group = GROUPS[groupKey];
-    if (!group) return;
-    document.querySelectorAll('.nav-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.dataset.group === groupKey);
-    });
-    // Budget summary only visible in Økonomi section
-    const summaryEl = document.getElementById('summary');
-    if (summaryEl) summaryEl.classList.toggle('summary-visible', groupKey === 'oekonomi');
-    const secondary = document.getElementById('nav-secondary');
-    if (PINNED_TABS[groupKey]) {
-      buildPinnedSecondary(secondary, group, PINNED_TABS[groupKey]);
-      switchTab(PINNED_TABS[groupKey][0]);
-    } else {
-      // Personligt — small enough to show all tabs
-      secondary.innerHTML = group.tabs.map((t, i) =>
-        `<button class="sub-tab${i === 0 ? ' active' : ''}" data-tab="${t.id}">${t.label}</button>`
-      ).join('');
-      switchTab(group.tabs[0].id);
-    }
+    const g = GROUPS[groupKey];
+    if (!g) return;
+    navigateTo(g.tabs[0].id);
   }
 
-  // Wire up primary nav buttons
-  document.querySelectorAll('.nav-btn').forEach(btn => {
-    btn.addEventListener('click', () => switchGroup(btn.dataset.group));
+  function _updateSidebarActive(panelId, owningGroup) {
+    const nav = document.getElementById('sb-nav');
+    if (!nav) return;
+    nav.querySelectorAll('.sb-item, .sb-sub-item').forEach(el => {
+      el.classList.toggle('active', el.dataset.sb === panelId);
+    });
+    // Open parent group, close others
+    nav.querySelectorAll('.sb-group').forEach(grp => {
+      const isOwner = grp.dataset.sbGroup === owningGroup;
+      grp.classList.toggle('open', !!isOwner);
+    });
+  }
+
+  function _updateBreadcrumb(panelId, owningGroup) {
+    let section = '', page = panelId;
+    if (panelId === 'dashboard') { page = 'Mit Dashboard'; }
+    else if (panelId === 'feed') { page = 'Nyheder & Indsigter'; }
+    else if (owningGroup && GROUPS[owningGroup]) {
+      const g   = GROUPS[owningGroup];
+      const tab = g.tabs.find(t => t.id === panelId);
+      section = g.label.replace(/^\S+\s*/, '');
+      page    = tab ? tab.label.replace(/^\S+\s*/, '') : panelId;
+    }
+    const secEl  = document.getElementById('topbar-bc-section');
+    const sepEl  = document.getElementById('topbar-bc-sep');
+    const pageEl = document.getElementById('topbar-bc-page');
+    if (secEl)  secEl.textContent  = section;
+    if (sepEl)  sepEl.textContent  = section ? '›' : '';
+    if (pageEl) pageEl.textContent = page;
+  }
+
+  function _closeMobileSidebar() {
+    document.getElementById('sidebar')?.classList.remove('mobile-open');
+    document.getElementById('sb-overlay')?.classList.remove('active');
+  }
+
+  // Sidebar collapse (desktop)
+  document.getElementById('sb-collapse')?.addEventListener('click', () => {
+    const sb  = document.getElementById('sidebar');
+    const btn = document.getElementById('sb-collapse');
+    if (!sb) return;
+    const collapsed = sb.classList.toggle('collapsed');
+    if (btn) btn.textContent = collapsed ? '›' : '‹';
   });
 
-  // Wire up secondary nav (sub-tabs + back button) via event delegation
-  document.getElementById('nav-secondary').addEventListener('click', e => {
-    const btn = e.target.closest('.sub-tab');
-    if (!btn) return;
-    document.querySelectorAll('.sub-tab').forEach(b => b.classList.remove('active'));
-    const alleBtn = document.querySelector('.nav-alle-btn');
-    if (alleBtn) alleBtn.classList.remove('nav-alle-active');
-    btn.classList.add('active');
-    switchTab(btn.dataset.tab);
+  // Mobile hamburger
+  document.getElementById('topbar-hamburger')?.addEventListener('click', () => {
+    document.getElementById('sidebar')?.classList.add('mobile-open');
+    document.getElementById('sb-overlay')?.classList.add('active');
   });
+  document.getElementById('sb-overlay')?.addEventListener('click', _closeMobileSidebar);
 
-  // Close "Alle" dropdown on outside click
-  document.addEventListener('click', () => {
-    document.querySelectorAll('.nav-alle-drop.open').forEach(d => d.classList.remove('open'));
-    document.querySelectorAll('.nav-alle-btn').forEach(b => {
-      if (b.textContent.includes('▴')) b.textContent = 'Alle ▾';
+  // Sidebar search filter
+  document.getElementById('sb-search')?.addEventListener('input', e => {
+    const q   = e.target.value.toLowerCase().trim();
+    const nav = document.getElementById('sb-nav');
+    if (!nav) return;
+    if (!q) {
+      nav.querySelectorAll('.sb-group, .sb-sub-item, .sb-item').forEach(el => el.style.display = '');
+      return;
+    }
+    nav.querySelectorAll('.sb-group').forEach(grp => {
+      let any = false;
+      grp.querySelectorAll('.sb-sub-item').forEach(item => {
+        const match = item.textContent.toLowerCase().includes(q);
+        item.style.display = match ? '' : 'none';
+        if (match) any = true;
+      });
+      grp.style.display = any ? '' : 'none';
+      if (any) grp.classList.add('open');
+    });
+    nav.querySelectorAll('.sb-item').forEach(item => {
+      item.style.display = item.textContent.toLowerCase().includes(q) ? '' : 'none';
     });
   });
 
-  // Initialise: show samfund hub
-  switchGroup('samfund');
-  window.__switchGroup = switchGroup;
-  window.__switchTab = switchTab;
-  window.__goHome = function() { switchGroup('samfund'); };
+  // ── Init ────────────────────────────────────────────────────────────────────
 
-  // Navigate directly to a panel by ID — used by news cards and hub grid
-  window.__mkClick = function(panelId) {
-    let targetGroup = 'samfund';
-    for (const [gk, g] of Object.entries(GROUPS)) {
-      if (g.tabs.some(t => t.id === panelId)) { targetGroup = gk; break; }
-    }
-    switchGroup(targetGroup);
-    if (panelId !== GROUPS[targetGroup].tabs[0].id) {
-      setTimeout(() => {
-        const btn = document.querySelector(`.sub-tab[data-tab="${panelId}"]`);
-        if (btn) btn.click();
-        else {
-          // Panel is in the "Alle ▾" overflow — mark overflow button active and navigate
-          const alleBtn = document.querySelector('.nav-alle-btn');
-          if (alleBtn) alleBtn.classList.add('nav-alle-active');
-          switchTab(panelId);
-        }
-      }, 30);
-    }
-  };
+  buildSidebar();
+  navigateTo('dashboard');
+
+  window.__switchGroup = switchGroup;
+  window.__switchTab   = switchTab;
+  window.__goHome      = () => navigateTo('dashboard');
+  window.__mkClick     = navigateTo;
 
   document.getElementById('btn-reset').addEventListener('click', () => {
     VG.reset();

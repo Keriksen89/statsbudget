@@ -3761,3 +3761,114 @@ body {
   .sidebar { width: 200px; min-width: 200px; }
   .panels-main { padding: 20px 24px; }
 }
+
+/* ════════════════════════════════════════════════════════════════════
+   FEED PANEL
+════════════════════════════════════════════════════════════════════ */
+
+.feed-page-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 16px; margin-bottom: 20px; flex-wrap: wrap;
+}
+.feed-page-title { font-size: 22px; font-weight: 700; margin: 0 0 4px; letter-spacing: -0.3px; }
+.feed-page-sub   { font-size: 13px; color: var(--text-2); margin: 0; }
+.feed-sentiment-wrap { font-size: 12px; color: var(--text-3); display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+
+.feed-filters {
+  display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px;
+}
+.feed-filter-btn {
+  padding: 5px 12px; font-size: 12px; font-weight: 500; border-radius: 20px;
+  border: 1px solid var(--border); background: var(--surface); color: var(--text-2);
+  cursor: pointer; transition: all .12s;
+}
+.feed-filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+.feed-filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+.feed-list { display: flex; flex-direction: column; gap: 14px; }
+
+.feed-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 18px 20px;
+  transition: box-shadow .15s;
+}
+.feed-card:hover { box-shadow: var(--shadow); }
+
+.feed-card-meta {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.feed-cat-label { font-size: 11px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.5px; }
+.feed-tag {
+  font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px;
+  text-transform: uppercase; letter-spacing: 0.4px;
+}
+.ft-ok    { background: color-mix(in srgb, var(--neg) 15%, transparent); color: var(--neg); }
+.ft-warn  { background: color-mix(in srgb, var(--warn) 15%, transparent); color: var(--warn); }
+.ft-alert { background: color-mix(in srgb, var(--pos) 15%, transparent); color: var(--pos); }
+.ft-info  { background: var(--surface-2); color: var(--text-2); }
+
+.feed-time    { font-size: 11px; color: var(--text-3); margin-left: auto; }
+.feed-ai-pill {
+  font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent); letter-spacing: 0.3px;
+}
+
+.feed-card-headline {
+  font-size: 16px; font-weight: 700; color: var(--text);
+  margin: 0 0 8px; line-height: 1.35; letter-spacing: -0.2px;
+}
+.feed-card-body {
+  font-size: 13px; color: var(--text-2); line-height: 1.6; margin: 0 0 14px;
+}
+
+.feed-card-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap;
+}
+.feed-explore {
+  font-size: 12px; font-weight: 600; color: var(--accent);
+  background: none; border: none; cursor: pointer; padding: 0;
+  transition: opacity .1s; flex-shrink: 0;
+}
+.feed-explore:hover { opacity: 0.7; }
+.feed-empty { color: var(--text-3); font-size: 14px; padding: 24px 0; }
+
+/* ════════════════════════════════════════════════════════════════════
+   VOTE BARS — shown on feed cards, news items, tweets
+════════════════════════════════════════════════════════════════════ */
+
+.vbar {
+  display: flex; align-items: center; gap: 6px; flex: 1; min-width: 0;
+}
+.vbar-btn {
+  display: flex; align-items: center; gap: 4px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 20px; padding: 3px 10px; cursor: pointer; font-size: 12px;
+  color: var(--text-2); transition: all .12s; white-space: nowrap; flex-shrink: 0;
+}
+.vbar-btn:hover { border-color: var(--text-3); color: var(--text); }
+.vbar-btn.vbar-pos.on { background: color-mix(in srgb, var(--neg) 15%, var(--surface)); border-color: var(--neg); color: var(--neg); }
+.vbar-btn.vbar-neg.on { background: color-mix(in srgb, var(--pos) 15%, var(--surface)); border-color: var(--pos); color: var(--pos); }
+.vbar-n { font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.vbar-track {
+  flex: 1; height: 4px; border-radius: 2px;
+  background: color-mix(in srgb, var(--pos) 20%, var(--surface-2));
+  overflow: hidden; min-width: 40px;
+}
+.vbar-fill {
+  height: 100%; border-radius: 2px;
+  background: var(--neg); transition: width .3s ease;
+}
+
+.vbar-total { font-size: 11px; color: var(--text-3); white-space: nowrap; flex-shrink: 0; }
+
+/* ── Sentiment badge (topbar / dashboard) ──────────────────────── */
+.sentiment-badge {
+  font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px;
+}
+.sent-pos { background: color-mix(in srgb, var(--neg) 15%, transparent); color: var(--neg); }
+.sent-neg { background: color-mix(in srgb, var(--pos) 15%, transparent); color: var(--pos); }
+.sent-mid { background: var(--surface-2); color: var(--text-2); }
