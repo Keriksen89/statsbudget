@@ -16,7 +16,7 @@ VG.feed._generateInsights = function() {
     const bad = v > 4, warn = v > 2;
     insights.push({
       id: 'inf-' + (eco.inflation.period || 'now').replace(/\s/g, '-'),
-      category: 'Økonomi', icon: '📈',
+      category: 'Økonomi', icon: '<i class="ph ph-trend-up"></i>',
       tag: bad ? 'Høj inflation' : warn ? 'Over 2%-mål' : v < 1 ? 'Under mål' : 'Stabil',
       tagType: bad ? 'alert' : warn ? 'warn' : 'ok',
       headline: `Inflation ${v.toFixed(1).replace('.', ',')}% — ${bad ? 'pres på ECB-mål' : warn ? 'over ECB\'s 2%-målsætning' : 'tæt på det optimale niveau'}`,
@@ -35,7 +35,7 @@ VG.feed._generateInsights = function() {
       const sign = pct >= 0 ? '+' : '';
       insights.push({
         id: 'budget-fl2026',
-        category: 'Økonomi', icon: '💰',
+        category: 'Økonomi', icon: '<i class="ph ph-scales"></i>',
         tag: pct < -3 ? 'EU-grænse' : pct < -0.5 ? 'Underskud' : 'Overskud',
         tagType: pct < -3 ? 'alert' : pct < -0.5 ? 'warn' : 'ok',
         headline: `Finanslov 2026: ${sign}${pct.toFixed(1).replace('.', ',')}% af BNP`,
@@ -58,7 +58,7 @@ VG.feed._generateInsights = function() {
     const rem = 70 - red;
     insights.push({
       id: 'co2-' + (cli.co2.year || 2024),
-      category: 'Klima', icon: '🌿',
+      category: 'Klima', icon: '<i class="ph ph-leaf"></i>',
       tag: red >= 70 ? 'Mål nået!' : red >= 60 ? 'Tæt på' : 'Bagud',
       tagType: red >= 70 ? 'ok' : red >= 55 ? 'warn' : 'alert',
       headline: `CO₂ reduceret ${red}% siden 1990${rem > 0 ? ` — ${rem}pp mangler til 2030-målet` : ' — klimamål nået!'}`,
@@ -73,7 +73,7 @@ VG.feed._generateInsights = function() {
     const v = eco.housing.qoq;
     insights.push({
       id: 'housing-' + (eco.housing.period || 'q').replace(/\s/g, '-'),
-      category: 'Bolig', icon: '🏠',
+      category: 'Bolig', icon: '<i class="ph ph-house"></i>',
       tag: v > 3 ? 'Kraftig stigning' : v > 1 ? 'Stigning' : v < -2 ? 'Prisfald' : 'Stabilt',
       tagType: v > 3 ? 'alert' : v > 1 ? 'warn' : v < -2 ? 'alert' : 'ok',
       headline: `Boligpriser ${v >= 0 ? 'steg' : 'faldt'} ${Math.abs(v).toFixed(1).replace('.', ',')}% (${eco.housing.period || 'kvartal'})`,
@@ -88,7 +88,7 @@ VG.feed._generateInsights = function() {
     const v = eco.nbRate.value;
     insights.push({
       id: 'nbrate-' + v.toFixed(2),
-      category: 'Økonomi', icon: '🏦',
+      category: 'Økonomi', icon: '<i class="ph ph-bank"></i>',
       tag: v > 4 ? 'Høj rente' : v > 2 ? 'Forhøjet' : v < 0.5 ? 'Historisk lav' : 'Normal',
       tagType: v > 4 ? 'alert' : v > 2.5 ? 'warn' : 'ok',
       headline: `Nationalbanken: pengepolitisk rente på ${v.toFixed(2).replace('.', ',')}%`,
@@ -104,7 +104,7 @@ VG.feed._generateInsights = function() {
     const rate = (val / 2_850_000 * 100);
     insights.push({
       id: 'unemp-' + (live.unemployment.period || 'now').replace(/\s/g, '-'),
-      category: 'Arbejdsmarked', icon: '👷',
+      category: 'Arbejdsmarked', icon: '<i class="ph ph-hard-hat"></i>',
       tag: rate > 6 ? 'Høj ledighed' : rate < 3 ? 'Historisk lav' : 'Normal',
       tagType: rate > 6 ? 'alert' : rate > 5 ? 'warn' : 'ok',
       headline: `${val.toLocaleString('da-DK')} ledige (${rate.toFixed(1).replace('.', ',')}%) — ${rate < 4 ? 'rekordlav ledighed' : 'stabil arbejdsmarked'}`,
@@ -117,7 +117,7 @@ VG.feed._generateInsights = function() {
   // ── Meningsmålinger (statisk snapshot) ───────────────────────────────────
   insights.push({
     id: 'polls-maj-2026',
-    category: 'Politik', icon: '📊',
+    category: 'Politik', icon: '<i class="ph ph-chart-bar"></i>',
     tag: 'Ny måling',
     tagType: 'info',
     headline: 'S fører med 20% — LA og V i tæt kamp om andenpladsen',
@@ -130,7 +130,7 @@ VG.feed._generateInsights = function() {
   if (live && live.activeBills && live.activeBills.length) {
     insights.push({
       id: 'ft-bills-' + live.activeBills.length,
-      category: 'Politik', icon: '🏛',
+      category: 'Politik', icon: '<i class="ph ph-buildings"></i>',
       tag: 'Aktiv lovgivning',
       tagType: 'info',
       headline: `${live.activeBills.length} lovforslag til afstemning i Folketing`,

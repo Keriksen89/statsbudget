@@ -342,31 +342,78 @@ document.addEventListener('DOMContentLoaded', () => {
     const nav = document.getElementById('sb-nav');
     if (!nav) return;
 
+    const GROUP_ICONS = {
+      personligt: '<i class="ph ph-user-circle"></i>',
+      samfund:    '<i class="ph ph-globe-hemisphere-west"></i>',
+      politik:    '<i class="ph ph-buildings"></i>',
+      oekonomi:   '<i class="ph ph-chart-line-up"></i>',
+    };
+    const TAB_ICONS = {
+      dashboard:'<i class="ph ph-squares-four"></i>',  feed:'<i class="ph ph-newspaper"></i>',
+      borger:'<i class="ph ph-calculator"></i>',        bolig:'<i class="ph ph-house"></i>',
+      pension:'<i class="ph ph-suitcase"></i>',         elpris:'<i class="ph ph-lightning"></i>',
+      overview:'<i class="ph ph-map-trifold"></i>',     demographics:'<i class="ph ph-users"></i>',
+      kommuner:'<i class="ph ph-map-pin"></i>',         sundhed:'<i class="ph ph-first-aid"></i>',
+      forbrug:'<i class="ph ph-shopping-bag"></i>',     energi:'<i class="ph ph-lightning"></i>',
+      ledighed:'<i class="ph ph-trend-down"></i>',      ventetider:'<i class="ph ph-clock"></i>',
+      dsb:'<i class="ph ph-train"></i>',                aeldrepleje:'<i class="ph ph-heart"></i>',
+      boligmarked:'<i class="ph ph-buildings"></i>',    indkomst:'<i class="ph ph-coin"></i>',
+      co2:'<i class="ph ph-leaf"></i>',                 kriminalitet:'<i class="ph ph-siren"></i>',
+      uddannelse:'<i class="ph ph-graduation-cap"></i>',inflation:'<i class="ph ph-trend-up"></i>',
+      udenrigshandel:'<i class="ph ph-globe"></i>',     landbrug:'<i class="ph ph-plant"></i>',
+      folkesundhed:'<i class="ph ph-first-aid"></i>',   ligestilling:'<i class="ph ph-scales"></i>',
+      velfaerdsstat:'<i class="ph ph-globe"></i>',      generationsregnskab:'<i class="ph ph-baby"></i>',
+      arbejdsmiljoe:'<i class="ph ph-hard-hat"></i>',   medietillid:'<i class="ph ph-newspaper"></i>',
+      groenomstilling:'<i class="ph ph-leaf"></i>',     boligkrise:'<i class="ph ph-house-line"></i>',
+      psykiatri:'<i class="ph ph-brain"></i>',          folkeskolen:'<i class="ph ph-student"></i>',
+      naturvand:'<i class="ph ph-waves"></i>',          integration:'<i class="ph ph-globe"></i>',
+      forsvar:'<i class="ph ph-shield"></i>',           platform:'<i class="ph ph-star"></i>',
+      party:'<i class="ph ph-check-square"></i>',       partier:'<i class="ph ph-chart-bar"></i>',
+      regering:'<i class="ph ph-bank"></i>',            folketing:'<i class="ph ph-notepad"></i>',
+      mandater:'<i class="ph ph-calculator"></i>',      valgkort:'<i class="ph ph-map-trifold"></i>',
+      meningsmaalinger:'<i class="ph ph-chart-bar"></i>',laboratorium:'<i class="ph ph-flask"></i>',
+      rygter:'<i class="ph ph-newspaper"></i>',         policy:'<i class="ph ph-scales"></i>',
+      spending:'<i class="ph ph-arrow-up-right"></i>',  revenue:'<i class="ph ph-arrow-down-left"></i>',
+      projection:'<i class="ph ph-chart-line-up"></i>', historik:'<i class="ph ph-clock-counter-clockwise"></i>',
+      scenarios:'<i class="ph ph-funnel"></i>',         statsgaeld:'<i class="ph ph-bank"></i>',
+      erhverv:'<i class="ph ph-briefcase"></i>',        innovation:'<i class="ph ph-flask"></i>',
+      reddit:'<i class="ph ph-reddit-logo"></i>',
+    };
+    const stripLabel = s => s.replace(/^[\p{Emoji_Presentation}\p{Extended_Pictographic}🏛🌍]+\s*/gu, '').trim();
+
     let html = `
       <a class="sb-item" data-sb="dashboard">
-        <span class="sb-item-icon">📌</span>
+        <span class="sb-item-icon">${TAB_ICONS.dashboard}</span>
         <span class="sb-item-label">Dashboard</span>
       </a>
       <a class="sb-item" data-sb="feed">
-        <span class="sb-item-icon">⚡</span>
+        <span class="sb-item-icon">${TAB_ICONS.feed}</span>
         <span class="sb-item-label">Nyheder & Indsigter</span>
+        <span class="sb-item-live"></span>
+      </a>
+      <a class="sb-item" data-sb="reddit">
+        <span class="sb-item-icon">${TAB_ICONS.reddit}</span>
+        <span class="sb-item-label">Reddit Danmark</span>
         <span class="sb-item-live"></span>
       </a>
       <div class="sb-section-label">Udforsk data</div>`;
 
     for (const [gk, group] of Object.entries(GROUPS)) {
-      const parts = group.label.match(/^(\S+)\s+(.+)$/);
-      const icon  = parts ? parts[1] : '●';
-      const name  = parts ? parts[2] : group.label;
+      const gIcon = GROUP_ICONS[gk] || '<i class="ph ph-circle"></i>';
+      const gName = stripLabel(group.label) || group.label;
       html += `
         <div class="sb-group" data-sb-group="${gk}">
           <button class="sb-group-btn">
-            <span class="sb-group-icon">${icon}</span>
-            <span class="sb-group-name">${name}</span>
+            <span class="sb-group-icon">${gIcon}</span>
+            <span class="sb-group-name">${gName}</span>
             <span class="sb-group-chevron">▾</span>
           </button>
           <div class="sb-group-items">
-            ${group.tabs.map(t => `<a class="sb-sub-item" data-sb="${t.id}">${t.label}</a>`).join('')}
+            ${group.tabs.map(t => {
+              const ico = TAB_ICONS[t.id] || '';
+              const lbl = stripLabel(t.label) || t.label;
+              return `<a class="sb-sub-item" data-sb="${t.id}">${ico ? `<span class="sb-sub-icon">${ico}</span>` : ''}${lbl}</a>`;
+            }).join('')}
           </div>
         </div>`;
     }
@@ -396,6 +443,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (panelId === 'party')     VG.party     && VG.party.load();
     if (panelId === 'dashboard') VG.dashboard && VG.dashboard.load();
     if (panelId === 'feed')      VG.feed      && VG.feed.load();
+    if (panelId === 'reddit')    VG.reddit    && VG.reddit.load();
 
     // Determine owning group
     let owningGroup = null;
@@ -470,6 +518,23 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!sb) return;
     const collapsed = sb.classList.toggle('collapsed');
     if (btn) btn.textContent = collapsed ? '›' : '‹';
+  });
+
+  // Sidebar expand toggle
+  const sbExpandBtn = document.getElementById('sb-expand-btn');
+  if (sbExpandBtn) {
+    sbExpandBtn.addEventListener('click', () => {
+      const sb = document.getElementById('sidebar');
+      if (!sb) return;
+      const expanded = sb.classList.toggle('sb-expanded');
+      sbExpandBtn.textContent = expanded ? '‹' : '›';
+    });
+  }
+  document.getElementById('sb-collapse')?.addEventListener('click', () => {
+    const sb = document.getElementById('sidebar');
+    if (sb) sb.classList.remove('sb-expanded');
+    const btn = document.getElementById('sb-expand-btn');
+    if (btn) btn.textContent = '›';
   });
 
   // Mobile hamburger

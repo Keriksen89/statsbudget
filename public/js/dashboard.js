@@ -5,7 +5,7 @@ VG.dashboard = {};
 const DASH_WIDGETS = [
   {
     id: 'budget',
-    icon: '💰',
+    icon: '<i class="ph ph-scales"></i>',
     title: 'Budgetsaldo',
     panel: 'laboratorium',
     render() {
@@ -24,7 +24,7 @@ const DASH_WIDGETS = [
   },
   {
     id: 'ledighed',
-    icon: '📉',
+    icon: '<i class="ph ph-trend-down"></i>',
     title: 'Ledighed',
     panel: 'ledighed',
     render() {
@@ -37,7 +37,7 @@ const DASH_WIDGETS = [
   },
   {
     id: 'inflation',
-    icon: '📈',
+    icon: '<i class="ph ph-trend-up"></i>',
     title: 'Inflation',
     panel: 'inflation',
     render() {
@@ -52,7 +52,7 @@ const DASH_WIDGETS = [
   },
   {
     id: 'rente',
-    icon: '🏦',
+    icon: '<i class="ph ph-bank"></i>',
     title: 'Nationalbankrente',
     panel: 'statsgaeld',
     render() {
@@ -65,7 +65,7 @@ const DASH_WIDGETS = [
   },
   {
     id: 'boligpris',
-    icon: '🏠',
+    icon: '<i class="ph ph-house"></i>',
     title: 'Boligpriser',
     panel: 'boligmarked',
     render() {
@@ -80,7 +80,7 @@ const DASH_WIDGETS = [
   },
   {
     id: 'loenvaekst',
-    icon: '💼',
+    icon: '<i class="ph ph-briefcase"></i>',
     title: 'Lønvækst',
     panel: 'indkomst',
     render() {
@@ -95,7 +95,7 @@ const DASH_WIDGETS = [
   },
   {
     id: 'polls',
-    icon: '📊',
+    icon: '<i class="ph ph-chart-bar"></i>',
     title: 'Meningsmåling',
     panel: 'meningsmaalinger',
     render() {
@@ -104,7 +104,7 @@ const DASH_WIDGETS = [
   },
   {
     id: 'co2',
-    icon: '🌿',
+    icon: '<i class="ph ph-leaf"></i>',
     title: 'CO₂-mål 2030',
     panel: 'co2',
     render() {
@@ -123,7 +123,7 @@ const DASH_WIDGETS = [
   },
   {
     id: 'befolkning',
-    icon: '👥',
+    icon: '<i class="ph ph-users"></i>',
     title: 'Befolkning',
     panel: 'demographics',
     render() {
@@ -136,7 +136,7 @@ const DASH_WIDGETS = [
   },
   {
     id: 'folketing',
-    icon: '🏛',
+    icon: '<i class="ph ph-buildings"></i>',
     title: 'Folketing',
     panel: 'folketing',
     render() {
@@ -147,7 +147,7 @@ const DASH_WIDGETS = [
   },
   {
     id: 'gini',
-    icon: '⚖️',
+    icon: '<i class="ph ph-scales"></i>',
     title: 'Ulighed',
     panel: 'ligestilling',
     render() {
@@ -160,17 +160,26 @@ const DASH_WIDGETS = [
   },
   {
     id: 'dsb',
-    icon: '🚂',
+    icon: '<i class="ph ph-train"></i>',
     title: 'DSB Rettidighed',
     panel: 'dsb',
     render() {
       return { big: '83%', sub: 'tog til tiden', status: 'warn', arrow: '→' };
     },
   },
+  {
+    id: 'reddit',
+    icon: '<i class="ph ph-reddit-logo"></i>',
+    title: 'Reddit Danmark',
+    panel: 'reddit',
+    render() {
+      return { big: 'r/Denmark', sub: 'hot topics live', arrow: null };
+    },
+  },
   // ── Wide widgets ─────────────────────────────────────────────────────────────
   {
     id: 'xdeck',
-    icon: '𝕏',
+    icon: '<i class="ph ph-x-logo"></i>',
     title: 'Politisk Debat',
     wide: true,
     desc: 'Følg politikere, partier og kommentatorer på X — live feeds som kolonner.',
