@@ -31,9 +31,9 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com", "https://platform.twitter.com"],
+      scriptSrc: ["'self'", "'unsafe-inline'", "https://unpkg.com", "https://platform.twitter.com", "https://cdn.jsdelivr.net"],
       scriptSrcAttr: ["'unsafe-inline'"],
-      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn.jsdelivr.net"],
       imgSrc: ["'self'", 'data:', 'https:'],
       connectSrc: ["'self'", "https://www.reddit.com"],
       fontSrc: ["'self'", "https://fonts.gstatic.com", "https://unpkg.com"],
