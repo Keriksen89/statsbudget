@@ -262,6 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const GROUPS = {
     personligt: { label: '👤 Personligt', tabs: [
+      { id: 'dashboard',        label: '📌 Mit Dashboard' },
       { id: 'borger',           label: '🧮 Skatteberegner' },
       { id: 'bolig',            label: '🏠 Boligberegner' },
       { id: 'pension',          label: '💼 Pensionsberegner' },
@@ -309,6 +310,7 @@ document.addEventListener('DOMContentLoaded', () => {
       { id: 'mandater',         label: '🧮 Mandater' },
       { id: 'valgkort',         label: '🗺 Valgkort' },
       { id: 'meningsmaalinger', label: '📊 Meningsmålinger' },
+      { id: 'xdeck',            label: '𝕏 Politisk Debat' },
     ]},
     oekonomi: { label: '💰 Økonomi', tabs: [
       { id: 'laboratorium',     label: '🧪 Politisk Lab' },
@@ -327,9 +329,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Pinned sub-tabs shown in the secondary bar (others go in "Alle ▾" dropdown)
   const PINNED_TABS = {
-    samfund:  ['overview', 'demographics', 'sundhed', 'ledighed', 'co2', 'boligmarked', 'uddannelse'],
-    politik:  ['platform', 'party', 'partier', 'regering', 'folketing', 'meningsmaalinger'],
-    oekonomi: ['laboratorium', 'policy', 'spending', 'revenue', 'projection', 'rygter'],
+    personligt: ['dashboard', 'borger', 'bolig', 'pension', 'elpris'],
+    samfund:    ['overview', 'demographics', 'sundhed', 'ledighed', 'co2', 'boligmarked', 'uddannelse'],
+    politik:    ['platform', 'party', 'partier', 'regering', 'folketing', 'meningsmaalinger', 'xdeck'],
+    oekonomi:   ['laboratorium', 'policy', 'spending', 'revenue', 'projection', 'rygter'],
   };
 
   let activeGroup = null;
@@ -354,6 +357,11 @@ document.addEventListener('DOMContentLoaded', () => {
         e.stopPropagation();
         const open = alleDrop.classList.toggle('open');
         alleBtn.textContent = open ? 'Alle ▴' : 'Alle ▾';
+        if (open) {
+          const r = alleBtn.getBoundingClientRect();
+          alleDrop.style.top  = (r.bottom + 4) + 'px';
+          alleDrop.style.left = r.left + 'px';
+        }
       });
       alleDrop.addEventListener('click', e => {
         const item = e.target.closest('.nav-alle-item');
@@ -373,7 +381,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.sub-tab').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.tab === tabId);
     });
-    if (tabId === 'party') VG.party.load();
+    if (tabId === 'party')      VG.party.load();
+    if (tabId === 'dashboard')  VG.dashboard && VG.dashboard.load();
+    if (tabId === 'xdeck')      VG.xdeck     && VG.xdeck.load();
     VG.render.fast();
   }
 
