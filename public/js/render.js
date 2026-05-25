@@ -506,7 +506,7 @@ VG.render.loadToday = function() {
         grid.innerHTML = '<p class="today-empty">Ingen aktuelle nyheder fundet — prøv igen om lidt.</p>';
         return;
       }
-      const SRC_CLS = { DR: 'source-dr', TV2: 'source-tv2', JP: 'source-jp', Berlingske: 'source-berlingske', Politiken: 'source-politiken', Weekendavisen: 'source-weekendavisen' };
+      const SRC_CLS = { DR: 'source-dr', TV2: 'source-tv2', JP: 'source-jp', Berlingske: 'source-berlingske', Politiken: 'source-politiken', Weekendavisen: 'source-weekendavisen', Altinget: 'source-altinget', Information: 'source-information', 'Børsen': 'source-børsen' };
       grid.innerHTML = items.map(n => {
         const stat = VG.render._todayStats[n.panel] || '';
         const srcClass = SRC_CLS[n.source] || 'source-dr';

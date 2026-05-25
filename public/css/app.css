@@ -2111,11 +2111,17 @@ canvas { display: block; max-width: 100%; }
 .source-jp           { background: rgba(30,60,120,0.12); color: #4a7cc7; border-color: rgba(30,60,120,0.2); }
 .source-berlingske   { background: rgba(10,80,40,0.12); color: #2e8b57; border-color: rgba(10,80,40,0.2); }
 .source-politiken    { background: rgba(80,40,10,0.12); color: #a0622a; border-color: rgba(80,40,10,0.2); }
-.source-weekendavisen{ background: rgba(60,20,80,0.12); color: #8b5ca0; border-color: rgba(60,20,80,0.2); }
-[data-theme="dark"] .source-jp            { background: rgba(60,100,200,0.15); color: #7aaaf0; border-color: rgba(60,100,200,0.25); }
-[data-theme="dark"] .source-berlingske    { background: rgba(20,120,60,0.15); color: #5dd490; border-color: rgba(20,120,60,0.25); }
-[data-theme="dark"] .source-politiken     { background: rgba(160,80,20,0.15); color: #f0a060; border-color: rgba(160,80,20,0.25); }
-[data-theme="dark"] .source-weekendavisen { background: rgba(120,60,160,0.15); color: #c090e0; border-color: rgba(120,60,160,0.25); }
+.source-weekendavisen{ background: rgba(60,20,80,0.12);  color: #8b5ca0; border-color: rgba(60,20,80,0.2); }
+.source-altinget     { background: rgba(10,60,100,0.12); color: #2070b4; border-color: rgba(10,60,100,0.2); }
+.source-information  { background: rgba(100,20,20,0.12); color: #b43020; border-color: rgba(100,20,20,0.2); }
+.source-børsen       { background: rgba(0,80,40,0.12);   color: #007040; border-color: rgba(0,80,40,0.2); }
+[data-theme="dark"] .source-jp            { background: rgba(60,100,200,0.15);  color: #7aaaf0;  border-color: rgba(60,100,200,0.25); }
+[data-theme="dark"] .source-berlingske    { background: rgba(20,120,60,0.15);   color: #5dd490;  border-color: rgba(20,120,60,0.25); }
+[data-theme="dark"] .source-politiken     { background: rgba(160,80,20,0.15);   color: #f0a060;  border-color: rgba(160,80,20,0.25); }
+[data-theme="dark"] .source-weekendavisen { background: rgba(120,60,160,0.15);  color: #c090e0;  border-color: rgba(120,60,160,0.25); }
+[data-theme="dark"] .source-altinget      { background: rgba(20,100,180,0.15);  color: #70b4f0;  border-color: rgba(20,100,180,0.25); }
+[data-theme="dark"] .source-information   { background: rgba(180,60,40,0.15);   color: #f08070;  border-color: rgba(180,60,40,0.25); }
+[data-theme="dark"] .source-børsen        { background: rgba(0,140,70,0.15);    color: #40d090;  border-color: rgba(0,140,70,0.25); }
 
 .rygte-title {
   font-size: 14px;
@@ -4041,3 +4047,26 @@ body {
   background: var(--surface-2); border-radius: 4px;
   font-family: monospace; font-size: 11px; color: var(--text);
 }
+
+/* ── Dashboard poll bar widget ─────────────────────────────────── */
+.dw-poll-row {
+  display: flex; align-items: center; gap: 8px; padding: 4px 0;
+}
+.dw-poll-name {
+  font-size: 11px; font-weight: 600; color: var(--text-2);
+  width: 28px; flex-shrink: 0; text-align: right;
+}
+.dw-poll-bar-wrap {
+  flex: 1; height: 8px; background: var(--surface-2); border-radius: 4px; overflow: hidden;
+}
+.dw-poll-bar {
+  height: 100%; background: var(--accent); border-radius: 4px;
+  transition: width .4s ease;
+}
+.dw-poll-pct {
+  font-size: 11px; color: var(--text-3); width: 42px; text-align: right; flex-shrink: 0;
+}
+
+/* "Seneste data" age badge in news widget */
+.dw-news-age[style] { font-style: normal; }
+

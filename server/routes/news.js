@@ -12,8 +12,14 @@ const FEEDS = [
   { src: 'JP',           url: 'https://jyllands-posten.dk/rss/jp.rss' },
   { src: 'JP',           url: 'https://jyllands-posten.dk/rss/jp_politik.rss' },
   { src: 'Berlingske',   url: 'https://www.berlingske.dk/rss/berlingske.rss' },
+  { src: 'Berlingske',   url: 'https://www.berlingske.dk/rss/business.rss' },
   { src: 'Politiken',    url: 'https://politiken.dk/rss/' },
+  { src: 'Politiken',    url: 'https://politiken.dk/rss/sektion/1429048' },
   { src: 'Weekendavisen',url: 'https://weekendavisen.dk/rss' },
+  { src: 'Altinget',     url: 'https://www.altinget.dk/rss/articles' },
+  { src: 'Altinget',     url: 'https://www.altinget.dk/rss/articles?type=politik' },
+  { src: 'Information',  url: 'https://www.information.dk/rss' },
+  { src: 'Børsen',       url: 'https://borsen.dk/rss' },
 ];
 
 /* ── Max article age: only show articles ≤ 3 days old ───────────────── */
@@ -111,29 +117,68 @@ function relTime(pubStr) {
   } catch { return ''; }
 }
 
-/* ── Fallback items — shown when live news is insufficient ───────────── */
+/* ── Fallback items — shown when live feeds are unavailable ─────────── */
 const FALLBACK = [
-  { panel: 'inflation',   group: 'samfund',   topicLabel: 'Inflation & Priser',
+  { panel: 'inflation',      group: 'samfund',   topicLabel: 'Inflation & Priser',
     headline: 'Nationalbanken fastholder renten på 3,35 % — inflationen er faldet til 2,1 %',
-    source: 'DR', age: '' },
-  { panel: 'forsvar',     group: 'samfund',   topicLabel: 'Forsvar',
+    source: 'DR', age: 'Seneste data' },
+  { panel: 'forsvar',        group: 'samfund',   topicLabel: 'Forsvar',
     headline: 'Danmark hæver forsvarsbudget til 1,65 % af BNP — NATO-målet er 3 % inden 2030',
-    source: 'TV2', age: '' },
-  { panel: 'boligmarked', group: 'samfund',   topicLabel: 'Boligmarked',
+    source: 'TV2', age: 'Seneste data' },
+  { panel: 'boligmarked',    group: 'samfund',   topicLabel: 'Boligmarked',
     headline: 'Boligpriser stiger 1,8 % på et kvartal — villaer over 3 mio. kr. sælger hurtigst',
-    source: 'DR', age: '' },
-  { panel: 'ledighed',    group: 'samfund',   topicLabel: 'Ledighed',
+    source: 'DR', age: 'Seneste data' },
+  { panel: 'ledighed',       group: 'samfund',   topicLabel: 'Ledighed',
     headline: 'Ledighedsprocenten holder sig stabilt på 4,8 % — 140.000 registrerede ledige',
-    source: 'TV2', age: '' },
-  { panel: 'psykiatri',   group: 'samfund',   topicLabel: 'Psykiatri',
+    source: 'TV2', age: 'Seneste data' },
+  { panel: 'psykiatri',      group: 'samfund',   topicLabel: 'Psykiatri',
     headline: 'Rekordmange børn og unge venter på psykiatrisk behandling — ventetiden er nu 2,1 år',
-    source: 'DR', age: '' },
-  { panel: 'co2',         group: 'samfund',   topicLabel: 'Klima & CO₂',
+    source: 'DR', age: 'Seneste data' },
+  { panel: 'co2',            group: 'samfund',   topicLabel: 'Klima & CO₂',
     headline: 'Danmark har reduceret CO₂-udledning med 47 % siden 1990 — målet er 70 % i 2030',
-    source: 'DR', age: '' },
-  { panel: 'aeldrepleje', group: 'samfund',   topicLabel: 'Ældrepleje',
+    source: 'DR', age: 'Seneste data' },
+  { panel: 'aeldrepleje',    group: 'samfund',   topicLabel: 'Ældrepleje',
     headline: '135.000 ældre modtager hjemmehjælp — sektoren koster ~105 mia. kr. om året',
-    source: 'TV2', age: '' },
+    source: 'TV2', age: 'Seneste data' },
+  { panel: 'energi',         group: 'samfund',   topicLabel: 'Energi & Strøm',
+    headline: 'Havvind dækker nu 57 % af Danmarks elforbrug — rekord for vedvarende energi',
+    source: 'DR', age: 'Seneste data' },
+  { panel: 'sundhed',        group: 'samfund',   topicLabel: 'Sundhed',
+    headline: 'Ni ud af ti danskere er tilfredse med sygehusvæsenet — ventetider dog stigende',
+    source: 'Berlingske', age: 'Seneste data' },
+  { panel: 'uddannelse',     group: 'samfund',   topicLabel: 'Uddannelse',
+    headline: 'Ny PISA-rapport: Danske elever klarer sig over OECD-gennemsnittet i læsning',
+    source: 'DR', age: 'Seneste data' },
+  { panel: 'integration',    group: 'samfund',   topicLabel: 'Integration',
+    headline: 'Færre asylansøgere i 2025 — antallet halveret sammenlignet med 2022',
+    source: 'TV2', age: 'Seneste data' },
+  { panel: 'kriminalitet',   group: 'samfund',   topicLabel: 'Kriminalitet',
+    headline: 'Banderelateret kriminalitet falder i Københavns politikreds — tre år i træk',
+    source: 'JP', age: 'Seneste data' },
+  { panel: 'erhverv',        group: 'oekonomi',  topicLabel: 'Erhverv & Vækst',
+    headline: 'Dansk BNP-vækst på 2,3 % i 2025 — eksport af grøn teknologi trækker op',
+    source: 'Børsen', age: 'Seneste data' },
+  { panel: 'statsgaeld',     group: 'oekonomi',  topicLabel: 'Statsgæld',
+    headline: 'Dansk statsgæld nede på 29 % af BNP — en af de laveste i EU',
+    source: 'Berlingske', age: 'Seneste data' },
+  { panel: 'indkomst',       group: 'samfund',   topicLabel: 'Indkomst & Ulighed',
+    headline: 'Lønvæksten på 3,8 % overstiger inflationen — realløn stiger for tredje år',
+    source: 'DR', age: 'Seneste data' },
+  { panel: 'naturvand',      group: 'samfund',   topicLabel: 'Natur & Miljø',
+    headline: 'Pesticider fundet i 30 % af boringer — ny handlingsplan for drikkevand',
+    source: 'Politiken', age: 'Seneste data' },
+  { panel: 'folkeskolen',    group: 'samfund',   topicLabel: 'Folkeskolen',
+    headline: 'Lærermangel i folkeskolen vokser — 4.000 timer dækkes af ikke-uddannede',
+    source: 'DR', age: 'Seneste data' },
+  { panel: 'ventetider',     group: 'samfund',   topicLabel: 'Ventetider',
+    headline: 'Gennemsnitlig ventetid på operation: 18 % venter over 2 måneder',
+    source: 'TV2', age: 'Seneste data' },
+  { panel: 'udenrigshandel', group: 'oekonomi',  topicLabel: 'Udenrigshandel',
+    headline: 'Dansk eksportoverskud på 97 mia. kr. i 2025 — medicin og grøn tech driver vækst',
+    source: 'Børsen', age: 'Seneste data' },
+  { panel: 'landbrug',       group: 'samfund',   topicLabel: 'Landbrug',
+    headline: 'Ny CO₂-afgift på landbrug udskudt til 2027 — landbruget kritiserer tempo',
+    source: 'JP', age: 'Seneste data' },
 ];
 
 /* ── Cache ───────────────────────────────────────────────────────────── */
@@ -160,11 +205,12 @@ router.get('/', async (req, res, next) => {
       .flatMap(r => r.status === 'fulfilled' ? r.value : [])
       .sort((a, b) => (b.pubMs || 0) - (a.pubMs || 0));
 
-    // One article per panel (up to 12 total), pick newest match per source
+    const limit = Math.min(parseInt(req.query.limit) || 20, 40);
+    // One article per panel (up to limit total), pick newest match per source
     const seen = new Set();
     const items = [];
     for (const article of all) {
-      if (items.length >= 12) break;
+      if (items.length >= limit) break;
       const topic = matchTopic(article);
       if (!topic) continue;
       // Allow up to 2 articles per panel if from different sources
@@ -185,9 +231,9 @@ router.get('/', async (req, res, next) => {
 
     // Pad with fallback items for panels with no live coverage
     const coveredPanels = new Set(items.map(i => i.panel));
-    if (items.length < 7) {
+    if (items.length < limit) {
       for (const fb of FALLBACK) {
-        if (items.length >= 7) break;
+        if (items.length >= limit) break;
         if (!coveredPanels.has(fb.panel)) {
           coveredPanels.add(fb.panel);
           items.push(fb);

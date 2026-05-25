@@ -202,7 +202,7 @@ VG.rygter._renderCard = function(item) {
     ? new Date(item.pubDate).toLocaleDateString('da-DK', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
     : '';
 
-  const SOURCE_CLS = { DR: 'source-dr', TV2: 'source-tv2', JP: 'source-jp', Berlingske: 'source-berlingske', Politiken: 'source-politiken', Weekendavisen: 'source-weekendavisen' };
+  const SOURCE_CLS = { DR: 'source-dr', TV2: 'source-tv2', JP: 'source-jp', Berlingske: 'source-berlingske', Politiken: 'source-politiken', Weekendavisen: 'source-weekendavisen', Altinget: 'source-altinget', Information: 'source-information', 'Børsen': 'source-børsen' };
   const sourceCls = SOURCE_CLS[item.source] || 'source-tv2';
 
   const fiscalHtml = impact.fiscalBn != null
