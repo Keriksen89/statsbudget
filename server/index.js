@@ -16,6 +16,7 @@ import borgerforslagRouter from './routes/borgerforslag.js';
 import energiRouter from './routes/energi.js';
 import kommunerRouter from './routes/kommuner.js';
 import rygterRouter from './routes/rygter.js';
+import newsRouter from './routes/news.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
@@ -60,6 +61,7 @@ app.use('/api/borgerforslag', borgerforslagRouter);
 app.use('/api/energi', energiRouter);
 app.use('/api/kommuner', kommunerRouter);
 app.use('/api/rygter', rygterRouter);
+app.use('/api/news', newsRouter);
 
 app.get('/api/health', (req, res) => {
   res.json({
