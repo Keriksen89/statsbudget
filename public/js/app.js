@@ -324,35 +324,82 @@ document.addEventListener('DOMContentLoaded', () => {
     ]},
   };
 
+  // Pinned sub-tabs shown in the secondary bar (others go in "Alle ▾" dropdown)
+  const PINNED_TABS = {
+    politik:  ['platform', 'party', 'partier', 'regering', 'folketing', 'meningsmaalinger'],
+    oekonomi: ['rygter', 'policy', 'spending', 'revenue', 'projection', 'historik'],
+  };
+
+  let activeGroup = null;
+
+  function buildPinnedSecondary(secondary, group, pinned) {
+    const pinnedSet  = new Set(pinned);
+    const pinnedTabs = group.tabs.filter(t => pinnedSet.has(t.id));
+    const extraTabs  = group.tabs.filter(t => !pinnedSet.has(t.id));
+    secondary.innerHTML = pinnedTabs.map((t, i) =>
+      `<button class="sub-tab${i === 0 ? ' active' : ''}" data-tab="${t.id}">${t.label}</button>`
+    ).join('') + (extraTabs.length ? `
+      <div class="nav-alle-wrap">
+        <button class="nav-alle-btn">Alle ▾</button>
+        <div class="nav-alle-drop">
+          ${group.tabs.map(t => `<button class="nav-alle-item" data-tab="${t.id}">${t.label}</button>`).join('')}
+        </div>
+      </div>` : '');
+    const alleBtn  = secondary.querySelector('.nav-alle-btn');
+    const alleDrop = secondary.querySelector('.nav-alle-drop');
+    if (alleBtn && alleDrop) {
+      alleBtn.addEventListener('click', e => {
+        e.stopPropagation();
+        const open = alleDrop.classList.toggle('open');
+        alleBtn.textContent = open ? 'Alle ▴' : 'Alle ▾';
+      });
+      alleDrop.addEventListener('click', e => {
+        const item = e.target.closest('.nav-alle-item');
+        if (!item) return;
+        alleDrop.classList.remove('open');
+        alleBtn.textContent = 'Alle ▾';
+        secondary.querySelectorAll('.sub-tab').forEach(b => b.classList.remove('active'));
+        alleBtn.classList.add('nav-alle-active');
+        switchTab(item.dataset.tab);
+      });
+    }
+  }
+
   function switchTab(tabId) {
     VG.state.activeTab = tabId;
     document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + tabId));
-    // Update active state on sub-tab buttons
     document.querySelectorAll('.sub-tab').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.tab === tabId);
     });
+    // Samfund hub mode: show breadcrumb back button when inside a sub-panel
+    if (activeGroup === 'samfund') {
+      const secondary = document.getElementById('nav-secondary');
+      secondary.innerHTML = tabId === 'overview' ? '' :
+        `<button class="sub-tab sub-tab-back" data-tab="overview">← Oversigt</button>`;
+    }
     if (tabId === 'party') VG.party.load();
     VG.render.fast();
   }
 
   function switchGroup(groupKey) {
+    activeGroup = groupKey;
     const group = GROUPS[groupKey];
     if (!group) return;
-
-    // Update primary nav active state
     document.querySelectorAll('.nav-btn').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.group === groupKey);
     });
-
     const secondary = document.getElementById('nav-secondary');
-    if (group.tabs.length <= 1) {
-      // Single-tab group: hide secondary bar and activate tab directly
+    if (groupKey === 'samfund') {
+      // Hub mode: no sub-tab bar — navigation happens via the hub grid
       secondary.innerHTML = '';
-      switchTab(group.tabs[0].id);
+      switchTab('overview');
+    } else if (PINNED_TABS[groupKey]) {
+      buildPinnedSecondary(secondary, group, PINNED_TABS[groupKey]);
+      switchTab(PINNED_TABS[groupKey][0]);
     } else {
-      // Multi-tab group: populate secondary bar
-      secondary.innerHTML = group.tabs.map(t =>
-        `<button class="sub-tab${t.id === group.tabs[0].id ? ' active' : ''}" data-tab="${t.id}">${t.label}</button>`
+      // Personligt — small enough to show all tabs
+      secondary.innerHTML = group.tabs.map((t, i) =>
+        `<button class="sub-tab${i === 0 ? ' active' : ''}" data-tab="${t.id}">${t.label}</button>`
       ).join('');
       switchTab(group.tabs[0].id);
     }
@@ -363,33 +410,58 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', () => switchGroup(btn.dataset.group));
   });
 
-  // Wire up secondary nav via event delegation
+  // Wire up secondary nav (sub-tabs + back button) via event delegation
   document.getElementById('nav-secondary').addEventListener('click', e => {
     const btn = e.target.closest('.sub-tab');
     if (!btn) return;
     document.querySelectorAll('.sub-tab').forEach(b => b.classList.remove('active'));
+    const alleBtn = document.querySelector('.nav-alle-btn');
+    if (alleBtn) alleBtn.classList.remove('nav-alle-active');
     btn.classList.add('active');
     switchTab(btn.dataset.tab);
   });
 
-  // Initialise: show samfund group (overview is the first tab there)
+  // Close "Alle" dropdown on outside click
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.nav-alle-drop.open').forEach(d => d.classList.remove('open'));
+    document.querySelectorAll('.nav-alle-btn').forEach(b => {
+      if (b.textContent.includes('▴')) b.textContent = 'Alle ▾';
+    });
+  });
+
+  // Initialise: show samfund hub
   switchGroup('samfund');
   window.__switchGroup = switchGroup;
   window.__switchTab = switchTab;
   window.__goHome = function() { switchGroup('samfund'); };
 
-  // Navigate directly to a panel by ID — used by news cards
+  // Navigate directly to a panel by ID — used by news cards and hub grid
   window.__mkClick = function(panelId) {
     let targetGroup = 'samfund';
     for (const [gk, g] of Object.entries(GROUPS)) {
       if (g.tabs.some(t => t.id === panelId)) { targetGroup = gk; break; }
     }
-    switchGroup(targetGroup);
-    if (panelId && panelId !== GROUPS[targetGroup].tabs[0].id) {
-      setTimeout(() => {
-        const btn = document.querySelector(`.sub-tab[data-tab="${panelId}"]`);
-        if (btn) btn.click();
-      }, 30);
+    if (targetGroup === 'samfund') {
+      // Hub mode: update primary nav highlight then switch tab directly
+      activeGroup = 'samfund';
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.group === 'samfund');
+      });
+      switchTab(panelId);
+    } else {
+      switchGroup(targetGroup);
+      if (panelId !== GROUPS[targetGroup].tabs[0].id) {
+        setTimeout(() => {
+          const btn = document.querySelector(`.sub-tab[data-tab="${panelId}"]`);
+          if (btn) btn.click();
+          else {
+            // Panel is in the "Alle" overflow — navigate directly
+            const alleBtn = document.querySelector('.nav-alle-btn');
+            if (alleBtn) alleBtn.classList.add('nav-alle-active');
+            switchTab(panelId);
+          }
+        }, 30);
+      }
     }
   };
 

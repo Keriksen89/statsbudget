@@ -214,7 +214,7 @@ VG.render.overview = function() {
   </div>
 </div>`;
 
-  return `${todaySection}<div class="grid-2" style="margin-top:24px">
+  return `${todaySection}${VG.render.hubGrid()}<div class="grid-2" style="margin-top:24px">
     <div class="card"><h2>Hvor pengene bruges</h2><p class="intro">Statslige, regionale og kommunale udgifter — i alt ${VG.fmt(totalExp)} kr/år</p>${expRows}</div>
     <div class="card"><h2>Hvor pengene kommer fra</h2><p class="intro">Skatter, afgifter og andre offentlige indtægter — i alt ${VG.fmt(totalRev)} kr/år</p>${revRows}</div>
   </div>
@@ -568,6 +568,67 @@ VG.render._todayStats = {
   ventetider:   '18% venter over 2 måneder · kræft: 84% i tid',
   naturvand:    '39 mg/l nitrat · 62% søer har god vandkvalitet',
   demographics: '5,97 mio. indbyggere · gennemsnitsalder 42,3 år',
+};
+
+/* Hub category grid — shown below "Danmark i dag" on Oversigt ────────── */
+VG.render.hubGrid = function() {
+  const cats = [
+    { icon: '🏥', label: 'Velfærd & Sundhed', items: [
+      { id: 'sundhed',       label: 'Sundhed',            stat: '184 mia. kr./år' },
+      { id: 'ventetider',    label: 'Ventetider',         stat: '18% venter over 2 mdr.' },
+      { id: 'aeldrepleje',   label: 'Ældrepleje',         stat: '135.000 modtagere' },
+      { id: 'psykiatri',     label: 'Psykiatri',          stat: '2,1 år ventetid (børn)' },
+      { id: 'folkesundhed',  label: 'Folkesundhed',       stat: '' },
+    ]},
+    { icon: '💼', label: 'Arbejdsmarked', items: [
+      { id: 'ledighed',      label: 'Ledighed',           stat: '4,8% · 140.000 ledige' },
+      { id: 'indkomst',      label: 'Indkomst & Ulighed', stat: 'Gini 29,2' },
+      { id: 'arbejdsmiljoe', label: 'Arbejdsmiljø',       stat: '' },
+      { id: 'ligestilling',  label: 'Ligestilling',       stat: '' },
+      { id: 'velfaerdsstat', label: 'Velfærdsstat',       stat: '' },
+    ]},
+    { icon: '🏠', label: 'Bolig & Forbrug', items: [
+      { id: 'boligmarked',   label: 'Boligmarked',        stat: '2,35 mio. kr. median' },
+      { id: 'boligkrise',    label: 'Boligkrise',         stat: '' },
+      { id: 'forbrug',       label: 'Forbrug',            stat: '' },
+    ]},
+    { icon: '🌱', label: 'Klima & Energi', items: [
+      { id: 'co2',           label: 'CO₂ & Klima',       stat: '47% reduktion siden 1990' },
+      { id: 'energi',        label: 'Energi & Strøm',    stat: '84% vedvarende el' },
+      { id: 'groenomstilling', label: 'Grøn Omstilling', stat: '' },
+      { id: 'naturvand',     label: 'Natur & Drikkevand', stat: '' },
+    ]},
+    { icon: '🎓', label: 'Uddannelse & Integration', items: [
+      { id: 'folkeskolen',   label: 'Folkeskolen',        stat: '560.000 elever' },
+      { id: 'uddannelse',    label: 'Uddannelse',         stat: '' },
+      { id: 'integration',   label: 'Integration',        stat: '15,2% af befolkning' },
+      { id: 'kriminalitet',  label: 'Kriminalitet',       stat: '↓31% siden 2005' },
+      { id: 'medietillid',   label: 'Medie & Tillid',    stat: '' },
+    ]},
+    { icon: '🌍', label: 'Danmark & Verden', items: [
+      { id: 'demographics',  label: 'Demografi',          stat: '5,97 mio. indbyggere' },
+      { id: 'inflation',     label: 'Inflation',          stat: 'KPI 2,1%' },
+      { id: 'udenrigshandel',label: 'Udenrigshandel',     stat: '65% af BNP' },
+      { id: 'landbrug',      label: 'Landbrug',           stat: '175 mia. kr. eksport/år' },
+      { id: 'forsvar',       label: 'Forsvar',            stat: '1,65% af BNP' },
+      { id: 'generationsregnskab', label: 'Generationsregnskab', stat: '' },
+      { id: 'dsb',           label: 'Transport',          stat: '' },
+      { id: 'kommuner',      label: 'Kommuner',           stat: '' },
+    ]},
+  ];
+
+  return `<div class="hub-section">
+    <h3 class="hub-section-title">Alle emner</h3>
+    <div class="hub-grid">
+      ${cats.map(cat => `<div class="hub-cat">
+        <div class="hub-cat-hd">${cat.icon} ${cat.label}</div>
+        ${cat.items.map(item => `<button class="hub-item" onclick="window.__mkClick('${item.id}')">
+          <span class="hub-item-label">${item.label}</span>
+          ${item.stat ? `<span class="hub-item-stat">${item.stat}</span>` : ''}
+        </button>`).join('')}
+      </div>`).join('')}
+    </div>
+  </div>`;
 };
 
 /* Load live news into the #today-grid placeholder ───────────────────── */
