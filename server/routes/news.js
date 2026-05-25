@@ -3,12 +3,17 @@ const router = express.Router();
 
 /* ── RSS feeds to watch ──────────────────────────────────────────────── */
 const FEEDS = [
-  { src: 'DR',  url: 'https://www.dr.dk/nyheder/service/feeds/indland' },
-  { src: 'DR',  url: 'https://www.dr.dk/nyheder/service/feeds/penge' },
-  { src: 'DR',  url: 'https://www.dr.dk/nyheder/service/feeds/politik' },
-  { src: 'TV2', url: 'https://nyheder.tv2.dk/rss' },
-  { src: 'TV2', url: 'https://finans.tv2.dk/rss' },
-  { src: 'TV2', url: 'https://feeds.tv2.dk/nyheder' },
+  { src: 'DR',           url: 'https://www.dr.dk/nyheder/service/feeds/indland' },
+  { src: 'DR',           url: 'https://www.dr.dk/nyheder/service/feeds/penge' },
+  { src: 'DR',           url: 'https://www.dr.dk/nyheder/service/feeds/politik' },
+  { src: 'TV2',          url: 'https://nyheder.tv2.dk/rss' },
+  { src: 'TV2',          url: 'https://finans.tv2.dk/rss' },
+  { src: 'TV2',          url: 'https://feeds.tv2.dk/nyheder' },
+  { src: 'JP',           url: 'https://jyllands-posten.dk/rss/jp.rss' },
+  { src: 'JP',           url: 'https://jyllands-posten.dk/rss/jp_politik.rss' },
+  { src: 'Berlingske',   url: 'https://www.berlingske.dk/rss/berlingske.rss' },
+  { src: 'Politiken',    url: 'https://politiken.dk/rss/' },
+  { src: 'Weekendavisen',url: 'https://weekendavisen.dk/rss' },
 ];
 
 /* ── Max article age: only show articles ≤ 3 days old ───────────────── */
@@ -155,14 +160,18 @@ router.get('/', async (req, res, next) => {
       .flatMap(r => r.status === 'fulfilled' ? r.value : [])
       .sort((a, b) => (b.pubMs || 0) - (a.pubMs || 0));
 
-    // One article per panel, pick newest match
+    // One article per panel (up to 12 total), pick newest match per source
     const seen = new Set();
     const items = [];
     for (const article of all) {
-      if (items.length >= 5) break;
+      if (items.length >= 12) break;
       const topic = matchTopic(article);
-      if (!topic || seen.has(topic.panel)) continue;
-      seen.add(topic.panel);
+      if (!topic) continue;
+      // Allow up to 2 articles per panel if from different sources
+      const key = `${topic.panel}:${article.src}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      seen.add(topic.panel + ':_any');
       items.push({
         panel:      topic.panel,
         group:      topic.group,
@@ -174,12 +183,13 @@ router.get('/', async (req, res, next) => {
       });
     }
 
-    // Pad with fallback items for any slots not covered by live news
-    if (items.length < 5) {
+    // Pad with fallback items for panels with no live coverage
+    const coveredPanels = new Set(items.map(i => i.panel));
+    if (items.length < 7) {
       for (const fb of FALLBACK) {
-        if (items.length >= 5) break;
-        if (!seen.has(fb.panel)) {
-          seen.add(fb.panel);
+        if (items.length >= 7) break;
+        if (!coveredPanels.has(fb.panel)) {
+          coveredPanels.add(fb.panel);
           items.push(fb);
         }
       }

@@ -99,7 +99,7 @@ VG.rygter._renderContent = function(panel) {
 <div class="card">
   ${scenariosHtml}
   <h2 style="margin-top:${scenariosHtml ? '32px' : '0'}">📰 Nyheder med DREAM-analyse</h2>
-  <p class="intro" style="margin-bottom:16px">Politiske nyheder fra DR og TV2, analyseret med DREAM/MAKRO-inspirerede parametre. Klik på et nyhedskort for at se den fulde analyse.</p>
+  <p class="intro" style="margin-bottom:16px">Politiske nyheder fra DR, TV2, Jyllands-Posten, Berlingske, Politiken og Weekendavisen — analyseret med DREAM/MAKRO-inspirerede parametre. Klik på et nyhedskort for at se den fulde analyse.</p>
   <div class="rygte-toolbar">
     <div class="rygte-filters" id="rygte-filters">${filterBtns}</div>
     <div class="rygte-sort-wrap">
@@ -109,7 +109,7 @@ VG.rygter._renderContent = function(panel) {
     </div>
   </div>
   <div class="rygte-list" id="rygte-list">${cards}</div>
-  <p class="rygte-global-disclaimer">DREAM/MAKRO-estimater er automatisk genererede og ikke officielle analyser. Kilde: DR Politik RSS + TV2 Nyheder RSS.</p>
+  <p class="rygte-global-disclaimer">DREAM/MAKRO-estimater er automatisk genererede og ikke officielle analyser. Kilder: DR, TV2, Jyllands-Posten, Berlingske, Politiken, Weekendavisen (RSS).</p>
 </div>`;
 
   VG.rygter._bindEvents(panel);
@@ -202,7 +202,8 @@ VG.rygter._renderCard = function(item) {
     ? new Date(item.pubDate).toLocaleDateString('da-DK', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
     : '';
 
-  const sourceCls = item.source === 'DR' ? 'source-dr' : 'source-tv2';
+  const SOURCE_CLS = { DR: 'source-dr', TV2: 'source-tv2', JP: 'source-jp', Berlingske: 'source-berlingske', Politiken: 'source-politiken', Weekendavisen: 'source-weekendavisen' };
+  const sourceCls = SOURCE_CLS[item.source] || 'source-tv2';
 
   const fiscalHtml = impact.fiscalBn != null
     ? VG.rygter._renderFiscalBar(impact.fiscalBn)
