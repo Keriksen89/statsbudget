@@ -717,16 +717,120 @@ VG.dashboard._fillNews = function() {
     .then(r => r.ok ? r.json() : Promise.reject())
     .then(({ items }) => {
       if (!items || !items.length) { el.innerHTML = '<p class="dw-empty">Ingen nyheder</p>'; return; }
-      el.innerHTML = items.slice(0, 12).map(n => {
+      const newsList = items.slice(0, 12);
+      el.innerHTML = newsList.map((n, i) => {
         const sc = SRC_CLS[n.source] || 'source-dr';
-        return `<div class="dw-news-item" onclick="window.__mkClick && window.__mkClick('${n.panel}')">
-          <div class="dw-news-meta"><span class="rygte-source-badge ${sc}">${n.source}</span><span class="dw-news-age">${n.age || ''}</span></div>
+        const catDot = n.dream && n.dream.category ? `<span class="dw-news-cat">${n.dream.category}</span>` : '';
+        return `<div class="dw-news-item dw-news-item--modal" data-news-idx="${i}">
+          <div class="dw-news-meta"><span class="rygte-source-badge ${sc}">${n.source}</span><span class="dw-news-age">${n.age || ''}</span>${catDot}</div>
           <div class="dw-news-hl">${n.headline}</div>
-          <div class="dw-news-topic">${n.topicLabel}</div>
+          <div class="dw-news-topic">${n.topicLabel} <span class="dw-news-dream-hint">📊 DREAM-analyse</span></div>
         </div>`;
       }).join('');
+      el.querySelectorAll('[data-news-idx]').forEach(item => {
+        item.onclick = () => VG.dashboard._openNewsModal(newsList[+item.dataset.newsIdx]);
+      });
     })
     .catch(() => { if (el) el.innerHTML = '<p class="dw-empty">Nyheder utilgængelige</p>'; });
+};
+
+VG.dashboard._openNewsModal = function(n) {
+  if (!n) return;
+  const d = n.dream || {};
+  const CAT_COLORS = {
+    Skat: 'var(--warn)', Velfærd: 'var(--neg)', Klima: '#2d8a50', Bolig: '#6b5ea8',
+    Forsvar: '#8a5c2d', Uddannelse: 'var(--accent)', Sundhed: '#c05858',
+    Arbejdsmarked: '#4a7fa5', Immigration: '#7a6b55', Pension: '#5a8a7a', Øvrig: 'var(--text-3)',
+  };
+  const CONF = { rygte: 'Rygte', forhandling: 'Forhandling', forslag: 'Forslag', vedtaget: 'Vedtaget' };
+  const catColor  = CAT_COLORS[d.category] || 'var(--text-3)';
+  const confLabel = CONF[d.confidence] || 'Rygte';
+  const sc        = SRC_CLS[n.source] || 'source-dr';
+
+  const fiscalHtml = d.fiscalBn != null
+    ? (() => {
+        const pct   = Math.min(100, Math.abs(d.fiscalBn) / 15 * 100).toFixed(1);
+        const color = d.fiscalBn > 0 ? 'var(--neg)' : 'var(--pos)';
+        const label = d.fiscalBn > 0
+          ? `+${d.fiscalBn.toFixed(1).replace('.', ',')} mia. kr./år (bedre balance)`
+          : `${d.fiscalBn.toFixed(1).replace('.', ',')} mia. kr./år (mere underskud)`;
+        return `<div class="dream-bar-wrap"><div class="dream-bar-track"><div class="dream-bar-fill" style="width:${pct}%;background:${color}"></div></div><span class="dream-bar-label" style="color:${color}">${label}</span></div>`;
+      })()
+    : '<span class="dream-na">Ikke estimeret</span>';
+
+  const gdpHtml = d.gdpPct != null
+    ? `<span class="dream-gdp ${d.gdpPct >= 0 ? 'pos' : 'neg'}">${d.gdpPct >= 0 ? '▲' : '▼'} ${Math.abs(d.gdpPct).toFixed(2).replace('.', ',')}% BNP</span>`
+    : '<span class="dream-na">—</span>';
+
+  const empHtml = d.employmentK != null && Math.abs(d.employmentK) >= 0.5
+    ? `<span class="dream-emp ${d.employmentK >= 0 ? 'pos' : 'neg'}">${d.employmentK >= 0 ? '+' : ''}${d.employmentK.toFixed(0)}k job</span>`
+    : '<span class="dream-na">—</span>';
+
+  const giniHtml = d.giniDelta != null && Math.abs(d.giniDelta) >= 0.05
+    ? `<span class="dream-gini ${d.giniDelta < 0 ? 'eq' : 'uneq'}">${d.giniDelta < 0 ? '↓ Mere lighed' : '↑ Mere ulighed'} (Δ${d.giniDelta >= 0 ? '+' : ''}${d.giniDelta.toFixed(1)})</span>`
+    : '<span class="dream-na">Neutral</span>';
+
+  const score     = d.politicalScore || 0;
+  const markerPct = Math.max(2, Math.min(98, (score + 100) / 200 * 100)).toFixed(1);
+  const compassHtml = `<div class="dream-compass"><div class="dream-compass-labels"><span>Venstre</span><span>Højre</span></div><div class="dream-compass-track"><div class="dream-compass-marker" style="left:${markerPct}%"></div></div></div>`;
+
+  const topicLink = n.panel
+    ? `<button class="vg-modal-topic-btn" onclick="VG.dashboard._closeNewsModal();window.__mkClick&&window.__mkClick('${n.panel}')">Gå til ${n.topicLabel} →</button>`
+    : '';
+
+  document.getElementById('vg-news-modal')?.remove();
+  const modal = document.createElement('div');
+  modal.id = 'vg-news-modal';
+  modal.className = 'vg-modal';
+  modal.innerHTML = `
+    <div class="vg-modal-backdrop"></div>
+    <div class="vg-modal-inner" role="dialog" aria-modal="true">
+      <button class="vg-modal-close" title="Luk"><i class="ph ph-x"></i></button>
+      <div class="vg-modal-article">
+        <div class="vg-modal-meta">
+          <span class="rygte-source-badge ${sc}">${n.source}</span>
+          <span class="rygte-cat-badge" style="background:${catColor}22;color:${catColor};border:1px solid ${catColor}55">${d.category || 'Øvrig'}</span>
+          <span class="rygte-confidence conf-${d.confidence || 'rygte'}">${confLabel}</span>
+          <span class="vg-modal-age">${n.age || ''}</span>
+        </div>
+        <h3 class="vg-modal-headline">
+          <a href="${n.link || '#'}" target="_blank" rel="noopener">${n.headline}</a>
+        </h3>
+        ${n.description ? `<p class="vg-modal-desc">${n.description}</p>` : ''}
+        <div class="dream-box">
+          <div class="dream-box-header">📊 DREAM/MAKRO analyse</div>
+          <div class="dream-stats">
+            <div class="dream-stat"><div class="dream-stat-label">Finanspolitisk effekt</div><div class="dream-stat-val">${fiscalHtml}</div></div>
+            <div class="dream-stat"><div class="dream-stat-label">BNP-effekt</div><div class="dream-stat-val">${gdpHtml}</div></div>
+            <div class="dream-stat"><div class="dream-stat-label">Beskæftigelse</div><div class="dream-stat-val">${empHtml}</div></div>
+            <div class="dream-stat"><div class="dream-stat-label">Indkomstfordeling</div><div class="dream-stat-val">${giniHtml}</div></div>
+          </div>
+          <div class="dream-compass-row">
+            <span class="dream-compass-label-txt">Politisk placering</span>
+            <div class="dream-compass-wrap">${compassHtml}</div>
+          </div>
+          <p class="dream-explanation">${d.explanation || ''}</p>
+          <p class="dream-disclaimer">Estimat baseret på DREAM/MAKRO-modelparametre. Ikke officiel analyse.</p>
+        </div>
+        <div class="vg-modal-actions">
+          <a class="vg-modal-src-btn" href="${n.link || '#'}" target="_blank" rel="noopener"><i class="ph ph-arrow-square-out"></i> Læs hos ${n.source}</a>
+          ${topicLink}
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  requestAnimationFrame(() => modal.classList.add('vg-modal--open'));
+  modal.querySelector('.vg-modal-backdrop').onclick = () => VG.dashboard._closeNewsModal();
+  modal.querySelector('.vg-modal-close').onclick    = () => VG.dashboard._closeNewsModal();
+  const onKey = e => { if (e.key === 'Escape') { VG.dashboard._closeNewsModal(); document.removeEventListener('keydown', onKey); } };
+  document.addEventListener('keydown', onKey);
+};
+
+VG.dashboard._closeNewsModal = function() {
+  const modal = document.getElementById('vg-news-modal');
+  if (!modal) return;
+  modal.classList.remove('vg-modal--open');
+  modal.addEventListener('transitionend', () => modal.remove(), { once: true });
 };
 
 VG.dashboard._fillInsights = function() {

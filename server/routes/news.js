@@ -1,4 +1,5 @@
 import express from 'express';
+import { estimateDREAMImpact } from '../lib/dreamAnalysis.js';
 const router = express.Router();
 
 /* ── RSS feeds to watch ──────────────────────────────────────────────── */
@@ -219,13 +220,15 @@ router.get('/', async (req, res, next) => {
       seen.add(key);
       seen.add(topic.panel + ':_any');
       items.push({
-        panel:      topic.panel,
-        group:      topic.group,
-        topicLabel: topic.label,
-        headline:   article.title,
-        source:     article.src,
-        age:        relTime(article.pub),
-        link:       article.link,
+        panel:       topic.panel,
+        group:       topic.group,
+        topicLabel:  topic.label,
+        headline:    article.title,
+        description: article.desc,
+        source:      article.src,
+        age:         relTime(article.pub),
+        link:        article.link,
+        dream:       estimateDREAMImpact(article.title, article.desc || ''),
       });
     }
 
