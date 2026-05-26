@@ -457,6 +457,7 @@ document.addEventListener('DOMContentLoaded', () => {
     switchTab(panelId);
     _updateSidebarActive(panelId, owningGroup);
     _updateBreadcrumb(panelId, owningGroup);
+    _updateMobileNav(panelId, owningGroup);
     _closeMobileSidebar();
   }
 
@@ -502,6 +503,19 @@ document.addEventListener('DOMContentLoaded', () => {
     if (secEl)  secEl.textContent  = section;
     if (sepEl)  sepEl.textContent  = section ? '›' : '';
     if (pageEl) pageEl.textContent = page;
+  }
+
+  function _updateMobileNav(panelId, owningGroup) {
+    const nav = document.getElementById('mobile-nav');
+    if (!nav) return;
+    const GROUP_MAP = { personligt: null, samfund: 'demographics', politik: 'meningsmaalinger', oekonomi: 'laboratorium' };
+    nav.querySelectorAll('.mnav-item').forEach(btn => {
+      const target = btn.dataset.mnav;
+      const isActive = target === panelId ||
+        (owningGroup && GROUP_MAP[owningGroup] === target) ||
+        (panelId === 'reddit' && target === 'feed');
+      btn.classList.toggle('active', isActive);
+    });
   }
 
   function _closeMobileSidebar() {
@@ -567,6 +581,18 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // ── Init ────────────────────────────────────────────────────────────────────
+
+  // Auto-collapse sidebar on medium screens (769–1100px) to maximize content area
+  if (window.innerWidth >= 769 && window.innerWidth <= 1100) {
+    document.getElementById('sidebar')?.classList.add('collapsed');
+    const colBtn = document.getElementById('sb-collapse');
+    if (colBtn) colBtn.textContent = '›';
+  }
+
+  // Wire up mobile bottom navigation
+  document.getElementById('mobile-nav')?.querySelectorAll('.mnav-item').forEach(btn => {
+    btn.addEventListener('click', () => navigateTo(btn.dataset.mnav));
+  });
 
   buildSidebar();
   navigateTo('dashboard');
