@@ -54,11 +54,18 @@ VG.rygter.renderPanel = async function() {
   if (!panel) return;
 
   if (!VG.rygter._data) {
+    // First visit — show spinner while loading
     panel.innerHTML = '<div class="panel-loading">Henter politiske nyheder og analyserer økonomi…</div>';
     await Promise.all([VG.rygter.load(), VG.rygter.loadScenarios()]);
+    VG.rygter._renderContent(panel);
+  } else {
+    // Already have data — render immediately, then refresh silently in background
+    VG.rygter._renderContent(panel);
+    Promise.all([VG.rygter.load(), VG.rygter.loadScenarios()]).then(() => {
+      if (document.getElementById('panel-rygter')?.classList.contains('active'))
+        VG.rygter._renderContent(document.getElementById('panel-rygter'));
+    });
   }
-
-  VG.rygter._renderContent(panel);
 };
 
 VG.rygter._renderContent = function(panel) {

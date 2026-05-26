@@ -325,7 +325,7 @@ router.get('/feed', async (req, res) => {
   // If both feeds failed, provide mock data for demo
   const result = analyzed.length > 0 ? analyzed : getMockRygter();
 
-  cache.set(cacheKey, result, 30 * 60); // 30 minutes
+  cache.set(cacheKey, result, 5 * 60); // 5 minutes
   res.setHeader('X-Cache', 'MISS');
   res.json(result);
 });
@@ -435,7 +435,7 @@ router.get('/scenarios', async (req, res) => {
     return { ...scenario, combined, relatedNews };
   });
 
-  cache.set(cacheKey, result, 30 * 60);
+  cache.set(cacheKey, result, 5 * 60);
   res.setHeader('X-Cache', 'MISS');
   res.json(result);
 });
