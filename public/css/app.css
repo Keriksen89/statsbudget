@@ -3584,13 +3584,13 @@ body {
   border-top: none !important;
   background: #f1f5f9;
 }
-[data-theme="dark"] .app { background: #0f172a; }
+[data-theme="dark"] .app { background: #000000; }
 [data-theme="dark"] .feed-card { background: #1e293b; border-color: rgba(255,255,255,0.08); }
 [data-theme="dark"] .card { background: #1e293b; border-color: rgba(255,255,255,0.08); }
 [data-theme="dark"] .xd-sidebar { background: #1e293b; border-color: rgba(255,255,255,0.08); }
 [data-theme="dark"] .xd-sidebar-hd { background: #131c2e; border-bottom-color: rgba(255,255,255,0.08); }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .app { background: #0f172a; }
+  :root:not([data-theme="light"]) .app { background: #000000; }
 }
 
 /* ── Topbar ─────────────────────────────────────────────────────── */
