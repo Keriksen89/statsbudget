@@ -55,7 +55,7 @@ VG.actions.share = function() {
       }
     });
     document.getElementById('btn-twitter').addEventListener('click', () => {
-      const text = encodeURIComponent('Jeg har lavet mit eget statsbudget for Danmark på Occulus:');
+      const text = encodeURIComponent('Jeg har lavet mit eget statsbudget for Danmark på Oculus:');
       window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(url)}`, '_blank');
     });
   }, 50);
@@ -522,6 +522,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('sidebar')?.classList.remove('mobile-open');
     document.getElementById('sb-overlay')?.classList.remove('active');
   }
+
+  // Logo click → go to dashboard
+  document.querySelector('.sb-brand')?.addEventListener('click', () => navigateTo('dashboard'));
 
   // Sidebar collapse (desktop)
   document.getElementById('sb-collapse')?.addEventListener('click', () => {

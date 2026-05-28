@@ -100,7 +100,7 @@ app.use((err, req, res, next) => {
 });
 
 const server = app.listen(PORT, HOST, () => {
-  console.log(`Occulus listening on http://${HOST}:${PORT}`);
+  console.log(`Oculus listening on http://${HOST}:${PORT}`);
 });
 
 const shutdown = (signal) => {
