@@ -148,6 +148,7 @@ function buildImpact(rule, category, confidence, title) {
 export function estimateDREAMImpact(title, description) {
   const text = `${title} ${description}`.toLowerCase();
 
+  // Check for specific fiscal rule match first (strong signal)
   for (const rule of FISCAL_RULES) {
     if (rule.pattern.test(text)) {
       const category = detectCategory(text);
@@ -156,23 +157,28 @@ export function estimateDREAMImpact(title, description) {
     }
   }
 
+  // Check if any policy keywords are present
   const category = detectCategory(text);
-  const confidence = detectConfidence(text);
 
+  // No policy keywords → not a policy article, skip analysis
+  if (category === 'Øvrig') return null;
+
+  // Policy topic detected but no specific fiscal rule → use category heuristics
+  const confidence = detectConfidence(text);
   const heuristics = {
-    Skat:           { fiscalBn: null, gdpPct: null, employmentK: null, giniDelta: null, politicalScore: 0 },
-    Velfærd:        { fiscalBn: -2.0, gdpPct: 0.03, employmentK: -1, giniDelta: -0.3, politicalScore: 45 },
-    Klima:          { fiscalBn: -3.0, gdpPct: 0.1, employmentK: 6, giniDelta: -0.1, politicalScore: 25 },
-    Bolig:          { fiscalBn: -1.5, gdpPct: 0.05, employmentK: 2, giniDelta: -0.1, politicalScore: 20 },
-    Forsvar:        { fiscalBn: -8.0, gdpPct: 0.15, employmentK: 6, giniDelta: 0.0, politicalScore: -15 },
-    Uddannelse:     { fiscalBn: -2.0, gdpPct: 0.08, employmentK: 5, giniDelta: -0.2, politicalScore: 30 },
-    Sundhed:        { fiscalBn: -3.0, gdpPct: 0.1, employmentK: 8, giniDelta: -0.2, politicalScore: 25 },
-    Arbejdsmarked:  { fiscalBn: 0.5,  gdpPct: 0.05, employmentK: 4, giniDelta: 0.05, politicalScore: -10 },
-    Immigration:    { fiscalBn: 1.5,  gdpPct: -0.05, employmentK: -3, giniDelta: 0.1, politicalScore: -40 },
-    Pension:        { fiscalBn: 3.0,  gdpPct: 0.2, employmentK: 8, giniDelta: 0.05, politicalScore: -20 },
-    Øvrig:          { fiscalBn: null, gdpPct: null, employmentK: null, giniDelta: null, politicalScore: 0 },
+    Skat:           { fiscalBn: null,  gdpPct: null,   employmentK: null, giniDelta: null,  politicalScore: 0 },
+    Velfærd:        { fiscalBn: -2.0,  gdpPct: 0.03,   employmentK: -1,   giniDelta: -0.3,  politicalScore: 45 },
+    Klima:          { fiscalBn: -3.0,  gdpPct: 0.1,    employmentK: 6,    giniDelta: -0.1,  politicalScore: 25 },
+    Bolig:          { fiscalBn: -1.5,  gdpPct: 0.05,   employmentK: 2,    giniDelta: -0.1,  politicalScore: 20 },
+    Forsvar:        { fiscalBn: -8.0,  gdpPct: 0.15,   employmentK: 6,    giniDelta: 0.0,   politicalScore: -15 },
+    Uddannelse:     { fiscalBn: -2.0,  gdpPct: 0.08,   employmentK: 5,    giniDelta: -0.2,  politicalScore: 30 },
+    Sundhed:        { fiscalBn: -3.0,  gdpPct: 0.1,    employmentK: 8,    giniDelta: -0.2,  politicalScore: 25 },
+    Arbejdsmarked:  { fiscalBn: 0.5,   gdpPct: 0.05,   employmentK: 4,    giniDelta: 0.05,  politicalScore: -10 },
+    Immigration:    { fiscalBn: 1.5,   gdpPct: -0.05,  employmentK: -3,   giniDelta: 0.1,   politicalScore: -40 },
+    Pension:        { fiscalBn: 3.0,   gdpPct: 0.2,    employmentK: 8,    giniDelta: 0.05,  politicalScore: -20 },
   };
 
-  const h = heuristics[category] || heuristics['Øvrig'];
+  const h = heuristics[category];
+  if (!h) return null;
   return buildImpact(h, category, confidence, title);
 }

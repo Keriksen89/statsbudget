@@ -1,5 +1,16 @@
 VG.dashboard = {};
 
+function _sparks(vals, colorClass) {
+  if (!vals || vals.length < 2) return '';
+  const mn = Math.min(...vals), mx = Math.max(...vals);
+  const rng = mx - mn || 1;
+  const n = vals.length;
+  const pts = vals.map((v, i) => `${(2 + i / (n - 1) * 96).toFixed(1)},${(26 - (v - mn) / rng * 22).toFixed(1)}`).join(' ');
+  const ly = (26 - (vals[n - 1] - mn) / rng * 22).toFixed(1);
+  const clr = colorClass === 'dw-ok' ? 'var(--neg)' : colorClass === 'dw-bad' ? 'var(--pos)' : 'var(--warn)';
+  return `<div class="dw-spark-wrap"><svg class="dw-spark" viewBox="0 0 100 30" preserveAspectRatio="none" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="${clr}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="98" cy="${ly}" r="2.5" fill="${clr}"/></svg></div>`;
+}
+
 // ── Widget definitions ────────────────────────────────────────────────────────
 // gs-w / gs-h: default grid size (grid is 12 columns, each cell ~80px tall)
 const DASH_WIDGETS = [
@@ -20,6 +31,8 @@ const DASH_WIDGETS = [
         trendCls: bal >= 0 ? 'dw-ok' : 'dw-bad',
         detail: 'Krav: strukturel balance · Konvergenskrav: −3% BNP',
         status: bal >= 0 ? 'ok' : 'bad',
+        spark: [3.4, 2.8, 1.2, 0.8, pct],
+        gauge: { pct: Math.max(0, Math.min(100, (pct + 5) / 10 * 100)), label: `Saldo: ${sign}${pct.toFixed(1).replace('.', ',')}% BNP`, color: bal >= 0 ? 'var(--neg)' : 'var(--pos)' },
       };
     },
   },
@@ -35,8 +48,10 @@ const DASH_WIDGETS = [
           trend: 'Ledighedspct: ~2,9%',
           trendCls: 'dw-ok',
           detail: 'EU-gns: 6,1% · Danmark: historisk lavt',
+          spark: [115, 108, 97, 94, 93, live.unemployment.value / 1000],
+          gauge: { pct: Math.max(0, 100 - live.unemployment.value / 1000 / 6 * 100), label: 'Lav = bedre', color: 'var(--neg)' },
         };
-      return { big: '~93.000', sub: 'ledige (seneste DST)', trend: 'Ledighedspct: ~2,9%', trendCls: 'dw-ok', detail: 'EU-gns: 6,1% · Historisk lavt' };
+      return { big: '~93.000', sub: 'ledige (seneste DST)', trend: 'Ledighedspct: ~2,9%', trendCls: 'dw-ok', detail: 'EU-gns: 6,1% · Historisk lavt', spark: [115, 108, 97, 94, 93, 93], gauge: { pct: 84, label: 'Lav = bedre', color: 'var(--neg)' } };
     },
   },
   {
@@ -53,9 +68,11 @@ const DASH_WIDGETS = [
           trendCls: v > 4 ? 'dw-bad' : v > 2 ? 'dw-warn' : 'dw-ok',
           detail: 'ECB-mål: 2,0% · EU-gns: 2,4% · Kerneinflation: ~2,1%',
           status: v > 4 ? 'bad' : v > 2 ? 'warn' : 'ok',
+          spark: [1.9, 7.5, 6.8, 3.8, 2.3, v],
+          gauge: { pct: Math.max(0, 100 - Math.abs(v - 2) / 4 * 100), label: `ECB-mål: 2% · Afstand: ${Math.abs(v - 2).toFixed(1).replace('.', ',')}pp`, color: v > 4 ? 'var(--pos)' : v > 2 ? 'var(--warn)' : 'var(--neg)' },
         };
       }
-      return { big: '~2,3%', sub: 'forbrugerprisindeks', trend: '↓ Faldende tendens', trendCls: 'dw-ok', detail: 'ECB-mål: 2,0% · EU-gns: 2,4%', status: 'ok' };
+      return { big: '~2,3%', sub: 'forbrugerprisindeks', trend: '↓ Faldende tendens', trendCls: 'dw-ok', detail: 'ECB-mål: 2,0% · EU-gns: 2,4%', status: 'ok', spark: [1.9, 7.5, 6.8, 3.8, 2.3, 2.3], gauge: { pct: 93, label: 'ECB-mål: 2% · Afstand: 0,3pp', color: 'var(--neg)' } };
     },
   },
   {
@@ -70,8 +87,9 @@ const DASH_WIDGETS = [
           trend: '↓ Nedsat fra 3,60% (okt. 2024)',
           trendCls: 'dw-ok',
           detail: 'ECB indlånsrente: 3,25% · Følger ECB tæt',
+          spark: [0.0, 0.0, 3.0, 3.60, 3.35, eco.nbRate.value],
         };
-      return { big: '3,35%', sub: 'pengepolitisk rente', trend: '↓ Nedsat fra 3,60%', trendCls: 'dw-ok', detail: 'ECB indlånsrente: 3,25%' };
+      return { big: '3,35%', sub: 'pengepolitisk rente', trend: '↓ Nedsat fra 3,60%', trendCls: 'dw-ok', detail: 'ECB indlånsrente: 3,25%', spark: [0.0, 0.0, 3.0, 3.60, 3.35, 3.35] };
     },
   },
   {
@@ -88,9 +106,10 @@ const DASH_WIDGETS = [
           trendCls: v > 0 ? 'dw-ok' : 'dw-bad',
           detail: 'Kbh: +2,1% · Jylland: +0,8% · Realkreditrente: ~4,5%',
           status: v > 0 ? 'ok' : 'bad',
+          spark: [6.2, 8.5, -3.2, -1.8, 1.2, v],
         };
       }
-      return { big: '+1,2%', sub: 'kvartal/kvartal', trend: '↑ Stabilt stigende', trendCls: 'dw-ok', detail: 'Kbh: +2,1% · Jylland: +0,8%', status: 'ok' };
+      return { big: '+1,2%', sub: 'kvartal/kvartal', trend: '↑ Stabilt stigende', trendCls: 'dw-ok', detail: 'Kbh: +2,1% · Jylland: +0,8%', status: 'ok', spark: [6.2, 8.5, -3.2, -1.8, 1.2, 1.2] };
     },
   },
   {
@@ -107,9 +126,11 @@ const DASH_WIDGETS = [
           trendCls: pct >= 60 ? 'dw-ok' : 'dw-warn',
           detail: 'Nuværende: ~38 Mton · Mål: 21,2 Mton CO₂-ækvivalenter',
           status: pct >= 70 ? 'ok' : pct >= 50 ? 'warn' : 'bad',
+          spark: [28, 33, 38, 44, 52, pct],
+          gauge: { pct: Math.min(100, pct / 70 * 100), label: `2030-mål: 70% reduktion — ${70 - pct > 0 ? (70 - pct) + 'pp mangler' : 'Opnået!'}`, color: pct >= 70 ? 'var(--neg)' : pct >= 50 ? 'var(--warn)' : 'var(--pos)' },
         };
       }
-      return { big: '~38 Mton', sub: 'CO₂-ækvivalenter 2024', trend: 'Mål 2030: 21,2 Mton', trendCls: 'dw-warn', detail: '70%-mål vs. 1990 · Afstand: 17 Mton', status: 'warn' };
+      return { big: '~38 Mton', sub: 'CO₂-ækvivalenter 2024', trend: 'Mål 2030: 21,2 Mton', trendCls: 'dw-warn', detail: '70%-mål vs. 1990 · Afstand: 17 Mton', status: 'warn', spark: [28, 33, 38, 44, 52, 56], gauge: { pct: 56 / 70 * 100, label: '2030-mål: 70% reduktion — 14pp mangler', color: 'var(--warn)' } };
     },
   },
   {
@@ -271,9 +292,10 @@ const DASH_WIDGETS = [
           trendCls: v > 200 ? 'dw-bad' : v > 100 ? 'dw-warn' : 'dw-ok',
           detail: 'DK2 (Øst): tilsvarende · Afgifter: +90 øre/kWh til forbrugerpris',
           status: v > 200 ? 'bad' : v > 100 ? 'warn' : 'ok',
+          spark: [50, 350, 120, 80, 87, v],
         };
       }
-      return { big: '~87 øre', sub: 'spotpris DK1 · kWh', trend: '↓ Under historisk gns.', trendCls: 'dw-ok', detail: 'Afgifter+moms: +90 øre/kWh til forbrugerpris', status: 'ok' };
+      return { big: '~87 øre', sub: 'spotpris DK1 · kWh', trend: '↓ Under historisk gns.', trendCls: 'dw-ok', detail: 'Afgifter+moms: +90 øre/kWh til forbrugerpris', status: 'ok', spark: [50, 350, 120, 80, 87, 87] };
     },
   },
   {
@@ -289,9 +311,11 @@ const DASH_WIDGETS = [
           trendCls: v >= 70 ? 'dw-ok' : 'dw-warn',
           detail: 'Vind: 43% · Sol: 7% · Biogas: 7% · Vandkraft: <1%',
           status: v >= 70 ? 'ok' : v >= 50 ? 'warn' : 'bad',
+          spark: [33, 40, 46, 52, 57, v],
+          gauge: { pct: v, label: `Mod 100%-mål 2030 — ${Math.round(100 - v)}pp mangler`, color: v >= 70 ? 'var(--neg)' : 'var(--warn)' },
         };
       }
-      return { big: '~57 %', sub: 'vedvarende energi', trend: 'Mål 2030: 100%', trendCls: 'dw-warn', detail: 'Vind: 43% · Sol: 7% · Biogas: 7%', status: 'ok' };
+      return { big: '~57 %', sub: 'vedvarende energi', trend: 'Mål 2030: 100%', trendCls: 'dw-warn', detail: 'Vind: 43% · Sol: 7% · Biogas: 7%', status: 'ok', spark: [33, 40, 46, 52, 57, 57], gauge: { pct: 57, label: 'Mod 100%-mål 2030 — 43pp mangler', color: 'var(--warn)' } };
     },
   },
   {
@@ -325,9 +349,11 @@ const DASH_WIDGETS = [
           trendCls: pct >= 2 ? 'dw-ok' : 'dw-warn',
           detail: 'Forsvarsforlig +20 mia DKK/år · Nuværende: 33 mia DKK',
           status: pct >= 2 ? 'ok' : 'warn',
+          spark: [1.35, 1.38, 1.40, 1.55, 1.65, pct],
+          gauge: { pct: pct / 3 * 100, label: `NATO-mål: 3% BNP — ${(3 - pct).toFixed(2).replace('.', ',')}pp mangler`, color: pct >= 2 ? 'var(--neg)' : 'var(--warn)' },
         };
       }
-      return { big: '1,65 %', sub: 'af BNP · NATO-mål 3 %', trend: 'Mål 2030: 3% · Afstand: 1,35pp', trendCls: 'dw-warn', detail: 'Forsvarsforlig +20 mia/år · ~33 mia DKK i dag', status: 'warn' };
+      return { big: '1,65 %', sub: 'af BNP · NATO-mål 3 %', trend: 'Mål 2030: 3% · Afstand: 1,35pp', trendCls: 'dw-warn', detail: 'Forsvarsforlig +20 mia/år · ~33 mia DKK i dag', status: 'warn', spark: [1.35, 1.38, 1.40, 1.55, 1.65, 1.65], gauge: { pct: 1.65 / 3 * 100, label: 'NATO-mål: 3% BNP — 1,35pp mangler', color: 'var(--warn)' } };
     },
   },
   {
@@ -648,10 +674,13 @@ VG.dashboard.renderPanel = function() {
     } else if (w.content === 'polls') {
       body = `<div class="dw-polls-body" id="dw-polls-body"><div class="dw-skeleton"></div><div class="dw-skeleton"></div></div>`;
     } else if (w.render) {
+      const sparkHtml = d.spark ? _sparks(d.spark, d.trendCls) : '';
+      const gaugeHtml = d.gauge ? `<div class="dw-gauge-wrap"><div class="dw-gauge-track"><div class="dw-gauge-fill" style="width:${Math.max(2, Math.min(100, d.gauge.pct)).toFixed(1)}%;background:${d.gauge.color}"></div></div>${d.gauge.label ? `<span class="dw-gauge-lbl">${d.gauge.label}</span>` : ''}</div>` : '';
       body = `
         <div class="dw-kpi-big ${sc}">${d.big || '—'}</div>
         <div class="dw-kpi-sub">${d.sub || ''}</div>
         ${d.trend ? `<div class="dw-kpi-trend ${d.trendCls || ''}">${d.trend}</div>` : ''}
+        ${sparkHtml}${gaugeHtml}
         ${d.detail ? `<div class="dw-kpi-detail">${d.detail}</div>` : ''}`;
     }
 
@@ -726,11 +755,12 @@ VG.dashboard._fillNews = function() {
       const newsList = items.slice(0, 12);
       el.innerHTML = newsList.map((n, i) => {
         const sc = SRC_CLS[n.source] || 'source-dr';
-        const catDot = n.dream && n.dream.category ? `<span class="dw-news-cat">${n.dream.category}</span>` : '';
+        const hasDream = n.dream && n.dream.category && n.dream.category !== 'Øvrig';
+        const catDot = hasDream ? `<span class="dw-news-cat">${n.dream.category}</span>` : '';
         return `<div class="dw-news-item dw-news-item--modal" data-news-idx="${i}">
           <div class="dw-news-meta"><span class="rygte-source-badge ${sc}">${n.source}</span><span class="dw-news-age">${n.age || ''}</span>${catDot}</div>
           <div class="dw-news-hl">${n.headline}</div>
-          <div class="dw-news-topic">${n.topicLabel} <span class="dw-news-dream-hint">📊 DREAM-analyse</span></div>
+          <div class="dw-news-topic">${n.topicLabel}${hasDream ? ' <span class="dw-news-dream-hint">📊 Analyse</span>' : ''}</div>
         </div>`;
       }).join('');
       el.querySelectorAll('[data-news-idx]').forEach(item => {
@@ -742,43 +772,67 @@ VG.dashboard._fillNews = function() {
 
 VG.dashboard._openNewsModal = function(n) {
   if (!n) return;
-  const d = n.dream || {};
+  const d = n.dream;
   const CAT_COLORS = {
     Skat: 'var(--warn)', Velfærd: 'var(--neg)', Klima: '#2d8a50', Bolig: '#6b5ea8',
     Forsvar: '#8a5c2d', Uddannelse: 'var(--accent)', Sundhed: '#c05858',
-    Arbejdsmarked: '#4a7fa5', Immigration: '#7a6b55', Pension: '#5a8a7a', Øvrig: 'var(--text-3)',
+    Arbejdsmarked: '#4a7fa5', Immigration: '#7a6b55', Pension: '#5a8a7a',
   };
   const CONF = { rygte: 'Rygte', forhandling: 'Forhandling', forslag: 'Forslag', vedtaget: 'Vedtaget' };
-  const catColor  = CAT_COLORS[d.category] || 'var(--text-3)';
-  const confLabel = CONF[d.confidence] || 'Rygte';
+  const catColor  = d ? (CAT_COLORS[d.category] || 'var(--accent)') : 'var(--text-3)';
+  const confLabel = d ? (CONF[d.confidence] || 'Rygte') : '';
   const sc        = SRC_CLS[n.source] || 'source-dr';
 
-  const fiscalHtml = d.fiscalBn != null
-    ? (() => {
-        const pct   = Math.min(100, Math.abs(d.fiscalBn) / 15 * 100).toFixed(1);
-        const color = d.fiscalBn > 0 ? 'var(--neg)' : 'var(--pos)';
-        const label = d.fiscalBn > 0
-          ? `+${d.fiscalBn.toFixed(1).replace('.', ',')} mia. kr./år (bedre balance)`
-          : `${d.fiscalBn.toFixed(1).replace('.', ',')} mia. kr./år (mere underskud)`;
-        return `<div class="dream-bar-wrap"><div class="dream-bar-track"><div class="dream-bar-fill" style="width:${pct}%;background:${color}"></div></div><span class="dream-bar-label" style="color:${color}">${label}</span></div>`;
-      })()
-    : '<span class="dream-na">Ikke estimeret</span>';
+  let dreamBoxHtml;
+  if (!d || d.category === 'Øvrig') {
+    dreamBoxHtml = `<div class="dream-box dream-box-na">
+      <div class="dream-box-header">📊 Ingen fiskal analyse</div>
+      <p class="dream-na-msg">Artiklen indeholder ikke konkrete politiske forslag med identificerbare finanspolitiske konsekvenser. DREAM/MAKRO-analyse kræver enten vedtagne politikker, fremsatte lovforslag eller dokumenterede planer med kvantificerbare budgeteffekter.</p>
+    </div>`;
+  } else {
+    const fiscalHtml = d.fiscalBn != null
+      ? (() => {
+          const pct   = Math.min(100, Math.abs(d.fiscalBn) / 15 * 100).toFixed(1);
+          const color = d.fiscalBn > 0 ? 'var(--neg)' : 'var(--pos)';
+          const label = d.fiscalBn > 0
+            ? `+${d.fiscalBn.toFixed(1).replace('.', ',')} mia. kr./år (bedre balance)`
+            : `${d.fiscalBn.toFixed(1).replace('.', ',')} mia. kr./år (mere underskud)`;
+          return `<div class="dream-bar-wrap"><div class="dream-bar-track"><div class="dream-bar-fill" style="width:${pct}%;background:${color}"></div></div><span class="dream-bar-label" style="color:${color}">${label}</span></div>`;
+        })()
+      : '<span class="dream-na">Ikke estimeret — afhænger af konkret udformning</span>';
 
-  const gdpHtml = d.gdpPct != null
-    ? `<span class="dream-gdp ${d.gdpPct >= 0 ? 'pos' : 'neg'}">${d.gdpPct >= 0 ? '▲' : '▼'} ${Math.abs(d.gdpPct).toFixed(2).replace('.', ',')}% BNP</span>`
-    : '<span class="dream-na">—</span>';
+    const gdpHtml = d.gdpPct != null
+      ? `<span class="dream-gdp ${d.gdpPct >= 0 ? 'pos' : 'neg'}">${d.gdpPct >= 0 ? '▲' : '▼'} ${Math.abs(d.gdpPct).toFixed(2).replace('.', ',')}% BNP</span>`
+      : '<span class="dream-na">—</span>';
 
-  const empHtml = d.employmentK != null && Math.abs(d.employmentK) >= 0.5
-    ? `<span class="dream-emp ${d.employmentK >= 0 ? 'pos' : 'neg'}">${d.employmentK >= 0 ? '+' : ''}${d.employmentK.toFixed(0)}k job</span>`
-    : '<span class="dream-na">—</span>';
+    const empHtml = d.employmentK != null && Math.abs(d.employmentK) >= 0.5
+      ? `<span class="dream-emp ${d.employmentK >= 0 ? 'pos' : 'neg'}">${d.employmentK >= 0 ? '+' : ''}${d.employmentK.toFixed(0)}k job</span>`
+      : '<span class="dream-na">—</span>';
 
-  const giniHtml = d.giniDelta != null && Math.abs(d.giniDelta) >= 0.05
-    ? `<span class="dream-gini ${d.giniDelta < 0 ? 'eq' : 'uneq'}">${d.giniDelta < 0 ? '↓ Mere lighed' : '↑ Mere ulighed'} (Δ${d.giniDelta >= 0 ? '+' : ''}${d.giniDelta.toFixed(1)})</span>`
-    : '<span class="dream-na">Neutral</span>';
+    const giniHtml = d.giniDelta != null && Math.abs(d.giniDelta) >= 0.05
+      ? `<span class="dream-gini ${d.giniDelta < 0 ? 'eq' : 'uneq'}">${d.giniDelta < 0 ? '↓ Mere lighed' : '↑ Mere ulighed'} (Δ${d.giniDelta >= 0 ? '+' : ''}${d.giniDelta.toFixed(1)})</span>`
+      : '<span class="dream-na">Neutral</span>';
 
-  const score     = d.politicalScore || 0;
-  const markerPct = Math.max(2, Math.min(98, (score + 100) / 200 * 100)).toFixed(1);
-  const compassHtml = `<div class="dream-compass"><div class="dream-compass-labels"><span>Venstre</span><span>Højre</span></div><div class="dream-compass-track"><div class="dream-compass-marker" style="left:${markerPct}%"></div></div></div>`;
+    const score     = d.politicalScore || 0;
+    const markerPct = Math.max(2, Math.min(98, (score + 100) / 200 * 100)).toFixed(1);
+    const compassHtml = `<div class="dream-compass"><div class="dream-compass-labels"><span>Venstre</span><span>Højre</span></div><div class="dream-compass-track"><div class="dream-compass-marker" style="left:${markerPct}%"></div></div></div>`;
+
+    dreamBoxHtml = `<div class="dream-box">
+      <div class="dream-box-header">📊 DREAM/MAKRO analyse — ${d.category}</div>
+      <div class="dream-stats">
+        <div class="dream-stat"><div class="dream-stat-label">Finanspolitisk effekt</div><div class="dream-stat-val">${fiscalHtml}</div></div>
+        <div class="dream-stat"><div class="dream-stat-label">BNP-effekt</div><div class="dream-stat-val">${gdpHtml}</div></div>
+        <div class="dream-stat"><div class="dream-stat-label">Beskæftigelse</div><div class="dream-stat-val">${empHtml}</div></div>
+        <div class="dream-stat"><div class="dream-stat-label">Indkomstfordeling</div><div class="dream-stat-val">${giniHtml}</div></div>
+      </div>
+      <div class="dream-compass-row">
+        <span class="dream-compass-label-txt">Politisk placering</span>
+        <div class="dream-compass-wrap">${compassHtml}</div>
+      </div>
+      <p class="dream-explanation">${d.explanation || ''}</p>
+      <p class="dream-disclaimer">Estimat baseret på DREAM/MAKRO-modelparametre. Ikke officiel analyse.</p>
+    </div>`;
+  }
 
   const topicLink = n.panel
     ? `<button class="vg-modal-topic-btn" onclick="VG.dashboard._closeNewsModal();window.__mkClick&&window.__mkClick('${n.panel}')">Gå til ${n.topicLabel} →</button>`
@@ -795,29 +849,15 @@ VG.dashboard._openNewsModal = function(n) {
       <div class="vg-modal-article">
         <div class="vg-modal-meta">
           <span class="rygte-source-badge ${sc}">${n.source}</span>
-          <span class="rygte-cat-badge" style="background:${catColor}22;color:${catColor};border:1px solid ${catColor}55">${d.category || 'Øvrig'}</span>
-          <span class="rygte-confidence conf-${d.confidence || 'rygte'}">${confLabel}</span>
+          ${d ? `<span class="rygte-cat-badge" style="background:${catColor}22;color:${catColor};border:1px solid ${catColor}55">${d.category}</span>
+          <span class="rygte-confidence conf-${d.confidence || 'rygte'}">${confLabel}</span>` : ''}
           <span class="vg-modal-age">${n.age || ''}</span>
         </div>
         <h3 class="vg-modal-headline">
           <a href="${n.link || '#'}" target="_blank" rel="noopener">${n.headline}</a>
         </h3>
         ${n.description ? `<p class="vg-modal-desc">${n.description}</p>` : ''}
-        <div class="dream-box">
-          <div class="dream-box-header">📊 DREAM/MAKRO analyse</div>
-          <div class="dream-stats">
-            <div class="dream-stat"><div class="dream-stat-label">Finanspolitisk effekt</div><div class="dream-stat-val">${fiscalHtml}</div></div>
-            <div class="dream-stat"><div class="dream-stat-label">BNP-effekt</div><div class="dream-stat-val">${gdpHtml}</div></div>
-            <div class="dream-stat"><div class="dream-stat-label">Beskæftigelse</div><div class="dream-stat-val">${empHtml}</div></div>
-            <div class="dream-stat"><div class="dream-stat-label">Indkomstfordeling</div><div class="dream-stat-val">${giniHtml}</div></div>
-          </div>
-          <div class="dream-compass-row">
-            <span class="dream-compass-label-txt">Politisk placering</span>
-            <div class="dream-compass-wrap">${compassHtml}</div>
-          </div>
-          <p class="dream-explanation">${d.explanation || ''}</p>
-          <p class="dream-disclaimer">Estimat baseret på DREAM/MAKRO-modelparametre. Ikke officiel analyse.</p>
-        </div>
+        ${dreamBoxHtml}
         <div class="vg-modal-actions">
           <a class="vg-modal-src-btn" href="${n.link || '#'}" target="_blank" rel="noopener"><i class="ph ph-arrow-square-out"></i> Læs hos ${n.source}</a>
           ${topicLink}

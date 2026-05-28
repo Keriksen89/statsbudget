@@ -3989,10 +3989,6 @@ body {
   overflow: hidden;
   transition: border-color .15s;
 }
-.dw-card-inner.dw-ok   { border-top: 3px solid var(--neg); }
-.dw-card-inner.dw-warn { border-top: 3px solid var(--warn); }
-.dw-card-inner.dw-bad  { border-top: 3px solid var(--pos); }
-
 [data-theme="dark"] .dw-card-inner { background: #1e293b; border-color: rgba(255,255,255,0.08); }
 
 /* Card header — drag handle */
@@ -4050,6 +4046,30 @@ body {
   border-top: 1px solid var(--border); padding-top: 5px;
   line-height: 1.5;
 }
+
+/* Sparkline chart */
+.dw-spark-wrap { margin: 8px 0 2px; }
+.dw-spark { width: 100%; height: 28px; display: block; overflow: visible; }
+
+/* Mini progress gauge */
+.dw-gauge-wrap { margin: 6px 0 2px; }
+.dw-gauge-track {
+  height: 5px; background: var(--border); border-radius: 3px; overflow: hidden;
+}
+.dw-gauge-fill { height: 100%; border-radius: 3px; transition: width .6s cubic-bezier(.4,0,.2,1); }
+.dw-gauge-lbl { font-size: 10px; color: var(--text-3); margin-top: 3px; display: block; line-height: 1.4; }
+
+/* Card status color bands */
+.dw-card-inner.dw-ok   { border-top: 3px solid var(--neg); background: linear-gradient(160deg, var(--surface) 75%, color-mix(in srgb, var(--neg) 6%, var(--surface)) 100%); }
+.dw-card-inner.dw-warn { border-top: 3px solid var(--warn); background: linear-gradient(160deg, var(--surface) 75%, color-mix(in srgb, var(--warn) 6%, var(--surface)) 100%); }
+.dw-card-inner.dw-bad  { border-top: 3px solid var(--pos); background: linear-gradient(160deg, var(--surface) 75%, color-mix(in srgb, var(--pos) 6%, var(--surface)) 100%); }
+[data-theme="dark"] .dw-card-inner.dw-ok   { background: linear-gradient(160deg, #1e293b 75%, color-mix(in srgb, var(--neg) 10%, #1e293b) 100%); }
+[data-theme="dark"] .dw-card-inner.dw-warn { background: linear-gradient(160deg, #1e293b 75%, color-mix(in srgb, var(--warn) 10%, #1e293b) 100%); }
+[data-theme="dark"] .dw-card-inner.dw-bad  { background: linear-gradient(160deg, #1e293b 75%, color-mix(in srgb, var(--pos) 10%, #1e293b) 100%); }
+
+/* No-analysis dream box */
+.dream-box-na { opacity: 0.7; }
+.dream-na-msg { font-size: 12px; color: var(--text-3); line-height: 1.5; font-style: italic; margin: 6px 0 0; }
 
 /* Clickable KPI cards */
 .dw-static .dw-card-clickable { cursor: pointer; transition: border-color .15s, box-shadow .15s; }

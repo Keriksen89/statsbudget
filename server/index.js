@@ -100,7 +100,7 @@ app.use((err, req, res, next) => {
 });
 
 const server = app.listen(PORT, HOST, () => {
-  console.log(`Virtuel Regering 1.0 listening on http://${HOST}:${PORT}`);
+  console.log(`Occulus listening on http://${HOST}:${PORT}`);
 });
 
 const shutdown = (signal) => {

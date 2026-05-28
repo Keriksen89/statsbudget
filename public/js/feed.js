@@ -114,16 +114,64 @@ VG.feed._generateInsights = function() {
     });
   }
 
-  // ── Meningsmålinger (statisk snapshot) ───────────────────────────────────
+  // ── Meningsmålinger ───────────────────────────────────────────────────────
   insights.push({
     id: 'polls-maj-2026',
     category: 'Politik', icon: '<i class="ph ph-chart-bar"></i>',
     tag: 'Ny måling',
     tagType: 'info',
     headline: 'S fører med 20% — LA og V i tæt kamp om andenpladsen',
-    body: 'Socialdemokraterne fører meningsmålingerne med 20,1%. Liberal Alliance (13,2%) og Venstre (12,8%) kæmper om andenpladsen. Danmarksdemokraterne i fremgang (+0,6pp). Alternativet over 3,5%-spærregrænsen.',
+    body: 'Socialdemokraterne fører meningsmålingerne med 20,1%. Liberal Alliance (13,2%) og Venstre (12,8%) kæmper om andenpladsen. Danmarksdemokraterne er i fremgang (+0,6pp). Alternativet er over 3,5%-spærregrænsen. Blå blok har ikke opnåeligt flertal alene.',
     panel: 'meningsmaalinger', time: 'Maj 2026',
     basePos: 22, baseNeg: 10,
+  });
+
+  // ── Forsvar & NATO ────────────────────────────────────────────────────────
+  insights.push({
+    id: 'forsvar-nato-2026',
+    category: 'Forsvar', icon: '<i class="ph ph-shield-checkered"></i>',
+    tag: 'NATO-krav',
+    tagType: 'alert',
+    headline: 'Danmark øger forsvar til 3% af BNP — historisk udgiftsniveau',
+    body: 'Regeringen har forpligtet sig til 3% af BNP i forsvarsudgifter inden 2030, svarende til ~75 mia. kr. pr. år — mere end en fordobling fra det nuværende niveau på ~33 mia. Det vil kræve enten markante nedskæringer andetsteds, ny gæld eller skatteforhøjelser. DREAM vurderer multiplikatoren til ~0,7 mod ~1,2 for civil investering.',
+    panel: 'forsvar', time: 'Maj 2026',
+    basePos: 14, baseNeg: 18,
+  });
+
+  // ── Boligkrise ────────────────────────────────────────────────────────────
+  insights.push({
+    id: 'boligkrise-2026',
+    category: 'Bolig', icon: '<i class="ph ph-house"></i>',
+    tag: 'Krise',
+    tagType: 'alert',
+    headline: 'Boligbyggeri på laveste niveau i 10 år — mens priserne stiger',
+    body: 'Antallet af nye boliger i byggetilladelse faldt til 31.000 i 2025 — det laveste siden 2015. Samtidig stiger priserne i Storkøbenhavn med 3,2% kvartalsvis. Gab mellem udbud og efterspørgsel vokser. Realkreditinstitutterne advarer om, at den kombinerede effekt af høje renter, materialeprisstigning og faldende byggeaktivitet kan skabe strukturel boligmangel i 2027-2030.',
+    panel: 'boligmarked', time: 'Maj 2026',
+    basePos: 8, baseNeg: 20,
+  });
+
+  // ── Statsgæld ─────────────────────────────────────────────────────────────
+  insights.push({
+    id: 'gaeld-forsvar-2026',
+    category: 'Økonomi', icon: '<i class="ph ph-bank"></i>',
+    tag: 'Advarsel',
+    tagType: 'warn',
+    headline: 'Forsvarsopbygning kan bringe statsgæld over 40% af BNP i 2030',
+    body: 'Den nuværende statsgæld på ~29% af BNP er solid. Men forsvarsforligets +40 mia./år kombineret med demografisk pres (flere ældre, færre i arbejde) kan drive gælden til 40-45% BNP inden 2030 uden finansieringsplan. Det er fortsat under Maastricht-grænsen på 60%, men råderummet til nye velfærdsinvesteringer indsnævres markant.',
+    panel: 'statsgaeld', time: 'Maj 2026',
+    basePos: 9, baseNeg: 12,
+  });
+
+  // ── Pesticider i drikkevand ───────────────────────────────────────────────
+  insights.push({
+    id: 'pesticider-2026',
+    category: 'Samfund', icon: '<i class="ph ph-drop"></i>',
+    tag: 'Miljø',
+    tagType: 'alert',
+    headline: '30% af danske vandboringer har pesticidfund — PFAS-krise accelererer',
+    body: '30% af alle overvågede vandboringer viser pesticidfund over grænseværdien. PFAS ("evighedskemikalier") er nu fundet i 45% af boringer. Miljøstyrelsen har lukket 118 vandværker siden 2020. Oprydning estimeres til 12-18 mia. kr. De ansvarlige industrier har i mange tilfælde ikke betalt for oprydningen.',
+    panel: 'naturvand', time: 'Maj 2026',
+    basePos: 5, baseNeg: 28,
   });
 
   // ── Folketing ─────────────────────────────────────────────────────────────

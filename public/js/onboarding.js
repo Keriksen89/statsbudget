@@ -40,8 +40,8 @@ VG.onboarding._render = function(newsItems) {
   card.innerHTML = `
     <button class="onboarding-skip" id="ob-skip">Spring over ×</button>
     <div class="onboarding-logo">🇩🇰</div>
-    <h2>Virtuel Regering</h2>
-    <p class="onboarding-sub">Tag stilling til dansk politik, se hvem der bestemmer — og prøv at styre Danmarks økonomi.</p>
+    <h2>Occulus</h2>
+    <p class="onboarding-sub">Danmarks politiske datapanel — live statistik, finanslov, meningsmålinger og samfundsdata.</p>
     ${newsHtml}
     <div class="ob-section-lbl"${hasNews ? '' : ' style="margin-top:0"'}>Vælg et tema at starte med</div>
     <div class="onboarding-choices">

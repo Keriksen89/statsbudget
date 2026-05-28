@@ -55,7 +55,7 @@ VG.actions.share = function() {
       }
     });
     document.getElementById('btn-twitter').addEventListener('click', () => {
-      const text = encodeURIComponent('Jeg har lavet mit eget statsbudget for Danmark på Virtuel Regering:');
+      const text = encodeURIComponent('Jeg har lavet mit eget statsbudget for Danmark på Occulus:');
       window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(url)}`, '_blank');
     });
   }, 50);
@@ -302,9 +302,9 @@ document.addEventListener('DOMContentLoaded', () => {
       { id: 'mandater',            label: 'Mandater' },
       { id: 'valgkort',            label: 'Valgkort' },
       { id: 'meningsmaalinger',    label: 'Meningsmålinger' },
+      { id: 'laboratorium',        label: 'Politisk Lab' },
     ]},
     oekonomi: { label: 'Økonomi', tabs: [
-      { id: 'laboratorium',        label: 'Politisk Lab' },
       { id: 'rygter',              label: 'Nyheder & DREAM-analyse' },
       { id: 'policy',              label: 'Politiske parametre' },
       { id: 'spending',            label: 'Udgifter' },
@@ -324,8 +324,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const PINNED_TABS = {
     personligt: ['borger', 'bolig', 'pension', 'elpris'],
     samfund:    ['demographics', 'sundhed', 'ledighed', 'co2', 'boligmarked', 'uddannelse'],
-    politik:    ['platform', 'party', 'partier', 'regering', 'folketing', 'meningsmaalinger'],
-    oekonomi:   ['laboratorium', 'policy', 'spending', 'revenue', 'projection', 'rygter'],
+    politik:    ['platform', 'party', 'partier', 'regering', 'folketing', 'meningsmaalinger', 'laboratorium'],
+    oekonomi:   ['policy', 'spending', 'revenue', 'projection', 'rygter', 'statsgaeld'],
   };
 
   let activeGroup = null;
