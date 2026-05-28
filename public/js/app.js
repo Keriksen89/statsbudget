@@ -55,7 +55,7 @@ VG.actions.share = function() {
       }
     });
     document.getElementById('btn-twitter').addEventListener('click', () => {
-      const text = encodeURIComponent('Jeg har lavet mit eget statsbudget for Danmark på Oculus:');
+      const text = encodeURIComponent('Jeg har lavet mit eget statsbudget for Danmark på Oculus Omnividens:');
       window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(url)}`, '_blank');
     });
   }, 50);
