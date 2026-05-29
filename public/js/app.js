@@ -270,7 +270,6 @@ document.addEventListener('DOMContentLoaded', () => {
       { id: 'elpris',              label: 'El-priser' },
     ]},
     samfund: { label: 'Samfund', tabs: [
-      { id: 'danmarkskort',        label: 'Danmarksmaskinen' },
       { id: 'demographics',        label: 'Demografi & Befolkning' },
       { id: 'kommuner',            label: 'Kommuner' },
       { id: 'sundhed',             label: 'Sundhed & Sygehuse' },
@@ -326,7 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Pinned sub-tabs shown in the secondary bar (others go in "Alle ▾" dropdown)
   const PINNED_TABS = {
     personligt: ['borger', 'bolig', 'pension', 'elpris'],
-    samfund:    ['danmarkskort', 'demographics', 'sundhed', 'ledighed', 'co2', 'boligmarked'],
+    samfund:    ['demographics', 'sundhed', 'ledighed', 'co2', 'boligmarked', 'uddannelse'],
     politik:    ['platform', 'party', 'partier', 'regering', 'folketing', 'meningsmaalinger', 'laboratorium'],
     oekonomi:   ['policy', 'spending', 'revenue', 'projection', 'rygter', 'statsgaeld'],
   };
@@ -380,6 +379,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const stripLabel = s => s.replace(/^[\p{Emoji_Presentation}\p{Extended_Pictographic}🏛🌍]+\s*/gu, '').trim();
 
     let html = `
+      <a class="sb-item" data-sb="danmarkskort">
+        <span class="sb-item-icon">${TAB_ICONS.danmarkskort}</span>
+        <span class="sb-item-label">Danmarksmaskinen</span>
+      </a>
       <a class="sb-item" data-sb="dashboard">
         <span class="sb-item-icon">${TAB_ICONS.dashboard}</span>
         <span class="sb-item-label">Dashboard</span>
@@ -494,7 +497,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function _updateBreadcrumb(panelId, owningGroup) {
     let section = '', page = panelId;
-    if (panelId === 'dashboard') { page = 'Mit Dashboard'; }
+    if (panelId === 'danmarkskort') { page = 'Danmarksmaskinen'; }
+    else if (panelId === 'dashboard') { page = 'Mit Dashboard'; }
     else if (panelId === 'feed') { page = 'Nyheder & Indsigter'; }
     else if (owningGroup && GROUPS[owningGroup]) {
       const g   = GROUPS[owningGroup];
@@ -603,7 +607,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   buildSidebar();
-  navigateTo('dashboard');
+  navigateTo('danmarkskort');
 
   window.__switchGroup = switchGroup;
   window.__switchTab   = switchTab;
