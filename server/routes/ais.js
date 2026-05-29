@@ -1,10 +1,11 @@
 import express from 'express';
+import WebSocket from 'ws';
+
 const router = express.Router();
 
-// Real-time AIS via aisstream.io (free API key required, set AISSTREAM_API_KEY).
-// We hold one WebSocket open, accumulate vessel positions in memory, and serve
-// the live snapshot over REST. No simulated data — if there is no key or no
-// connection, we return an empty list with a status flag.
+// Real-time AIS via aisstream.io. Holds one WebSocket open, accumulates vessel
+// positions in memory, and serves a live snapshot over REST. No simulated data
+// — returns empty list with status flag if key is absent or connection fails.
 
 const API_KEY = process.env.AISSTREAM_API_KEY || '';
 const WS_URL = 'wss://stream.aisstream.io/v0/stream';
@@ -12,23 +13,44 @@ const WS_URL = 'wss://stream.aisstream.io/v0/stream';
 const BBOX = [[54.4, 7.5], [58.2, 15.6]];
 const STALE_MS = 6 * 60 * 1000;   // drop vessels not heard from in 6 min
 const MAX_VESSELS = 800;
+const CONNECT_TIMEOUT_MS = 45000; // mark error if no open within 45s
+const PING_INTERVAL_MS = 30000;   // keepalive ping every 30s
 
 const vessels = new Map(); // mmsi -> { mmsi, name, pos:[lon,lat], cog, sog, heading, type, t }
 let status = API_KEY ? 'connecting' : 'no-key';
 let ws = null;
 let reconnectDelay = 2000;
+let connectTimer = null;
+let pingTimer = null;
+
+function clearTimers() {
+  if (connectTimer) { clearTimeout(connectTimer); connectTimer = null; }
+  if (pingTimer)    { clearInterval(pingTimer);   pingTimer = null; }
+}
 
 function connect() {
   if (!API_KEY) { status = 'no-key'; return; }
+  status = 'connecting';
+  clearTimers();
+
   try {
-    ws = new WebSocket(WS_URL);
+    ws = new WebSocket(WS_URL, { handshakeTimeout: 20000 });
   } catch (e) {
     status = 'error';
     scheduleReconnect();
     return;
   }
 
-  ws.addEventListener('open', () => {
+  // Watchdog: if socket never opens, force-reconnect
+  connectTimer = setTimeout(() => {
+    if (ws && ws.readyState !== WebSocket.OPEN) {
+      status = 'error';
+      try { ws.terminate(); } catch {}
+    }
+  }, CONNECT_TIMEOUT_MS);
+
+  ws.on('open', () => {
+    clearTimers();
     status = 'live';
     reconnectDelay = 2000;
     ws.send(JSON.stringify({
@@ -36,12 +58,15 @@ function connect() {
       BoundingBoxes: [BBOX],
       FilterMessageTypes: ['PositionReport', 'ShipStaticData'],
     }));
+    // Keepalive: send ping frame every 30s
+    pingTimer = setInterval(() => {
+      if (ws && ws.readyState === WebSocket.OPEN) ws.ping();
+    }, PING_INTERVAL_MS);
   });
 
-  ws.addEventListener('message', (ev) => {
+  ws.on('message', (data) => {
     let msg;
-    try { msg = JSON.parse(typeof ev.data === 'string' ? ev.data : ev.data.toString()); }
-    catch { return; }
+    try { msg = JSON.parse(data.toString()); } catch { return; }
     const meta = msg.MetaData || {};
     const mmsi = meta.MMSI || (msg.Message && msg.Message.PositionReport && msg.Message.PositionReport.UserID);
     if (!mmsi) return;
@@ -74,8 +99,18 @@ function connect() {
     if (vessels.size > MAX_VESSELS) pruneOldest();
   });
 
-  ws.addEventListener('close', () => { status = 'reconnecting'; scheduleReconnect(); });
-  ws.addEventListener('error', () => { status = 'error'; try { ws.close(); } catch {} });
+  ws.on('close', () => {
+    clearTimers();
+    status = 'reconnecting';
+    scheduleReconnect();
+  });
+
+  ws.on('error', (err) => {
+    console.error('[ais] WebSocket error:', err.message);
+    status = 'error';
+    clearTimers();
+    try { ws.terminate(); } catch {}
+  });
 }
 
 function scheduleReconnect() {

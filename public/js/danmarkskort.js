@@ -10,6 +10,7 @@ VG.danmarkskort = {};
   const AIS_URL = '/api/ais';           // real AIS proxy (aisstream.io)
   const AIRCRAFT_REFRESH_MS = 10000;
   const SHIP_REFRESH_MS = 12000;
+  const LERP_MS = 2500;                 // ms to smooth position fix transitions
 
   // ── Municipality data ──────────────────────────────────────────────────────
   // Keys match label_dk property in the GeoJSON
@@ -250,12 +251,26 @@ VG.danmarkskort = {};
   // contacts back to their reported position.
   const M_PER_DEG_LAT = 111320;
 
+  function easeInOut(t) { return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; }
+
   // Advance aircraft using velocity (m/s) and true_track (deg). dt in seconds.
+  // When a new position fix arrives, smoothly lerps from the current DR position
+  // to the reported fix over LERP_MS before resuming dead-reckoning from there.
   function advanceAircraft(ac, dt) {
+    const now = performance.now();
     ac.forEach(p => {
+      if (p._lerpFrom && p._lerpStart != null) {
+        const t = Math.min((now - p._lerpStart) / LERP_MS, 1);
+        const e = easeInOut(t);
+        p.pos = [
+          p._lerpFrom[0] + (p._lerpTo[0] - p._lerpFrom[0]) * e,
+          p._lerpFrom[1] + (p._lerpTo[1] - p._lerpFrom[1]) * e,
+        ];
+        if (t >= 1) p._lerpFrom = null;
+      }
       if (!p.pos || !p.speed) return;
       const lat = p.pos[1];
-      const distM = p.speed * dt;                 // p.speed is m/s (from OpenSky velocity)
+      const distM = p.speed * dt;
       const rad = (p.heading || 0) * Math.PI / 180;
       const dLat = (distM * Math.cos(rad)) / M_PER_DEG_LAT;
       const dLon = (distM * Math.sin(rad)) / (M_PER_DEG_LAT * Math.cos(lat * Math.PI / 180));
@@ -265,10 +280,20 @@ VG.danmarkskort = {};
 
   // Advance ships using SOG (knots) and COG (deg). dt in seconds.
   function advanceShips(ships, dt) {
+    const now = performance.now();
     ships.forEach(s => {
+      if (s._lerpFrom && s._lerpStart != null) {
+        const t = Math.min((now - s._lerpStart) / LERP_MS, 1);
+        const e = easeInOut(t);
+        s.pos = [
+          s._lerpFrom[0] + (s._lerpTo[0] - s._lerpFrom[0]) * e,
+          s._lerpFrom[1] + (s._lerpTo[1] - s._lerpFrom[1]) * e,
+        ];
+        if (t >= 1) s._lerpFrom = null;
+      }
       if (!s.pos || !s.sog) return;
       const lat = s.pos[1];
-      const distM = s.sog * 0.514444 * dt;        // knots → m/s
+      const distM = s.sog * 0.514444 * dt;
       const rad = (s.cog || s.heading || 0) * Math.PI / 180;
       const dLat = (distM * Math.cos(rad)) / M_PER_DEG_LAT;
       const dLon = (distM * Math.sin(rad)) / (M_PER_DEG_LAT * Math.cos(lat * Math.PI / 180));
@@ -1081,13 +1106,26 @@ VG.danmarkskort = {};
       }));
   }
 
-  // Merge a fresh fetch onto existing contacts so dead-reckoning carries the
-  // identity. New reported positions snap contacts to the real fix.
+  // Merge a fresh fetch onto existing contacts. Preserves object identity so
+  // dead-reckoning continues; new position fix becomes the lerp target, smoothed
+  // over LERP_MS milliseconds to eliminate position-snap jumps.
   function mergeContacts(current, incoming, key) {
     const map = new Map(current.map(c => [c[key], c]));
+    const now = performance.now();
     return incoming.map(n => {
       const prev = map.get(n[key]);
-      return prev ? Object.assign(prev, n) : n;
+      if (!prev) return n;
+      const oldPos = prev.pos ? [prev.pos[0], prev.pos[1]] : null;
+      Object.assign(prev, n);
+      if (oldPos && n.pos) {
+        const dx = n.pos[0] - oldPos[0], dy = n.pos[1] - oldPos[1];
+        if (dx*dx + dy*dy > 0.00005 * 0.00005) { // only lerp if moved >~5 m
+          prev._lerpFrom  = oldPos;
+          prev._lerpTo    = [n.pos[0], n.pos[1]];
+          prev._lerpStart = now;
+        }
+      }
+      return prev;
     });
   }
 
