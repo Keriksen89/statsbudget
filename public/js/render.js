@@ -1,6 +1,7 @@
 VG.render = {};
 
 VG.render.summary = function() {
+  if (!VG.state.baseline) return;
   const rev = VG.sumRev(), exp = VG.sumExp(), bal = rev - exp;
   const dRev = rev - VG.baseRev(), dExp = exp - VG.baseExp();
   const BNP = VG.state.baseline.gdp;
