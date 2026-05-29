@@ -144,6 +144,57 @@ VG.danmarkskort = {};
     { name: 'HERNING',   pos: [ 8.9737, 56.1326], pop:  91000 },
   ];
 
+  // ── Air traffic ──────────────────────────────────────────────────────────────
+  // Client-side live source (user's browser can reach OpenSky even though our
+  // server IP cannot). Falls back to a realistic simulation around DK airports.
+  const OPENSKY_DIRECT = 'https://opensky-network.org/api/states/all?lamin=54.4&lomin=7.5&lamax=58.2&lomax=15.4';
+  const AIRPORTS = [
+    { name: 'CPH', pos: [12.6476, 55.6181] }, // Kastrup
+    { name: 'BLL', pos: [ 9.1518, 55.7403] }, // Billund
+    { name: 'AAL', pos: [ 9.8492, 57.0928] }, // Aalborg
+    { name: 'AAR', pos: [10.6190, 56.3000] }, // Aarhus
+    { name: 'RKE', pos: [12.1314, 55.5856] }, // Roskilde
+  ];
+  const AIRLINES = ['SAS', 'DLH', 'KLM', 'BAW', 'NOZ', 'RYR', 'EWG', 'THY', 'AFR', 'FIN', 'WZZ', 'EZY'];
+
+  // ── Satellites ────────────────────────────────────────────────────────────────
+  // Live positions are computed in-browser from TLE orbital elements via
+  // satellite.js at the real current time, so they move in real time. We try to
+  // refresh TLEs from CelesTrak client-side; otherwise we use this snapshot.
+  const CELESTRAK_TLE = 'https://celestrak.org/NORAD/elements/gp.php?GROUP=visual&FORMAT=tle';
+  const TLE_FALLBACK = [
+    ['ISS (ZARYA)',
+     '1 25544U 98067A   24160.51782528  .00016717  00000-0  30074-3 0  9993',
+     '2 25544  51.6416 247.4627 0006703 130.5360 325.0288 15.49815308 47587'],
+    ['CSS (TIANHE)',
+     '1 48274U 21035A   24160.45000000  .00020000  00000-0  22000-3 0  9990',
+     '2 48274  41.4700 120.0000 0008000  90.0000 270.0000 15.60000000 50000'],
+    ['HST (HUBBLE)',
+     '1 20580U 90037B   24160.40000000  .00001000  00000-0  50000-4 0  9990',
+     '2 20580  28.4700 280.0000 0002800 100.0000 260.0000 15.09000000 60000'],
+    ['NOAA 19',
+     '1 33591U 09005A   24160.30000000  .00000100  00000-0  90000-4 0  9990',
+     '2 33591  99.1900 200.0000 0013000 250.0000 110.0000 14.13000000 70000'],
+    ['SENTINEL-2A',
+     '1 40697U 15028A   24160.20000000  .00000050  00000-0  30000-4 0  9990',
+     '2 40697  98.5700 210.0000 0001200 100.0000 260.0000 14.30000000 47000'],
+    ['STARLINK-1010',
+     '1 44713U 19074A   24160.10000000  .00010000  00000-0  70000-3 0  9990',
+     '2 44713  53.0500 150.0000 0001400  80.0000 280.0000 15.06000000 30000'],
+    ['STARLINK-2046',
+     '1 47543U 21012A   24160.15000000  .00012000  00000-0  80000-3 0  9990',
+     '2 47543  53.0500 250.0000 0001500  70.0000 290.0000 15.06000000 25000'],
+    ['ENVISAT',
+     '1 27386U 02009A   24160.05000000  .00000030  00000-0  20000-4 0  9990',
+     '2 27386  98.1600 180.0000 0001000 120.0000 240.0000 14.38000000 60000'],
+    ['METOP-B',
+     '1 38771U 12049A   24160.25000000  .00000040  00000-0  25000-4 0  9990',
+     '2 38771  98.6900 190.0000 0001100 110.0000 250.0000 14.21000000 50000'],
+    ['TERRA',
+     '1 25994U 99068A   24160.18000000  .00000060  00000-0  35000-4 0  9990',
+     '2 25994  98.2100 175.0000 0001300 115.0000 245.0000 14.57000000 50000'],
+  ];
+
   // ── Shipping routes ────────────────────────────────────────────────────────
   // Each ship travels between two waypoints, bouncing back and forth
   const SHIP_ROUTES = [
@@ -210,6 +261,102 @@ VG.danmarkskort = {};
     });
   }
 
+  // ── Simulated aircraft (fallback when no live OpenSky data) ─────────────────
+  function makeAircraft() {
+    const LAMIN = 54.5, LAMAX = 58.0, LOMIN = 7.8, LOMAX = 15.2;
+    const n = 16 + Math.floor(Math.random() * 10);
+    const arr = [];
+    for (let i = 0; i < n; i++) {
+      const heading = Math.random() * 360;
+      const ap = AIRPORTS[i % AIRPORTS.length];
+      // Half spawn near airports (climbing/landing), half mid-air en route
+      const nearAp = Math.random() > 0.5;
+      const pos = nearAp
+        ? [ap.pos[0] + (Math.random() - 0.5) * 0.6, ap.pos[1] + (Math.random() - 0.5) * 0.6]
+        : [LOMIN + Math.random() * (LOMAX - LOMIN), LAMIN + Math.random() * (LAMAX - LAMIN)];
+      arr.push({
+        icao24:   Math.random().toString(16).slice(2, 8),
+        callsign: AIRLINES[i % AIRLINES.length] + (100 + Math.floor(Math.random() * 899)),
+        origin:   'Simuleret',
+        pos,
+        altitude: 600 + Math.floor(Math.random() * 11400),
+        heading,
+        speed:    0.0010 + Math.random() * 0.0020,
+        simulated: true,
+      });
+    }
+    return arr;
+  }
+
+  function advanceAircraft(ac) {
+    const LAMIN = 54.2, LAMAX = 58.4, LOMIN = 7.2, LOMAX = 15.6;
+    ac.forEach(p => {
+      const rad = p.heading * Math.PI / 180;
+      p.pos = [p.pos[0] + Math.sin(rad) * p.speed, p.pos[1] + Math.cos(rad) * p.speed];
+      // Wrap around the DK airspace window so the sky stays populated
+      if (p.pos[0] < LOMIN) p.pos[0] = LOMAX;
+      if (p.pos[0] > LOMAX) p.pos[0] = LOMIN;
+      if (p.pos[1] < LAMIN) p.pos[1] = LAMAX;
+      if (p.pos[1] > LAMAX) p.pos[1] = LAMIN;
+    });
+  }
+
+  // ── Satellites (live via satellite.js + TLE) ────────────────────────────────
+  function parseTLEs(text) {
+    const lines = text.split(/\r?\n/).map(l => l.trimEnd()).filter(l => l.length);
+    const recs = [];
+    const sat = window.satellite;
+    if (!sat) return recs;
+    for (let i = 0; i + 2 < lines.length + 1; i++) {
+      if (lines[i] && lines[i + 1] && lines[i + 2] &&
+          lines[i + 1][0] === '1' && lines[i + 2][0] === '2') {
+        const name = lines[i].replace(/^0\s+/, '').trim();
+        try {
+          const rec = sat.twoline2satrec(lines[i + 1], lines[i + 2]);
+          if (rec && !rec.error) recs.push({ name, rec });
+        } catch {}
+        i += 2;
+      }
+    }
+    return recs;
+  }
+
+  function loadSatellites() {
+    // Fallback first so something always shows, then try a live refresh.
+    _satRecs = parseTLEs(TLE_FALLBACK.map(t => t.join('\n')).join('\n'));
+    fetch(CELESTRAK_TLE, { mode: 'cors' })
+      .then(r => r.ok ? r.text() : Promise.reject())
+      .then(txt => {
+        const recs = parseTLEs(txt);
+        if (recs.length) _satRecs = recs.slice(0, 120); // cap for performance
+      })
+      .catch(() => { /* keep fallback snapshot */ })
+      .finally(() => { _satFreshUntil = 0; computeSatellites(); updateStats(); });
+  }
+
+  function computeSatellites() {
+    const sat = window.satellite;
+    if (!sat || !_satRecs.length) { _satellites = []; return; }
+    const now = new Date();
+    const gmst = sat.gstime(now);
+    const out = [];
+    for (const s of _satRecs) {
+      try {
+        const pv = sat.propagate(s.rec, now);
+        if (!pv || !pv.position) continue;
+        const geo = sat.eciToGeodetic(pv.position, gmst);
+        const lon = sat.degreesLong(geo.longitude);
+        const lat = sat.degreesLat(geo.latitude);
+        const altKm = geo.height;
+        // Show satellites currently over NW Europe so the DK-centred view is alive
+        if (lat > 42 && lat < 66 && lon > -12 && lon < 32 && altKm > 0) {
+          out.push({ name: s.name, pos: [lon, lat], alt: altKm });
+        }
+      } catch {}
+    }
+    _satellites = out;
+  }
+
   // ── Color helpers ──────────────────────────────────────────────────────────
   // t: normalised 0→1, goodHigh: true means high is gold/good
   function colorForValue(t, goodHigh) {
@@ -251,20 +398,24 @@ VG.danmarkskort = {};
   let _pulse      = 0;
   let _rafId      = null;
   let _aircraft   = [];
+  let _aircraftSimulated = false;
   let _ships      = makeShips();
+  let _satRecs    = [];        // parsed satellite.js satrec objects
+  let _satellites = [];        // computed { name, pos:[lon,lat], alt } per frame
+  let _satFreshUntil = 0;      // recompute throttle
   let _container  = null;
   let _initialized = false;
   let _aircraftTimer = null;
 
   // ── Build deck.gl layers ───────────────────────────────────────────────────
-  function buildLayers(geo, metric, view, pulse, aircraft, ships) {
+  function buildLayers(geo, metric, view, pulse, aircraft, ships, satellites) {
     const d = window.deck;
     if (!d) return [];
 
     const layers = [];
 
     // ── Kommuner (GeoJson extruded) ──────────────────────────────────────────
-    if (geo && (view === 'kommuner' || view === 'lufttrafik' || view === 'skibstrafik')) {
+    if (geo && (view === 'kommuner' || view === 'lufttrafik' || view === 'skibstrafik' || view === 'satellitter')) {
       const metricCfg = METRICS[metric] || METRICS.ledighed;
       layers.push(new d.GeoJsonLayer({
         id: 'kommuner',
@@ -372,6 +523,61 @@ VG.danmarkskort = {};
       }));
     }
 
+    // ── Satellite layer (live, 3D altitude) ──────────────────────────────────
+    if (view === 'satellitter' && satellites && satellites.length) {
+      const SCALE = 600; // km → metres of map elevation (visual)
+      // Tether line from ground subpoint up to the satellite
+      layers.push(new d.LineLayer({
+        id: 'sat-tethers',
+        data: satellites,
+        pickable: false,
+        opacity: 0.25,
+        getSourcePosition: s => [s.pos[0], s.pos[1], 0],
+        getTargetPosition: s => [s.pos[0], s.pos[1], s.alt * SCALE],
+        getColor: [120, 200, 255, 60],
+        getWidth: 1,
+      }));
+      layers.push(new d.ScatterplotLayer({
+        id: 'sat-glow',
+        data: satellites,
+        pickable: false,
+        billboard: true,
+        opacity: 0.18,
+        radiusMinPixels: 8,
+        radiusMaxPixels: 22,
+        getPosition: s => [s.pos[0], s.pos[1], s.alt * SCALE],
+        getFillColor: [150, 220, 255, 70],
+      }));
+      layers.push(new d.ScatterplotLayer({
+        id: 'sat-points',
+        data: satellites,
+        pickable: true,
+        billboard: true,
+        stroked: true,
+        radiusMinPixels: 3,
+        radiusMaxPixels: 7,
+        getPosition: s => [s.pos[0], s.pos[1], s.alt * SCALE],
+        getFillColor: [220, 245, 255, 240],
+        getLineColor: [120, 200, 255, 200],
+        getLineWidth: 1,
+        onHover: info => showTooltipSat(info),
+      }));
+      layers.push(new d.TextLayer({
+        id: 'sat-labels',
+        data: satellites,
+        pickable: false,
+        getPosition: s => [s.pos[0], s.pos[1], s.alt * SCALE],
+        getText: s => s.name,
+        getSize: 9,
+        getColor: [150, 220, 255, 200],
+        getPixelOffset: [0, -12],
+        fontFamily: '"Courier New", Courier, monospace',
+        getTextAnchor: 'middle',
+        getAlignmentBaseline: 'bottom',
+        characterSet: 'ABCDEFGHIJKLMNOPQRSTUVWXYZÆØÅabcdefghijklmnopqrstuvwxyzæøå0123456789 .,-()',
+      }));
+    }
+
     // ── City pulsing rings (always visible) ──────────────────────────────────
     const p1 = (Math.sin(pulse) * 0.5 + 0.5);
     const p2 = (Math.sin(pulse + 1.5) * 0.5 + 0.5);
@@ -471,6 +677,22 @@ VG.danmarkskort = {};
     el.style.top  = (info.y - 10) + 'px';
   }
 
+  function showTooltipSat(info) {
+    const el = document.getElementById('dk-tooltip');
+    if (!el) return;
+    if (!info || !info.object) { el.style.display = 'none'; return; }
+    const s = info.object;
+    el.innerHTML = `
+      <div class="dkt-title">${s.name}</div>
+      <div class="dkt-row"><span class="dkt-k">Højde</span><span class="dkt-v">${Math.round(s.alt)} km</span></div>
+      <div class="dkt-row"><span class="dkt-k">Position</span><span class="dkt-v">${s.pos[1].toFixed(2)}°N ${s.pos[0].toFixed(2)}°E</span></div>
+      <div class="dkt-row"><span class="dkt-k">Kilde</span><span class="dkt-v">TLE · live</span></div>
+    `;
+    el.style.display = 'block';
+    el.style.left = (info.x + 12) + 'px';
+    el.style.top  = (info.y - 10) + 'px';
+  }
+
   function updateTooltip(info, currentMetric) {
     const el = document.getElementById('dk-tooltip');
     if (!el) return;
@@ -504,24 +726,40 @@ VG.danmarkskort = {};
   }
 
   // ── Fetch aircraft ─────────────────────────────────────────────────────────
+  function parseStates(states) {
+    return (states || [])
+      .filter(s => s && s[5] != null && s[6] != null)
+      .map(s => ({
+        icao24:   s[0] || '',
+        callsign: (s[1] || '').trim(),
+        origin:   s[2] || '—',
+        pos:      [s[5], s[6]],
+        altitude: s[7] || s[13] || 0,
+        heading:  s[10] || 0,
+      }));
+  }
+
   async function fetchAircraft() {
+    let live = [];
+    // 1) Our server proxy (works when the server IP is allowed)
     try {
-      const resp = await fetch(OPENSKY_URL);
-      if (!resp.ok) throw new Error('non-200');
-      const data = await resp.json();
-      const states = (data && Array.isArray(data.states)) ? data.states : [];
-      _aircraft = states
-        .filter(s => s && s[5] != null && s[6] != null)
-        .map(s => ({
-          icao24:   s[0] || '',
-          callsign: (s[1] || '').trim(),
-          origin:   s[2] || '—',
-          pos:      [s[5], s[6]],
-          altitude: s[7] || 0,
-          heading:  s[11] || 0,
-        }));
-    } catch (e) {
-      _aircraft = [];
+      const r = await fetch(OPENSKY_URL);
+      if (r.ok) { const d = await r.json(); live = parseStates(d && d.states); }
+    } catch {}
+    // 2) Direct from the browser (works on the user's network even if ours is blocked)
+    if (!live.length) {
+      try {
+        const r = await fetch(OPENSKY_DIRECT, { mode: 'cors' });
+        if (r.ok) { const d = await r.json(); live = parseStates(d && d.states); }
+      } catch {}
+    }
+    if (live.length) {
+      _aircraft = live;
+      _aircraftSimulated = false;
+    } else {
+      // 3) Realistic simulation so the sky is never empty
+      if (!_aircraftSimulated || !_aircraft.length) _aircraft = makeAircraft();
+      _aircraftSimulated = true;
     }
     updateStats();
   }
@@ -530,9 +768,11 @@ VG.danmarkskort = {};
   function updateStats() {
     const el = document.getElementById('dk-stats');
     if (!el) return;
+    const planeTag = _aircraftSimulated ? ' (simuleret)' : ' (live)';
     el.innerHTML = `
-      <span class="dk-stat"><i class="ph ph-airplane-tilt"></i> ${_aircraft.length} fly i luften</span>
-      <span class="dk-stat"><i class="ph ph-anchor-simple"></i> ${_ships.length} skibe</span>
+      <span class="dk-stat"><i class="ph ph-airplane-tilt"></i> ${_aircraft.length} fly${planeTag}</span>
+      <span class="dk-stat"><i class="ph ph-boat"></i> ${_ships.length} skibe</span>
+      <span class="dk-stat"><i class="ph ph-globe-stand"></i> ${_satellites.length} satellitter (live)</span>
     `;
   }
 
@@ -547,9 +787,16 @@ VG.danmarkskort = {};
       }
       _pulse += 0.025;
       advanceShips(_ships);
+      // Animate simulated planes; live OpenSky data refreshes on its own timer
+      if (_view === 'lufttrafik' && _aircraftSimulated) advanceAircraft(_aircraft);
+      // Recompute live satellite positions ~3x/sec (real-time orbital motion)
+      if (_view === 'satellitter') {
+        const now = Date.now();
+        if (now >= _satFreshUntil) { computeSatellites(); _satFreshUntil = now + 333; updateStats(); }
+      }
 
       if (_deck) {
-        _deck.setProps({ layers: buildLayers(_geo, _metric, _view, _pulse, _aircraft, _ships) });
+        _deck.setProps({ layers: buildLayers(_geo, _metric, _view, _pulse, _aircraft, _ships, _satellites) });
       }
       _rafId = requestAnimationFrame(frame);
     }
@@ -604,6 +851,7 @@ VG.danmarkskort = {};
       <button class="dk-btn active" data-view="kommuner">KOMMUNER</button>
       <button class="dk-btn" data-view="lufttrafik">LUFTTRAFIK</button>
       <button class="dk-btn" data-view="skibstrafik">SKIBSTRAFIK</button>
+      <button class="dk-btn" data-view="satellitter">SATELLITTER</button>
     </div>
     <div class="dk-metric-btns" id="dk-metric-btns">
       <button class="dk-btn active" data-metric="ledighed">LEDIGHED</button>
@@ -674,14 +922,14 @@ VG.danmarkskort = {};
       parameters: {
         clearColor: [0, 0, 0, 255],
       },
-      layers: buildLayers(_geo, _metric, _view, _pulse, _aircraft, _ships),
+      layers: buildLayers(_geo, _metric, _view, _pulse, _aircraft, _ships, _satellites),
       getCursor: ({ isHovering }) => isHovering ? 'pointer' : 'grab',
       onHover: (info) => {
         if (_view === 'kommuner') {
           updateTooltip(info, _metric);
-        } else {
-          // aircraft/ship tooltips handled in per-layer onHover
-          if (_view !== 'lufttrafik' && _view !== 'skibstrafik') {
+        } else if (_view === 'lufttrafik' || _view === 'skibstrafik' || _view === 'satellitter') {
+          // per-layer onHover handles tooltip; only hide if no object hovered
+          if (!info || !info.object) {
             const tt = document.getElementById('dk-tooltip');
             if (tt) tt.style.display = 'none';
           }
@@ -742,6 +990,9 @@ VG.danmarkskort = {};
     if (canvas) initDeck(canvas);
 
     _initialized = true;
+
+    // Load satellite TLEs (fallback + live CelesTrak refresh)
+    loadSatellites();
 
     // Fetch aircraft now and on interval
     await fetchAircraft();

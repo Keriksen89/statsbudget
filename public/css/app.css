@@ -4545,6 +4545,11 @@ body.dk-immersive.dk-peek .sidebar {
 }
 /* App fills the whole width once the sidebar is out of flow */
 body.dk-immersive .app { width: 100%; min-width: 0; }
+/* Remove the topbar (white band) — the map has its own HUD */
+body.dk-immersive .topbar { display: none; }
+body.dk-immersive .summary { display: none; }
+body.dk-immersive .panels-main { padding: 0; overflow: hidden; }
+body.dk-immersive #panel-danmarkskort { height: 100dvh; }
 /* Dim backdrop behind the peeked menu */
 body.dk-immersive .dk-peek-backdrop { display: none; }
 body.dk-immersive.dk-peek .dk-peek-backdrop {
