@@ -25,7 +25,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="/css/app.css">
 <link rel="stylesheet" href="/vendor/gridstack.min.css"/>
+<link rel="stylesheet" href="/vendor/cesium/Widgets/widgets.css"/>
 <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+<!-- CesiumJS true-3D globe. Base URL must be set before the bundle loads so it
+     can find its Workers/Assets/Widgets. Vendored same-origin under /vendor. -->
+<script>window.CESIUM_BASE_URL = '/vendor/cesium/';</script>
 </head>
 <body>
 
@@ -229,6 +233,7 @@
 <script src="/js/lab.js"></script>
 <script src="/js/dashboard.js"></script>
 <script src="/vendor/satellite.min.js"></script>
+<script src="/vendor/cesium/Cesium.js"></script>
 <script src="/js/danmarkskort.js"></script>
 <script src="/js/xdeck.js"></script>
 <script src="/js/votes.js"></script>

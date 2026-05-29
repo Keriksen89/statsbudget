@@ -21,6 +21,7 @@ import xfeedRouter from './routes/xfeed.js';
 import openskyRouter from './routes/opensky.js';
 import aisRouter from './routes/ais.js';
 import tleRouter from './routes/tle.js';
+import geoconfigRouter from './routes/geoconfig.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
@@ -35,12 +36,18 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https://unpkg.com", "https://platform.twitter.com", "https://cdn.jsdelivr.net"],
+      // CesiumJS needs WASM ('wasm-unsafe-eval') and spawns its workers from
+      // blob: URLs.
+      scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "'wasm-unsafe-eval'", "blob:", "https://unpkg.com", "https://platform.twitter.com", "https://cdn.jsdelivr.net"],
       scriptSrcAttr: ["'unsafe-inline'"],
+      workerSrc: ["'self'", "blob:"],
+      childSrc: ["'self'", "blob:"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdn.jsdelivr.net", "https://unpkg.com"],
-      imgSrc: ["'self'", 'data:', 'https:'],
-      connectSrc: ["'self'", "https://www.reddit.com", "https://*.basemaps.cartocdn.com", "https://celestrak.org", "https://celestrak.com"],
-      fontSrc: ["'self'", "https://fonts.gstatic.com", "https://unpkg.com"],
+      imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
+      // Cesium ion (tokens + asset CDN), Google Photorealistic 3D Tiles, and
+      // token-free OpenStreetMap raster imagery.
+      connectSrc: ["'self'", "data:", "https://www.reddit.com", "https://*.basemaps.cartocdn.com", "https://celestrak.org", "https://celestrak.com", "https://api.cesium.com", "https://assets.ion.cesium.com", "https://*.cesium.com", "https://tile.googleapis.com", "https://tile.openstreetmap.org", "https://*.tile.openstreetmap.org"],
+      fontSrc: ["'self'", "data:", "https://fonts.gstatic.com", "https://unpkg.com"],
       frameSrc: ["'self'", "https://platform.twitter.com", "https://twitter.com"],
       objectSrc: ["'none'"],
       baseUri: ["'self'"],
@@ -75,6 +82,7 @@ app.use('/api/xfeed', xfeedRouter);
 app.use('/api/opensky', openskyRouter);
 app.use('/api/ais', aisRouter);
 app.use('/api/tle', tleRouter);
+app.use('/api/geo', geoconfigRouter);
 
 app.get('/api/health', (req, res) => {
   res.json({

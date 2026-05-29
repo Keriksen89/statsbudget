@@ -9,6 +9,42 @@ const CENTER = { lat: 56.0, lon: 10.5, distNm: 250 };
 const CACHE_MS = 8000;
 let _cache = { at: 0, payload: null };
 
+// ── OpenSky OAuth2 client-credentials (accounts created since Mar 2025) ──────
+// Set OPENSKY_CLIENT_ID + OPENSKY_CLIENT_SECRET to lift the anonymous rate
+// limit. Falls back silently to anonymous access (and the adsb providers) when
+// unset. Tokens last 30 min; we refresh ~1 min early.
+const OSK_TOKEN_URL = 'https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token';
+const OSK_CLIENT_ID = process.env.OPENSKY_CLIENT_ID || '';
+const OSK_CLIENT_SECRET = process.env.OPENSKY_CLIENT_SECRET || '';
+let _oskToken = { value: null, expiresAt: 0 };
+
+async function openSkyToken() {
+  if (!OSK_CLIENT_ID || !OSK_CLIENT_SECRET) return null;
+  if (_oskToken.value && Date.now() < _oskToken.expiresAt) return _oskToken.value;
+  try {
+    const body = new URLSearchParams({
+      grant_type: 'client_credentials',
+      client_id: OSK_CLIENT_ID,
+      client_secret: OSK_CLIENT_SECRET,
+    });
+    const r = await fetch(OSK_TOKEN_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body,
+      signal: AbortSignal.timeout(6000),
+    });
+    if (!r.ok) throw new Error('token ' + r.status);
+    const d = await r.json();
+    _oskToken = {
+      value: d.access_token,
+      expiresAt: Date.now() + Math.max((d.expires_in || 1800) - 60, 60) * 1000,
+    };
+    return _oskToken.value;
+  } catch {
+    return null;
+  }
+}
+
 // Normalise every upstream into the OpenSky "states" array the client expects:
 // [icao24, callsign, origin_country, t_pos, t, lon, lat, baro_alt, on_ground,
 //  velocity, true_track, vert_rate, sensors, geo_alt, squawk, spi, position_src]
@@ -67,8 +103,11 @@ async function tryAdsbFi() {
 
 async function tryOpenSky() {
   const q = `lamin=${BBOX.lamin}&lomin=${BBOX.lomin}&lamax=${BBOX.lamax}&lomax=${BBOX.lomax}`;
+  const headers = { Accept: 'application/json' };
+  const token = await openSkyToken();
+  if (token) headers.Authorization = 'Bearer ' + token;
   const r = await fetch(`https://opensky-network.org/api/states/all?${q}`, {
-    headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(6000),
+    headers, signal: AbortSignal.timeout(6000),
   });
   if (!r.ok) throw new Error('opensky ' + r.status);
   const d = await r.json();
@@ -83,7 +122,12 @@ router.get('/', async (req, res) => {
 
   let states = [];
   let source = 'none';
-  for (const [name, fn] of [['adsb.lol', tryAdsbLol], ['adsb.fi', tryAdsbFi], ['opensky', tryOpenSky]]) {
+  // When OAuth credentials are configured, authenticated OpenSky is the best
+  // source so try it first; otherwise prefer the no-auth adsb providers.
+  const providers = (OSK_CLIENT_ID && OSK_CLIENT_SECRET)
+    ? [['opensky', tryOpenSky], ['adsb.lol', tryAdsbLol], ['adsb.fi', tryAdsbFi]]
+    : [['adsb.lol', tryAdsbLol], ['adsb.fi', tryAdsbFi], ['opensky', tryOpenSky]];
+  for (const [name, fn] of providers) {
     try {
       const s = await fn();
       if (s && s.length) {
