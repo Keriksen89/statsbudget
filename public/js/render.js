@@ -24,48 +24,102 @@ VG.render.summary = function() {
   document.getElementById('s-debt-card').classList.toggle('alert', debt2030 > 0.6);
 };
 
+/* ── Ticker config ──────────────────────────────────────────────── */
+VG.render._TICKER_ALL = [
+  { id: 'befolkning', label: 'BEFOLKNING', nav: 'demographics', group: 'samfund' },
+  { id: 'ledighed',   label: 'LEDIGE',     nav: 'ledighed',     group: 'samfund' },
+  { id: 'inflation',  label: 'INFLATION',  nav: 'inflation',    group: 'oekonomi' },
+  { id: 'boligpris',  label: 'BOLIGPRISER',nav: 'boligmarked',  group: 'samfund' },
+  { id: 'rente',      label: 'NBR-RENTE',  nav: 'policy',       group: 'oekonomi' },
+  { id: 'loenvaekst', label: 'LØNVÆKST',   nav: 'indkomst',     group: 'samfund' },
+  { id: 'gdp',        label: 'BNP',        nav: 'overview',     group: 'samfund' },
+];
+VG.render._TICKER_DEFAULT = ['befolkning', 'inflation', 'boligpris', 'rente', 'loenvaekst'];
+
+VG.render._tickerEnabled = function() {
+  try {
+    const s = localStorage.getItem('vg-ticker');
+    if (s) return JSON.parse(s);
+  } catch {}
+  return VG.render._TICKER_DEFAULT;
+};
+
 VG.render.liveIndicators = function() {
   const live = VG.state.live;
   const container = document.getElementById('live-indicators');
-  const items = [];
-  if (live.population) {
-    items.push(`<div class="live-indicator"><span class="live-dot"></span><span class="label">Befolkning</span><span class="value">${live.population.value.toLocaleString('da-DK')}</span><span class="label">(${live.population.period})</span></div>`);
-  }
-  if (live.gdp) {
-    items.push(`<div class="live-indicator"><span class="live-dot"></span><span class="label">BNP, kvt</span><span class="value">${VG.fmt(live.gdp.value / 1000)}</span><span class="label">(${live.gdp.period})</span></div>`);
-  }
-  if (live.unemployment) {
-    items.push(`<div class="live-indicator"><span class="live-dot"></span><span class="label">Ledige</span><span class="value">${live.unemployment.value.toLocaleString('da-DK')}</span><span class="label">(${live.unemployment.period})</span></div>`);
-  }
-
-  // Economic live data enrichment
+  if (!container) return;
   const eco = (typeof VG.livedata !== 'undefined') ? VG.livedata.economic : null;
-  if (eco) {
-    if (eco.inflation) {
-      const inf = eco.inflation;
-      const infColor = inf.yoy > 4 ? 'style="color:var(--pos)"' : inf.yoy > 2 ? 'style="color:var(--warn)"' : 'style="color:var(--neg)"';
-      const infVal = inf.yoy != null ? inf.yoy.toFixed(1).replace('.', ',') : inf.value.toFixed(1).replace('.', ',');
-      items.push(`<div class="live-indicator"><span class="live-dot"></span><span class="label">Inflation</span><span class="value" ${infColor}>${infVal}%</span><span class="label">(${inf.period})</span></div>`);
+  const enabled = VG.render._tickerEnabled();
+
+  const built = [];
+  for (const m of VG.render._TICKER_ALL) {
+    if (!enabled.includes(m.id)) continue;
+    let val = null, sub = '';
+
+    if (m.id === 'befolkning' && live.population) {
+      val = live.population.value.toLocaleString('da-DK');
+      sub = live.population.period;
+    } else if (m.id === 'ledighed' && live.unemployment) {
+      val = live.unemployment.value.toLocaleString('da-DK');
+      sub = live.unemployment.period;
+    } else if (m.id === 'inflation' && eco?.inflation) {
+      const v = eco.inflation.yoy != null ? eco.inflation.yoy : eco.inflation.value;
+      val = v.toFixed(1).replace('.', ',') + '%';
+      sub = eco.inflation.period;
+    } else if (m.id === 'boligpris' && eco?.housing) {
+      const sign = eco.housing.qoq >= 0 ? '+' : '';
+      val = sign + eco.housing.qoq.toFixed(1).replace('.', ',') + '%';
+      sub = 'kvartal';
+    } else if (m.id === 'rente' && eco?.nbRate) {
+      val = eco.nbRate.value.toFixed(2).replace('.', ',') + '%';
+    } else if (m.id === 'loenvaekst' && eco?.wageGrowth) {
+      const sign = eco.wageGrowth.yoy >= 0 ? '+' : '';
+      val = sign + eco.wageGrowth.yoy.toFixed(1).replace('.', ',') + '%';
+    } else if (m.id === 'gdp' && live.gdp) {
+      val = VG.fmt(live.gdp.value / 1000);
+      sub = live.gdp.period;
     }
-    if (eco.housing) {
-      const h = eco.housing;
-      const sign = h.qoq >= 0 ? '+' : '';
-      items.push(`<div class="live-indicator"><span class="live-dot"></span><span class="label">Boligpriser</span><span class="value">${sign}${h.qoq.toFixed(1).replace('.', ',')}%</span><span class="label">(kvartal)</span></div>`);
-    }
-    if (eco.nbRate) {
-      items.push(`<div class="live-indicator"><span class="live-dot"></span><span class="label">NBR-rente</span><span class="value">${eco.nbRate.value.toFixed(2).replace('.', ',')}%</span></div>`);
-    }
-    if (eco.wageGrowth) {
-      const w = eco.wageGrowth;
-      const sign = w.yoy >= 0 ? '+' : '';
-      items.push(`<div class="live-indicator"><span class="live-dot"></span><span class="label">Lønvækst</span><span class="value">${sign}${w.yoy.toFixed(1).replace('.', ',')}%</span></div>`);
-    }
+
+    if (val !== null) built.push({ m, val, sub });
   }
 
-  if (!items.length) {
-    items.push('<div class="live-indicator"><span class="label">Live data fra DST henter...</span></div>');
+  if (!built.length) {
+    container.innerHTML = '<div class="live-indicator"><span class="label">Henter live data…</span></div>';
+    return;
   }
-  container.innerHTML = items.join('');
+
+  container.innerHTML = built.map(({ m, val, sub }) =>
+    `<button class="live-indicator" data-nav="${m.nav}" data-group="${m.group}" title="Vis ${m.label}">
+      <span class="live-dot"></span>
+      <span class="label">${m.label}</span>
+      <span class="value">${val}</span>
+      ${sub ? `<span class="label">(${sub})</span>` : ''}
+    </button>`
+  ).join('') + `<button class="ticker-cfg-btn" id="ticker-cfg-btn" title="Tilpas indikatorer">⚙</button>`;
+
+  document.getElementById('ticker-cfg-btn')?.addEventListener('click', e => {
+    e.stopPropagation();
+    VG.render.showTickerConfig();
+  });
+};
+
+VG.render.showTickerConfig = function() {
+  const enabled = VG.render._tickerEnabled();
+  const checks = VG.render._TICKER_ALL.map(m => `
+    <label class="ticker-cfg-row">
+      <input type="checkbox" value="${m.id}"${enabled.includes(m.id) ? ' checked' : ''}>
+      <span>${m.label}</span>
+    </label>`).join('');
+  VG.showModal('Tilpas topbar-indikatorer', `
+    <p style="font-size:12px;color:var(--text-2);margin-bottom:14px">Vælg hvilke indikatorer der vises i topbaren. Klik på en indikator for at gå til de tilhørende data.</p>
+    <div class="ticker-cfg-list">${checks}</div>
+    <button class="btn primary" id="ticker-cfg-save" style="margin-top:16px">Gem</button>`);
+  document.getElementById('ticker-cfg-save')?.addEventListener('click', () => {
+    const sel = [...document.querySelectorAll('.ticker-cfg-list input:checked')].map(el => el.value);
+    try { localStorage.setItem('vg-ticker', JSON.stringify(sel.length ? sel : VG.render._TICKER_DEFAULT)); } catch {}
+    VG.closeModal();
+    VG.render.liveIndicators();
+  });
 };
 
 VG.render.overview = function() {

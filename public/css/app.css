@@ -3600,9 +3600,9 @@ body {
   background: #ffffff; border-bottom: 1px solid #e2e8f0;
   flex-shrink: 0; z-index: 50;
 }
-[data-theme="dark"] .topbar { background: #1e293b; border-bottom-color: rgba(255,255,255,0.07); }
+[data-theme="dark"] .topbar { background: #0d0d0d; border-bottom-color: rgba(212,175,55,0.12); }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .topbar { background: #1e293b; border-bottom-color: rgba(255,255,255,0.07); }
+  :root:not([data-theme="light"]) .topbar { background: #0d0d0d; border-bottom-color: rgba(212,175,55,0.12); }
 }
 
 .topbar-hamburger {
@@ -3622,21 +3622,49 @@ body {
 
 .topbar-ticker {
   flex: 1; display: flex; gap: 0; overflow: hidden;
-  padding: 0 12px;
+  padding: 0 8px; align-items: center;
 }
 /* Live-indicator items inside topbar */
 .topbar-ticker .live-indicator {
   display: flex; align-items: center; gap: 5px;
-  padding: 4px 10px; background: transparent; border-right: 1px solid var(--border);
-  font-size: 11.5px; white-space: nowrap; flex-shrink: 0;
+  padding: 4px 10px; background: transparent;
+  border: none; border-right: 1px solid rgba(212,175,55,0.15);
+  font-size: 11px; white-space: nowrap; flex-shrink: 0;
+  cursor: pointer; transition: background .12s; border-radius: 0;
+  font-family: inherit; color: inherit;
 }
-.topbar-ticker .live-indicator:last-child { border-right: none; }
+.topbar-ticker .live-indicator:hover { background: rgba(212,175,55,0.06); }
+.topbar-ticker .live-indicator:last-of-type { border-right: none; }
 .topbar-ticker .live-dot {
   width: 5px; height: 5px; border-radius: 50%;
-  background: #22c55e; flex-shrink: 0;
+  background: var(--accent); flex-shrink: 0;
+  animation: ticker-pulse 2.5s ease-in-out infinite;
 }
-.topbar-ticker .label { color: var(--text-3); }
-.topbar-ticker .value { font-weight: 600; color: var(--text); }
+@keyframes ticker-pulse {
+  0%,100% { opacity: 1; box-shadow: 0 0 4px var(--accent); }
+  50%      { opacity: 0.4; box-shadow: none; }
+}
+.topbar-ticker .label { color: var(--text-3); font-size: 10.5px; letter-spacing: .04em; }
+.topbar-ticker .value { font-weight: 700; color: var(--accent); letter-spacing: .02em; }
+
+/* Ticker config button */
+.ticker-cfg-btn {
+  background: none; border: none; cursor: pointer;
+  color: var(--text-3); font-size: 13px; padding: 4px 6px;
+  border-radius: 4px; flex-shrink: 0; transition: color .12s, background .12s;
+  margin-left: 4px;
+}
+.ticker-cfg-btn:hover { color: var(--accent); background: rgba(212,175,55,0.08); }
+
+/* Ticker config modal list */
+.ticker-cfg-list { display: flex; flex-direction: column; gap: 8px; }
+.ticker-cfg-row {
+  display: flex; align-items: center; gap: 10px; cursor: pointer;
+  font-size: 13px; color: var(--text); padding: 6px 8px;
+  border-radius: 6px; transition: background .1s;
+}
+.ticker-cfg-row:hover { background: var(--surface-2); }
+.ticker-cfg-row input { accent-color: var(--accent); width: 14px; height: 14px; }
 
 .topbar-controls { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 .topbar-btn {
@@ -4400,4 +4428,90 @@ body {
   /* Range input larger touch area */
   input[type=range] { height: 28px; }
 }
+
+/* ── Danmarksmaskinen (deck.gl map panel) ────────────────────────── */
+#panel-danmarkskort {
+  padding: 0; overflow: hidden;
+  height: calc(100vh - 54px);
+  display: flex; flex-direction: column;
+}
+.dk-wrap {
+  position: relative; flex: 1; width: 100%; min-height: 500px;
+  background: #000; overflow: hidden;
+}
+.dk-canvas { display: block; width: 100% !important; height: 100% !important; }
+.dk-hud {
+  position: absolute; top: 16px; left: 16px; z-index: 10;
+  display: flex; flex-direction: column; gap: 8px;
+  pointer-events: none;
+}
+.dk-hud > * { pointer-events: auto; }
+.dk-hud-title {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 11px; font-weight: 700; letter-spacing: .18em;
+  color: var(--accent); opacity: 0.85;
+  text-shadow: 0 0 12px rgba(212,175,55,0.5);
+}
+.dk-view-btns, .dk-metric-btns {
+  display: flex; gap: 4px; flex-wrap: wrap;
+}
+.dk-vbtn, .dk-mbtn {
+  padding: 4px 10px; font-size: 10.5px; font-weight: 600;
+  font-family: 'Courier New', Courier, monospace;
+  letter-spacing: .06em;
+  background: rgba(0,0,0,0.7); border: 1px solid rgba(212,175,55,0.3);
+  color: var(--text-3); border-radius: 3px; cursor: pointer;
+  transition: all .15s; backdrop-filter: blur(6px);
+}
+.dk-vbtn:hover, .dk-mbtn:hover { border-color: var(--accent); color: var(--accent); }
+.dk-vbtn.active, .dk-mbtn.active {
+  background: rgba(212,175,55,0.15); border-color: var(--accent); color: var(--accent);
+}
+.dk-legend {
+  background: rgba(0,0,0,0.7); border: 1px solid rgba(212,175,55,0.2);
+  border-radius: 4px; padding: 6px 8px; backdrop-filter: blur(6px);
+}
+.dk-leg-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.dk-leg-item { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.dk-leg-swatch { width: 14px; height: 14px; border-radius: 2px; }
+.dk-leg-label { font-size: 9px; color: var(--text-3); white-space: nowrap; font-family: 'Courier New', Courier, monospace; }
+.dk-stats {
+  font-size: 10px; color: var(--text-3);
+  font-family: 'Courier New', Courier, monospace;
+  letter-spacing: .04em;
+}
+.dk-stats span { color: var(--accent); font-weight: 700; }
+.dk-source { font-size: 9px; color: rgba(212,175,55,0.35); font-family: 'Courier New', Courier, monospace; }
+.dk-tooltip {
+  position: absolute; display: none; z-index: 20; pointer-events: none;
+  background: rgba(0,0,0,0.88); border: 1px solid rgba(212,175,55,0.4);
+  border-radius: 6px; padding: 10px 14px; min-width: 160px;
+  backdrop-filter: blur(8px);
+}
+.dk-tt-name { font-weight: 700; color: var(--accent); font-size: 13px; margin-bottom: 4px; font-family: 'Courier New', Courier, monospace; }
+.dk-tt-val  { font-size: 20px; font-weight: 700; color: #fff; line-height: 1.2; }
+.dk-tt-unit { font-size: 10px; color: var(--text-3); margin-bottom: 6px; }
+.dk-tt-extra { display: flex; flex-direction: column; gap: 2px; font-size: 11px; color: var(--text-3); }
+.dk-tt-extra strong { color: var(--text-2); }
+.dk-loading {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 16px;
+  background: #000; z-index: 30;
+}
+.dk-loading-ring {
+  width: 40px; height: 40px; border-radius: 50%;
+  border: 2px solid rgba(212,175,55,0.15);
+  border-top-color: var(--accent);
+  animation: dk-spin 0.9s linear infinite;
+}
+@keyframes dk-spin { to { transform: rotate(360deg); } }
+.dk-loading-txt { font-size: 12px; color: var(--text-3); font-family: 'Courier New', Courier, monospace; letter-spacing: .08em; }
+.dk-aircraft-badge {
+  position: absolute; top: 16px; right: 16px; z-index: 10;
+  background: rgba(0,0,0,0.75); border: 1px solid rgba(0,255,200,0.3);
+  border-radius: 4px; padding: 6px 12px; font-size: 10px;
+  font-family: 'Courier New', Courier, monospace; color: #00ffc8;
+  letter-spacing: .06em; backdrop-filter: blur(6px);
+}
+@media (max-width: 768px) { .dk-hud { top: 8px; left: 8px; } .dk-hud-title { font-size: 10px; } }
 

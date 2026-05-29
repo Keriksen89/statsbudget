@@ -169,10 +169,8 @@ VG.theme.toggle = function() {
 VG.theme.init = function() {
   let saved = null;
   try { saved = localStorage.getItem('vg-theme'); } catch {}
-  if (saved && saved !== 'system') {
-    VG.theme.apply(saved);
-  }
-  // Always sync icon to effective theme (handles system dark mode on first visit)
+  const mode = saved || 'dark';
+  VG.theme.apply(mode);
   document.getElementById('theme-icon').textContent = VG.theme._isDark() ? '☾' : '☀';
 };
 
@@ -219,6 +217,10 @@ VG.bootstrap = async function() {
           VG.render.loadToday();
         }
       });
+      // Auto-refresh live ticker every 5 minutes
+      setInterval(() => {
+        VG.livedata.load().then(() => VG.render.liveIndicators()).catch(() => {});
+      }, 5 * 60 * 1000);
 
       VG.api.fetchJSON('/api/oda/active-bills').then(data => {
         if (data && data.bills) {
@@ -268,6 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
       { id: 'elpris',              label: 'El-priser' },
     ]},
     samfund: { label: 'Samfund', tabs: [
+      { id: 'danmarkskort',        label: 'Danmarksmaskinen' },
       { id: 'demographics',        label: 'Demografi & Befolkning' },
       { id: 'kommuner',            label: 'Kommuner' },
       { id: 'sundhed',             label: 'Sundhed & Sygehuse' },
@@ -323,7 +326,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Pinned sub-tabs shown in the secondary bar (others go in "Alle ▾" dropdown)
   const PINNED_TABS = {
     personligt: ['borger', 'bolig', 'pension', 'elpris'],
-    samfund:    ['demographics', 'sundhed', 'ledighed', 'co2', 'boligmarked', 'uddannelse'],
+    samfund:    ['danmarkskort', 'demographics', 'sundhed', 'ledighed', 'co2', 'boligmarked'],
     politik:    ['platform', 'party', 'partier', 'regering', 'folketing', 'meningsmaalinger', 'laboratorium'],
     oekonomi:   ['policy', 'spending', 'revenue', 'projection', 'rygter', 'statsgaeld'],
   };
@@ -347,6 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
       borger:'<i class="ph ph-calculator"></i>',        bolig:'<i class="ph ph-house"></i>',
       pension:'<i class="ph ph-suitcase"></i>',         elpris:'<i class="ph ph-lightning"></i>',
       overview:'<i class="ph ph-map-trifold"></i>',     demographics:'<i class="ph ph-users"></i>',
+      danmarkskort:'<i class="ph ph-globe-hemisphere-west"></i>',
       kommuner:'<i class="ph ph-map-pin"></i>',         sundhed:'<i class="ph ph-first-aid"></i>',
       forbrug:'<i class="ph ph-shopping-bag"></i>',     energi:'<i class="ph ph-lightning"></i>',
       ledighed:'<i class="ph ph-trend-down"></i>',      ventetider:'<i class="ph ph-clock"></i>',
@@ -438,10 +442,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (REDIRECTS[panelId]) panelId = REDIRECTS[panelId];
 
     // Lazy-load panel-specific modules
-    if (panelId === 'party')     VG.party     && VG.party.load();
-    if (panelId === 'dashboard') VG.dashboard && VG.dashboard.load();
-    if (panelId === 'feed')      VG.feed      && VG.feed.load();
-    if (panelId === 'reddit')    VG.reddit    && VG.reddit.load();
+    if (panelId === 'party')        VG.party        && VG.party.load();
+    if (panelId === 'dashboard')    VG.dashboard    && VG.dashboard.load();
+    if (panelId === 'feed')         VG.feed         && VG.feed.load();
+    if (panelId === 'reddit')       VG.reddit       && VG.reddit.load();
+    if (panelId === 'danmarkskort') VG.danmarkskort && VG.danmarkskort.render(document.getElementById('panel-danmarkskort'));
 
     // Determine owning group
     let owningGroup = null;
@@ -615,6 +620,12 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-share').addEventListener('click', VG.actions.share);
   document.getElementById('btn-analyze').addEventListener('click', VG.actions.analyze);
   document.getElementById('theme-toggle').addEventListener('click', VG.theme.toggle);
+
+  // Ticker click → navigate to relevant panel
+  document.getElementById('live-indicators')?.addEventListener('click', e => {
+    const ind = e.target.closest('[data-nav]');
+    if (ind) navigateTo(ind.dataset.nav);
+  });
 
   document.getElementById('modal-close').addEventListener('click', VG.closeModal);
   document.getElementById('modal-backdrop').addEventListener('click', (e) => {
