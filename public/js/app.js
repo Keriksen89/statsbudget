@@ -518,6 +518,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (secEl)  secEl.textContent  = section;
     if (sepEl)  sepEl.textContent  = section ? '›' : '';
     if (pageEl) pageEl.textContent = page;
+    const kortBtn = document.getElementById('topbar-bc-kort');
+    if (kortBtn) kortBtn.style.display = panelId === 'danmarkskort' ? 'none' : '';
   }
 
   function _updateMobileNav(panelId, owningGroup) {
@@ -613,6 +615,21 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   buildSidebar();
+
+  // Inject "← Til kortet" chip into the topbar breadcrumb area
+  (function () {
+    const pageEl = document.getElementById('topbar-bc-page');
+    if (pageEl && !document.getElementById('topbar-bc-kort')) {
+      const kortBtn = document.createElement('button');
+      kortBtn.id = 'topbar-bc-kort';
+      kortBtn.className = 'topbar-bc-kort';
+      kortBtn.style.display = 'none';
+      kortBtn.textContent = '🗺 Kort';
+      kortBtn.addEventListener('click', () => navigateTo('danmarkskort'));
+      pageEl.parentNode.insertBefore(kortBtn, pageEl.nextSibling);
+    }
+  })();
+
   navigateTo('danmarkskort');
 
   window.__switchGroup = switchGroup;

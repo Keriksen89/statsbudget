@@ -12,6 +12,54 @@ VG.danmarkskort = {};
   const SHIP_REFRESH_MS = 12000;
   const LERP_MS = 2500;                 // ms to smooth position fix transitions
 
+  const VIEW_DATA_LINKS = {
+    kommuner:      [
+      { panel: 'ledighed',     icon: '📉', label: 'Ledighed',          stat: () => { const v = window.VG?.state?.live?.unemployment; return v ? v.toFixed(1)+'%' : ''; } },
+      { panel: 'indkomst',     icon: '💰', label: 'Indkomst & Ulighed', stat: () => '' },
+      { panel: 'boligmarked',  icon: '🏠', label: 'Boligmarked',       stat: () => '' },
+      { panel: 'demographics', icon: '👥', label: 'Demografi',         stat: () => { const v = window.VG?.state?.live?.population; return v ? (v/1e6).toFixed(2)+'M' : ''; } },
+      { panel: 'co2',          icon: '🌿', label: 'Klima & CO₂',       stat: () => '' },
+      { panel: 'kommuner',     icon: '🗺', label: 'Kommuner (detail)', stat: () => '' },
+    ],
+    lufttrafik:    [
+      { panel: 'dsb',           icon: '🚆', label: 'Transport & DSB',    stat: () => '' },
+      { panel: 'erhverv',       icon: '📈', label: 'Erhverv & Vækst',    stat: () => '' },
+      { panel: 'udenrigshandel',icon: '🌐', label: 'Udenrigshandel',    stat: () => '' },
+      { panel: 'energi',        icon: '⚡', label: 'Energi & Strøm',     stat: () => '' },
+      { panel: 'innovation',    icon: '🔬', label: 'Innovation',         stat: () => '' },
+    ],
+    skibstrafik:   [
+      { panel: 'udenrigshandel',icon: '🌐', label: 'Udenrigshandel',    stat: () => '' },
+      { panel: 'landbrug',      icon: '🌾', label: 'Landbrug & Fiskeri', stat: () => '' },
+      { panel: 'erhverv',       icon: '📈', label: 'Erhverv & Vækst',   stat: () => '' },
+      { panel: 'energi',        icon: '⚡', label: 'Energi',             stat: () => '' },
+      { panel: 'inflation',     icon: '💹', label: 'Inflation',          stat: () => '' },
+    ],
+    satellitter:   [
+      { panel: 'forsvar',       icon: '🛡', label: 'Forsvar & Sikkerhed', stat: () => '' },
+      { panel: 'innovation',    icon: '🔬', label: 'Innovation',          stat: () => '' },
+      { panel: 'udenrigshandel',icon: '🌐', label: 'Udenrigshandel',     stat: () => '' },
+      { panel: 'medietillid',   icon: '📰', label: 'Medie & Tillid',     stat: () => '' },
+    ],
+    overvågning:   [
+      { panel: 'forsvar',       icon: '🛡', label: 'Forsvar & Sikkerhed', stat: () => '' },
+      { panel: 'udenrigshandel',icon: '🌐', label: 'Udenrigshandel',     stat: () => '' },
+      { panel: 'innovation',    icon: '🔬', label: 'Innovation & Tech',   stat: () => '' },
+      { panel: 'medietillid',   icon: '📰', label: 'Medie & Tillid',     stat: () => '' },
+      { panel: 'naturvand',     icon: '💧', label: 'Natur & Ressourcer', stat: () => '' },
+    ],
+    infrastruktur: [
+      { panel: 'energi',        icon: '⚡', label: 'Energi & Strøm',    stat: () => '' },
+      { panel: 'co2',           icon: '🌿', label: 'Klima & CO₂',       stat: () => '' },
+      { panel: 'erhverv',       icon: '📈', label: 'Erhverv & Vækst',   stat: () => '' },
+      { panel: 'udenrigshandel',icon: '🌐', label: 'Udenrigshandel',    stat: () => '' },
+      { panel: 'dsb',           icon: '🚆', label: 'Transport',         stat: () => '' },
+      { panel: 'naturvand',     icon: '💧', label: 'Natur & Miljø',     stat: () => '' },
+    ],
+  };
+
+  const METRIC_PANELS = { ledighed:'ledighed', indkomst:'indkomst', boligpris:'boligmarked', befolkning:'demographics', co2:'co2' };
+
   // ── Municipality data ──────────────────────────────────────────────────────
   // Keys match label_dk property in the GeoJSON
   const KD = {
@@ -1177,6 +1225,43 @@ VG.danmarkskort = {};
     return layers;
   }
 
+  // ── Dataportal navigation ─────────────────────────────────────────────────
+  function navigateFromMap(panelId) {
+    const wrap = document.getElementById('dk-wrap');
+    if (wrap) {
+      wrap.style.transition = 'opacity 0.35s ease';
+      wrap.style.opacity = '0';
+      document.body.classList.add('dk-portal-transition');
+      setTimeout(() => {
+        if (window.__mkClick) window.__mkClick(panelId);
+        wrap.style.opacity = '';
+        wrap.style.transition = '';
+        setTimeout(() => document.body.classList.remove('dk-portal-transition'), 800);
+      }, 360);
+    } else {
+      if (window.__mkClick) window.__mkClick(panelId);
+    }
+  }
+  window.__navigateFromMap = navigateFromMap;
+
+  function updateDataPortal(view) {
+    const el = document.getElementById('dk-portal-items');
+    if (!el) return;
+    const links = VIEW_DATA_LINKS[view] || [];
+    el.innerHTML = links.map(link => {
+      const stat = link.stat();
+      return `<button class="dk-portal-item" data-panel="${link.panel}">
+        <span class="dk-portal-icon">${link.icon}</span>
+        <span class="dk-portal-label">${link.label}</span>
+        ${stat ? `<span class="dk-portal-stat">${stat}</span>` : ''}
+        <span class="dk-portal-arrow">→</span>
+      </button>`;
+    }).join('');
+    el.querySelectorAll('.dk-portal-item').forEach(btn => {
+      btn.addEventListener('click', () => navigateFromMap(btn.dataset.panel));
+    });
+  }
+
   // ── Tooltip logic ──────────────────────────────────────────────────────────
   function showTooltipAircraft(info) {
     const el = document.getElementById('dk-tooltip');
@@ -1351,15 +1436,22 @@ VG.danmarkskort = {};
         const bc = colorForValue(t, m.goodHigh);
         const barW = Math.round(t * 56);
         const active = k === currentMetric ? ' dkt-row-active' : '';
-        rows += `<div class="dkt-row${active}">
+        const destPanel = JSON.stringify(METRIC_PANELS[k] || 'kommuner');
+        rows += `<div class="dkt-row${active}" style="cursor:pointer" title="Gå til ${m.label}" onclick="(function(){var p=${destPanel};if(window.__navigateFromMap)window.__navigateFromMap(p);else if(window.__mkClick)window.__mkClick(p);})()">
           <span class="dkt-k">${m.label}</span>
           <span class="dkt-v">${m.format(v)}</span>
           <div class="dkt-bar" style="width:${barW}px;background:rgb(${bc[0]},${bc[1]},${bc[2]})"></div>
+          <span class="dkt-link-arrow">›</span>
         </div>`;
       });
     }
 
     el.innerHTML = `<div class="dkt-title">${name}</div>${rows}`;
+    el.innerHTML += `<div class="dkt-footer">
+      <button class="dkt-goto" onclick="if(window.__navigateFromMap)window.__navigateFromMap('kommuner');else window.__mkClick&&window.__mkClick('kommuner')">
+        Se alle kommuner →
+      </button>
+    </div>`;
     el.style.display = 'block';
     el.style.left = (info.x + 12) + 'px';
     el.style.top  = (info.y - 10) + 'px';
@@ -1555,6 +1647,10 @@ VG.danmarkskort = {};
     </div>
     <div class="dk-legend" id="dk-legend"></div>
     <div class="dk-stats" id="dk-stats"></div>
+    <div class="dk-portal" id="dk-portal">
+      <div class="dk-portal-hdr">◈ DATAPORTAL</div>
+      <div class="dk-portal-items" id="dk-portal-items"></div>
+    </div>
   </div>
 
   <div class="dk-tooltip" id="dk-tooltip"></div>
@@ -1593,6 +1689,7 @@ VG.danmarkskort = {};
         const tt = document.getElementById('dk-tooltip');
         if (tt) tt.style.display = 'none';
         if (_view === 'overvågning' && !_groundTracks.length) computeGroundTracks();
+        updateDataPortal(_view);
       });
     });
 
@@ -1620,6 +1717,7 @@ VG.danmarkskort = {};
 
     refreshLegend();
     updateStats();
+    updateDataPortal(_view);
   }
 
   // ── deck.gl init ───────────────────────────────────────────────────────────
