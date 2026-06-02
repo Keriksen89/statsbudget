@@ -123,6 +123,41 @@ router.post('/events', (req, res) => {
   }
 });
 
+/* ── GET /api/promises/fiscal — full before/after fiscal picture ─────── */
+router.get('/fiscal', (req, res) => {
+  const { promises } = loadData();
+
+  // FL2026 budget baseline (matches budget.js values exactly)
+  const rev_bn  = 1444, exp_bn  = 1364, gdp_bn = 2700;
+  const bal_bn  = rev_bn - exp_bn;                          // +80
+  const bal_pct = +(bal_bn / gdp_bn * 100).toFixed(2);     // +2.96
+
+  let cost_static = 0, cost_dynamic = 0, savings = 0;
+  const byCat = {};
+
+  for (const p of promises) {
+    const a = p.cost.per_year ? 1 : 0.2;
+    const s = p.cost.static_bn_dkk  * a;
+    const d = p.cost.dynamic_bn_dkk * a;
+    if (!byCat[p.category]) byCat[p.category] = { net: 0, n: 0 };
+    byCat[p.category].n++;
+    if (s > 0) { cost_static += s; cost_dynamic += d; byCat[p.category].net += d; }
+    else        { savings += Math.abs(s);              byCat[p.category].net -= Math.abs(d); }
+  }
+
+  const net   = +(cost_dynamic - savings).toFixed(1);
+  const pBal  = +(bal_bn  - net).toFixed(1);
+  const pPct  = +(pBal / gdp_bn * 100).toFixed(2);
+  const pDebt = +((0.30 + (net * 4) / gdp_bn) * 100).toFixed(1);
+
+  res.json({
+    baseline:  { rev_bn, exp_bn, gdp_bn, bal_bn, bal_pct, debt_pct: 30.0 },
+    impact:    { cost_static: +cost_static.toFixed(1), cost_dynamic: +cost_dynamic.toFixed(1), savings: +savings.toFixed(1), net, count: promises.length },
+    projected: { bal_bn: pBal, bal_pct: pPct, debt_pct: pDebt, eu_ok: pPct > -3, budgetlov: pPct > -1, status: pPct > 1 ? 'ok' : pPct > -1 ? 'advarsel' : 'kritisk' },
+    by_category: Object.entries(byCat).map(([cat, d]) => ({ category: cat, net: +d.net.toFixed(1), count: d.n })).sort((a,b) => Math.abs(b.net)-Math.abs(a.net)),
+  });
+});
+
 /* ── GET /api/promises/:id — single promise with signals ─────────────── */
 router.get('/:id', (req, res) => {
   const { promises } = loadData();

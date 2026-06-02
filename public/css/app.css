@@ -5,69 +5,84 @@
 ═══════════════════════════════════════════════════════════════════════════ */
 
 :root {
-  --bg:            #2a2a2a;
-  --surface:       #353535;
-  --surface-1:     #3a3a3a;
-  --surface-2:     #424242;
-  --surface-3:     #4a4a4a;
-  --text:          #f0f0f0;
-  --text-1:        #f0f0f0;
-  --text-2:        #d0d0d0;
-  --text-3:        #999999;
-  --accent:        #d4af37;
-  --accent-2:      #c9a961;
-  --pos:           #ff6b6b;
-  --neg:           #51cf66;
-  --warn:          #ffc107;
-  --border:        #4a4a4a;
-  --border-strong: #5a5a5a;
+  /* Deep black backgrounds — Blackstone-inspired */
+  --bg:            #0d0d0d;
+  --surface:       #141414;
+  --surface-1:     #1c1c1c;
+  --surface-2:     #242424;
+  --surface-3:     #2e2e2e;
+
+  /* Clean white text */
+  --text:          #f8f8f8;
+  --text-1:        #f8f8f8;
+  --text-2:        #b8b8b8;
+  --text-3:        #686868;
+
+  /* Dark gold accent */
+  --accent:        #c4a020;
+  --accent-2:      #a88918;
+
+  /* Semantic — dark toned, professional */
+  --pos:           #e05252;   /* expenses / cost — dark red   */
+  --neg:           #2eaa6a;   /* revenue / savings — dark green */
+  --warn:          #c4870a;   /* warning — dark amber */
+
+  /* Borders */
+  --border:        #2a2a2a;
+  --border-strong: #3a3a3a;
+
+  /* Shape */
   --radius:        4px;
   --radius-lg:     8px;
-  --shadow:        0 2px 8px rgba(0,0,0,0.4), 0 6px 16px rgba(0,0,0,0.3);
-  --shadow-sm:     0 1px 3px rgba(0,0,0,0.3);
+
+  /* Effects */
+  --shadow:        0 2px 12px rgba(0,0,0,0.6), 0 6px 24px rgba(0,0,0,0.4);
+  --shadow-sm:     0 1px 4px rgba(0,0,0,0.5);
+
+  /* Fonts */
   --font:          'DM Sans', -apple-system, system-ui, sans-serif;
   --font-display:  'Fraunces', Georgia, serif;
 }
 
 [data-theme="dark"] {
-  --bg:            #2a2a2a;
-  --surface:       #353535;
-  --surface-1:     #3a3a3a;
-  --surface-2:     #424242;
-  --surface-3:     #4a4a4a;
-  --text:          #f0f0f0;
-  --text-1:        #f0f0f0;
-  --text-2:        #d0d0d0;
-  --text-3:        #999999;
-  --accent:        #d4af37;
-  --accent-2:      #c9a961;
-  --pos:           #ff6b6b;
-  --neg:           #51cf66;
-  --warn:          #ffc107;
-  --border:        #4a4a4a;
-  --border-strong: #5a5a5a;
-  --shadow:        0 2px 8px rgba(0,0,0,0.4), 0 6px 16px rgba(0,0,0,0.3);
-  --shadow-sm:     0 1px 3px rgba(0,0,0,0.3);
+  --bg:            #0d0d0d;
+  --surface:       #141414;
+  --surface-1:     #1c1c1c;
+  --surface-2:     #242424;
+  --surface-3:     #2e2e2e;
+  --text:          #f8f8f8;
+  --text-1:        #f8f8f8;
+  --text-2:        #b8b8b8;
+  --text-3:        #686868;
+  --accent:        #c4a020;
+  --accent-2:      #a88918;
+  --pos:           #e05252;
+  --neg:           #2eaa6a;
+  --warn:          #c4870a;
+  --border:        #2a2a2a;
+  --border-strong: #3a3a3a;
+  --shadow:        0 2px 12px rgba(0,0,0,0.6), 0 6px 24px rgba(0,0,0,0.4);
+  --shadow-sm:     0 1px 4px rgba(0,0,0,0.5);
 }
 
-/* Explicit light override — wins over system dark media query */
+/* Light mode — clean white with same dark-gold accent */
 [data-theme="light"] {
-  --bg:            #2a2a2a;
-  --surface:       #353535;
-  --surface-1:     #3a3a3a;
-  --surface-2:     #424242;
-  --surface-3:     #4a4a4a;
-  --text:          #f0f0f0;
-  --text-1:        #f0f0f0;
-  --text-2:        #d0d0d0;
-  --text-3:        #999999;
-  --accent:        #d4af37;
-  --accent-2:      #c9a961;
-  --pos:           #ff6b6b;
-  --neg:           #51cf66;
-  --warn:          #ffc107;
-  --border:        #4a4a4a;
-  --border-strong: #5a5a5a;
+  --bg:            #f5f5f3;
+  --surface:       #ffffff;
+  --surface-1:     #f0f0ee;
+  --surface-2:     #e8e8e6;
+  --surface-3:     #ddddd8;
+  --text:          #0a0a0a;
+  --text-1:        #0a0a0a;
+  --text-2:        #444444;
+  --text-3:        #888888;
+  --accent:        #9a7510;
+  --accent-2:      #7a5d0d;
+  --pos:           #b83030;
+  --neg:           #1a8050;
+  --warn:          #a06b00;
+  --border:        #e0e0dd;
+  --border-strong: #ccccca;
   --shadow:        0 2px 8px rgba(0,0,0,0.4), 0 6px 16px rgba(0,0,0,0.3);
   --shadow-sm:     0 1px 3px rgba(0,0,0,0.3);
 }

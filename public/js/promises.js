@@ -29,23 +29,21 @@ VG.promises = (function () {
     const panel = document.getElementById('panel-promises');
     if (!panel) return;
 
-    panel.innerHTML = `<div class="flex-center" style="padding:60px 0;color:var(--text-3)">
-      <span class="loading-spin"></span>&nbsp;&nbsp;Henter løfter…</div>`;
+    panel.innerHTML = `<div style="padding:40px 0;text-align:center;color:var(--text-3)"><div class="loading"></div></div>`;
 
     try {
-      const [data, signalsData] = await Promise.all([
+      const [data, fiscal, signalsData] = await Promise.all([
         VG.api.fetchJSON('/api/promises'),
-        VG.api.fetchJSON('/api/promises/signals?type=scope_change&limit=10').catch(() => ({ signals: [] })),
+        VG.api.fetchJSON('/api/promises/fiscal').catch(() => null),
+        VG.api.fetchJSON('/api/promises/signals?type=scope_change&limit=8').catch(() => ({ signals: [] })),
       ]);
       state.data = data;
+      state.fiscal = fiscal;
       state.scopeAlerts = signalsData.signals || [];
-
-      // Index signal counts from annotated promises
       state.signalsByPromise = {};
       (data.promises || []).forEach(p => {
         if (p._signals) state.signalsByPromise[p.id] = p._signals;
       });
-
       render();
     } catch (e) {
       const panel2 = document.getElementById('panel-promises');
@@ -67,6 +65,107 @@ VG.promises = (function () {
       if (h < 24) return `${h}t siden`;
       return `${Math.round(h / 24)}d siden`;
     } catch { return ''; }
+  }
+
+  function renderFiscalComparison() {
+    const f = state.fiscal;
+    if (!f) return '';
+
+    const { baseline, impact, projected, by_category } = f;
+
+    const statusColor = projected.status === 'ok' ? 'var(--neg)' : projected.status === 'advarsel' ? '#f59e0b' : 'var(--pos)';
+    const statusLabel = projected.status === 'ok' ? 'Holdbar saldo' : projected.status === 'advarsel' ? 'Advarsel' : 'Kritisk';
+
+    // Balance bar: 100% = GDP, show baseline vs projected
+    const baseW = Math.max(0, (baseline.bal_bn / baseline.gdp_bn) * 100 * 8).toFixed(1); // ×8 to make visible
+    const projW = Math.max(0, (projected.bal_bn / baseline.gdp_bn) * 100 * 8).toFixed(1);
+
+    // Top 4 categories by cost
+    const topCats = by_category.slice(0, 4);
+
+    return `
+    <div style="background:var(--surface-1);border:1px solid var(--border-strong);border-radius:var(--radius-lg);padding:20px 24px;margin-bottom:20px">
+
+      <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text-3);margin-bottom:14px">
+        Finansielt overblik — FL2026 status quo vs. løfternes konsekvenser
+      </div>
+
+      <!-- Before / After comparison -->
+      <div style="display:grid;grid-template-columns:1fr 48px 1fr;gap:0;align-items:stretch;margin-bottom:18px">
+
+        <!-- FL2026 BASELINE -->
+        <div style="background:var(--surface-2);border-radius:var(--radius) 0 0 var(--radius);padding:16px 18px;border:1px solid var(--border)">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin-bottom:10px">FL2026 · Status quo</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+            <div>
+              <div style="font-size:10px;color:var(--text-3);margin-bottom:2px">Indtægter</div>
+              <div style="font-family:'Courier New',monospace;font-size:18px;font-weight:700;color:var(--neg)">${baseline.rev_bn} mia.</div>
+            </div>
+            <div>
+              <div style="font-size:10px;color:var(--text-3);margin-bottom:2px">Udgifter</div>
+              <div style="font-family:'Courier New',monospace;font-size:18px;font-weight:700;color:var(--pos)">${baseline.exp_bn} mia.</div>
+            </div>
+          </div>
+          <div style="height:1px;background:var(--border);margin-bottom:10px"></div>
+          <div style="font-size:10px;color:var(--text-3);margin-bottom:3px">Budgetsaldo</div>
+          <div style="font-family:'Courier New',monospace;font-size:24px;font-weight:700;color:var(--neg)">+${baseline.bal_bn} mia.</div>
+          <div style="font-size:12px;color:var(--text-3);margin-top:2px">+${baseline.bal_pct}% af BNP · Statsgæld ${baseline.debt_pct}% af BNP</div>
+        </div>
+
+        <!-- ARROW -->
+        <div style="display:flex;align-items:center;justify-content:center;background:var(--surface-2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+          <div style="font-size:22px;color:var(--text-3)">→</div>
+        </div>
+
+        <!-- PROJECTED AFTER PROMISES -->
+        <div style="background:var(--surface-2);border-radius:0 var(--radius) var(--radius) 0;padding:16px 18px;border:1px solid var(--border)">
+          <div style="font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);margin-bottom:10px">Efter løfter · DREAM-dynamisk</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+            <div>
+              <div style="font-size:10px;color:var(--text-3);margin-bottom:2px">Nye udgifter</div>
+              <div style="font-family:'Courier New',monospace;font-size:18px;font-weight:700;color:var(--pos)">−${impact.cost_dynamic.toFixed(1)} mia.</div>
+            </div>
+            <div>
+              <div style="font-size:10px;color:var(--text-3);margin-bottom:2px">Besparelser</div>
+              <div style="font-family:'Courier New',monospace;font-size:18px;font-weight:700;color:var(--neg)">+${impact.savings.toFixed(1)} mia.</div>
+            </div>
+          </div>
+          <div style="height:1px;background:var(--border);margin-bottom:10px"></div>
+          <div style="font-size:10px;color:var(--text-3);margin-bottom:3px">Projekteret saldo</div>
+          <div style="font-family:'Courier New',monospace;font-size:24px;font-weight:700;color:${projected.bal_bn >= 0 ? 'var(--neg)' : 'var(--pos)'}">
+            ${projected.bal_bn >= 0 ? '+' : ''}${projected.bal_bn} mia.
+          </div>
+          <div style="font-size:12px;color:var(--text-3);margin-top:2px">${projected.bal_pct >= 0 ? '+' : ''}${projected.bal_pct}% af BNP · Gæld ~${projected.debt_pct}% af BNP</div>
+        </div>
+      </div>
+
+      <!-- STATUS ROW -->
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+        <span style="background:rgba(255,255,255,.05);border:1px solid ${statusColor};border-radius:20px;padding:4px 12px;font-size:12px;font-weight:600;color:${statusColor}">
+          ${statusLabel} · ${projected.bal_pct >= 0 ? '+' : ''}${projected.bal_pct}% af BNP
+        </span>
+        <span style="font-size:12px;color:${projected.budgetlov ? 'var(--neg)' : 'var(--pos)'}">
+          ${projected.budgetlov ? '✓' : '✗'} Budgetlov (> −1%)
+        </span>
+        <span style="font-size:12px;color:${projected.eu_ok ? 'var(--neg)' : 'var(--pos)'}">
+          ${projected.eu_ok ? '✓' : '✗'} EU Stabilitetspagt (> −3%)
+        </span>
+        <span style="font-size:12px;color:var(--text-3);margin-left:auto">
+          Nettobyrde: <strong style="color:var(--pos)">−${impact.net_cost_dynamic.toFixed(1)} mia./år</strong> (${((impact.net_cost_dynamic/baseline.gdp_bn)*100).toFixed(1)}% af BNP)
+        </span>
+      </div>
+
+      <!-- BY-CATEGORY BREAKDOWN -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+        ${topCats.map(c => `
+          <div style="background:var(--surface-2);border-radius:var(--radius);padding:8px 10px">
+            <div style="font-size:10px;color:var(--text-3);text-transform:capitalize;margin-bottom:3px">${CAT_LABELS[c.category] || c.category}</div>
+            <div style="font-family:'Courier New',monospace;font-size:13px;font-weight:700;color:${c.net > 0 ? 'var(--pos)' : 'var(--neg)'}">
+              ${c.net > 0 ? '−' : '+'}${Math.abs(c.net).toFixed(1)} mia.
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`;
   }
 
   function renderScopeAlerts() {
@@ -144,81 +243,33 @@ VG.promises = (function () {
     const cats = [...new Set(promises.map(p => p.category))];
 
     panel.innerHTML = `
-      <div class="panel-header">
-        <div class="panel-header-left">
-          <div class="panel-title">Regeringsløfter 2026</div>
-          <div class="panel-subtitle">${government.agreement_title} · ${government.type} · Præsenteret ${government.formed}</div>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap">
+        <div>
+          <h1 style="font-size:22px;font-weight:700;letter-spacing:-.01em;margin-bottom:3px">Regeringsløfter 2026</h1>
+          <div style="font-size:13px;color:var(--text-3)">${government.type} · Præsenteret ${government.formed} · ${promises.length} løfter analyseret</div>
         </div>
-        <div class="panel-actions">
-          <button class="btn btn-sm" id="btn-promises-share">↗ Del analyse</button>
-        </div>
+        <button class="btn btn-sm" id="btn-promises-share" style="flex-shrink:0">↗ Del</button>
       </div>
 
+      ${renderFiscalComparison()}
       ${renderScopeAlerts()}
 
-      <!-- HERO KPI BAR -->
-      <div class="promises-hero">
-        <div class="promises-hero-title">Hvad koster løfterne?</div>
-        <div class="promises-hero-sub">DREAM-modellerede effekter baseret på koalitionsaftalens ${promises.length} løfter · Alle beløb er årlige netto-effekter medmindre andet er angivet</div>
-        <div class="promises-kpis">
-          <div class="promises-kpi">
-            <div class="promises-kpi-label">Samlede udgifter</div>
-            <div class="promises-kpi-val cost">${totals.total_cost.toFixed(1)} mia.</div>
-            <div class="promises-kpi-note">Statisk estimat, per år</div>
-          </div>
-          <div class="promises-kpi">
-            <div class="promises-kpi-label">Dynamisk (DREAM)</div>
-            <div class="promises-kpi-val dynamic" style="color:var(--warn)">${totals.total_cost_dynamic.toFixed(1)} mia.</div>
-            <div class="promises-kpi-note">Inkl. adfærdseffekter</div>
-          </div>
-          <div class="promises-kpi">
-            <div class="promises-kpi-label">Identificerede besparelser</div>
-            <div class="promises-kpi-val save">${totals.total_savings.toFixed(1)} mia.</div>
-            <div class="promises-kpi-note">Fra stramninger</div>
-          </div>
-          <div class="promises-kpi">
-            <div class="promises-kpi-label">Nettobelastning</div>
-            <div class="promises-kpi-val net">${totals.net_cost.toFixed(1)} mia.</div>
-            <div class="promises-kpi-note">Finansieringsgab per år</div>
-          </div>
-        </div>
-        <div class="gap-bar">
-          <div class="gap-bar-track">
-            <div class="gap-bar-fill cost" style="width:${Math.min(100, (totals.net_cost / totals.total_cost) * 100).toFixed(0)}%"></div>
-          </div>
-          <div class="gap-bar-labels">
-            <span>Finansieringsgab: <strong>${totals.net_cost.toFixed(1)} mia. kr./år</strong></span>
-            <span>${totals.total_savings.toFixed(1)} mia. identificeret finansiering</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- FILTER BAR -->
-      <div class="filter-bar" id="promises-filter-bar">
-        <span style="font-size:12px;color:var(--text-3);font-weight:500">Kategori:</span>
-        <button class="filter-chip ${state.activeCategory === 'alle' ? 'active' : ''}" data-cat="alle">Alle (${promises.length})</button>
-        ${cats.map(cat => {
-          const count = promises.filter(p => p.category === cat).length;
-          return `<button class="filter-chip ${state.activeCategory === cat ? 'active' : ''}" data-cat="${cat}">${CAT_LABELS[cat] || cat} (${count})</button>`;
-        }).join('')}
+      <!-- FILTER + SORT in one clean bar -->
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px;padding:10px 14px;background:var(--surface-1);border:1px solid var(--border);border-radius:var(--radius)">
+        <span style="font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;flex-shrink:0">Filtrer:</span>
+        <button class="filter-chip ${state.activeCategory === 'alle' ? 'active' : ''}" data-cat="alle">Alle</button>
+        ${cats.map(cat => `<button class="filter-chip ${state.activeCategory === cat ? 'active' : ''}" data-cat="${cat}">${CAT_LABELS[cat] || cat}</button>`).join('')}
         <span class="filter-sep"></span>
-        <span style="font-size:12px;color:var(--text-3);font-weight:500">Status:</span>
-        <button class="filter-chip ${state.activeStatus === 'alle' ? 'active' : ''}" data-status="alle">Alle</button>
+        <button class="filter-chip ${state.activeStatus === 'alle' ? 'active' : ''}" data-status="alle">Alle status</button>
         <button class="filter-chip ${state.activeStatus === 'annonceret' ? 'active' : ''}" data-status="annonceret">Annonceret</button>
-        <button class="filter-chip ${state.activeStatus === 'lovforslag' ? 'active' : ''}" data-status="lovforslag">Lovforslag</button>
         <button class="filter-chip ${state.activeStatus === 'vedtaget' ? 'active' : ''}" data-status="vedtaget">Vedtaget</button>
-      </div>
-
-      <!-- SORT BAR -->
-      <div class="sort-bar">
-        <span>Sortér:</span>
-        <select class="sort-select" id="promises-sort">
-          <option value="cost-desc" ${state.sortBy === 'cost-desc' ? 'selected' : ''}>Størst pris først</option>
-          <option value="cost-asc"  ${state.sortBy === 'cost-asc'  ? 'selected' : ''}>Mindst pris først</option>
+        <span class="filter-sep"></span>
+        <select class="sort-select" id="promises-sort" style="margin-left:auto">
+          <option value="cost-desc" ${state.sortBy === 'cost-desc' ? 'selected' : ''}>↓ Størst kostnad</option>
+          <option value="cost-asc"  ${state.sortBy === 'cost-asc'  ? 'selected' : ''}>↑ Mindst kostnad</option>
           <option value="category"  ${state.sortBy === 'category'  ? 'selected' : ''}>Kategori</option>
-          <option value="date-desc" ${state.sortBy === 'date-desc' ? 'selected' : ''}>Nyeste først</option>
         </select>
-        <span style="margin-left:auto;color:var(--text-3)">${filtered.length} af ${promises.length} løfter vist</span>
+        <span style="font-size:11px;color:var(--text-3);flex-shrink:0">${filtered.length}/${promises.length}</span>
       </div>
 
       <!-- PROMISE CARDS -->
@@ -226,8 +277,8 @@ VG.promises = (function () {
         ${filtered.map(p => renderCard(p)).join('')}
       </div>
 
-      <p style="font-size:11px;color:var(--text-3);margin-top:24px;line-height:1.6">
-        * Alle estimater er baseret på DREAM/MAKRO-parametre for dansk økonomi. Statiske estimater angiver den direkte budgeteffekt; dynamiske estimater inkluderer adfærdseffekter (arbejdsudbud, investeringer, forbrugsmønstre). Éngangsbeløb er amortiseret over 5 år i totalsummen. Kilde: Koalitionsaftalen "${government.agreement_title}", 2. juni 2026.
+      <p style="font-size:11px;color:var(--text-3);margin-top:20px;line-height:1.6">
+        Estimater er baseret på DREAM/MAKRO-parametre for dansk økonomi. Dynamiske estimater inkluderer adfærdseffekter. Éngangsbeløb amortiseret over 5 år. Kilde: Koalitionsaftalen "${government.agreement_title}", 2. juni 2026.
       </p>
     `;
 

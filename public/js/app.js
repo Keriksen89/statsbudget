@@ -267,55 +267,26 @@ document.addEventListener('DOMContentLoaded', () => {
   VG.bootstrap();
 
   const GROUPS = {
-    personligt: { label: 'Personligt', tabs: [
-      { id: 'borger',              label: 'Skatteberegner' },
-      { id: 'bolig',               label: 'Boligberegner' },
-      { id: 'pension',             label: 'Pensionsberegner' },
-      { id: 'elpris',              label: 'El-priser' },
-    ]},
-    samfund: { label: 'Samfund', tabs: [
-      { id: 'demographics',        label: 'Demografi & Befolkning' },
-      { id: 'kommuner',            label: 'Kommuner' },
-      { id: 'sundhed',             label: 'Sundhed & Sygehuse' },
-      { id: 'psykiatri',           label: 'Psykiatri' },
-      { id: 'ventetider',          label: 'Ventetider' },
-      { id: 'aeldrepleje',         label: 'Ældrepleje' },
-      { id: 'ledighed',            label: 'Ledighed' },
-      { id: 'indkomst',            label: 'Indkomst & Ulighed' },
-      { id: 'arbejdsmiljoe',       label: 'Arbejdsmiljø' },
-      { id: 'ligestilling',        label: 'Ligestilling' },
-      { id: 'boligmarked',         label: 'Boligmarked' },
-      { id: 'forbrug',             label: 'Forbrug' },
-      { id: 'dsb',                 label: 'Transport & DSB' },
-      { id: 'co2',                 label: 'Klima & CO₂' },
-      { id: 'energi',              label: 'Energi & Strøm' },
-      { id: 'naturvand',           label: 'Natur & Drikkevand' },
-      { id: 'uddannelse',          label: 'Uddannelse' },
-      { id: 'integration',         label: 'Integration' },
-      { id: 'kriminalitet',        label: 'Kriminalitet' },
-      { id: 'forsvar',             label: 'Forsvar & Sikkerhed' },
-      { id: 'landbrug',            label: 'Landbrug' },
-      { id: 'medietillid',         label: 'Medie & Tillid' },
-      { id: 'velfaerdsstat',       label: 'Velfærdsstat' },
-      { id: 'generationsregnskab', label: 'Generationsregnskab' },
-    ]},
-    politik: { label: 'Politik', tabs: [
+    loefter: { label: 'Løfter & Politisk analyse', tabs: [
+      { id: 'promises',            label: 'Regeringsløfter 2026' },
+      { id: 'rygter',              label: 'Nyheder & DREAM-analyse' },
+      { id: 'laboratorium',        label: 'Politisk Lab' },
+      { id: 'partier',             label: 'Partier' },
+      { id: 'regering',            label: 'Regering & koalition' },
+      { id: 'folketing',           label: 'Folketing — afstemninger' },
+      { id: 'mandater',            label: 'Mandater' },
+      { id: 'meningsmaalinger',    label: 'Meningsmålinger' },
+      { id: 'borger',              label: 'Borgerforslag' },
       { id: 'platform',            label: 'Mit Parti' },
       { id: 'party',               label: 'Borgerstemmer' },
-      { id: 'partier',             label: 'Partier' },
-      { id: 'regering',            label: 'Regering' },
-      { id: 'folketing',           label: 'Folketing' },
-      { id: 'mandater',            label: 'Mandater' },
       { id: 'valgkort',            label: 'Valgkort' },
-      { id: 'meningsmaalinger',    label: 'Meningsmålinger' },
-      { id: 'laboratorium',        label: 'Politisk Lab' },
     ]},
-    oekonomi: { label: 'Økonomi', tabs: [
-      { id: 'rygter',              label: 'Nyheder & DREAM-analyse' },
-      { id: 'policy',              label: 'Politiske parametre' },
+    oekonomi: { label: 'Økonomi & Budget', tabs: [
+      { id: 'policy',              label: 'Politiske parametre (MAKRO)' },
       { id: 'spending',            label: 'Udgifter' },
       { id: 'revenue',             label: 'Indtægter' },
-      { id: 'projection',          label: 'Fremskrivning' },
+      { id: 'projection',          label: 'Fremskrivning & Holdbarhed' },
+      { id: 'statsgaeld',          label: 'Statsgæld' },
       { id: 'historik',            label: 'Historik' },
       { id: 'scenarios',           label: 'Scenarier' },
       { id: 'statsgaeld',          label: 'Statsgæld' },
@@ -394,7 +365,7 @@ document.addEventListener('DOMContentLoaded', () => {
       </a>
       <a class="sb-item" data-sb="feed">
         <span class="sb-item-icon">${TAB_ICONS.feed}</span>
-        <span class="sb-item-label">Nyheder & Indsigter</span>
+        <span class="sb-item-label">Nyheder</span>
         <span class="sb-item-live"></span>
       </a>
       <a class="sb-item" data-sb="profile">
@@ -614,6 +585,9 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   buildSidebar();
+
+  // Override overview to show hub grid only — news belongs in Nyheder
+  VG.render.overview = function() { return VG.render.hubGrid(); };
 
   // Start on overview (original landing), pre-load promises panel too
   navigateTo('overview');
