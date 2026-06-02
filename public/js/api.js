@@ -74,3 +74,18 @@ VG.api.loadPartyPlatform = async function() {
 VG.api.loadGovernment = async function() {
   try { return await VG.api.fetchJSON('/api/government/data'); } catch(e) { console.warn('[api] government:', e.message); return null; }
 };
+
+VG.api.loadPromises = async function(params) {
+  try {
+    const qs = params ? '?' + new URLSearchParams(params).toString() : '';
+    return await VG.api.fetchJSON('/api/promises' + qs);
+  } catch(e) { console.warn('[api] promises:', e.message); return null; }
+};
+
+VG.api.authPost = async function(path, body) {
+  return VG.api.fetchJSON(path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+};

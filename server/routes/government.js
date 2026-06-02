@@ -22,9 +22,9 @@ const governmentData = {
     ]
   },
   government: {
-    pm: { name: 'Mette Frederiksen', party: 'A', since: 'December 2022' },
-    formed: 'December 2022',
-    type: 'Mindretalsregering (SVM)',
+    pm: { name: 'Mette Frederiksen', party: 'A', since: 'Juni 2026' },
+    formed: 'Juni 2026',
+    type: 'Flertalsregering (A·V·M·I·C·D)',
     ministers: [
       { name: 'Mette Frederiksen',      title: 'Statsminister',                            ministry: 'Statsministeriet',                           party: 'A' },
       { name: 'Lars Løkke Rasmussen',   title: 'Udenrigsminister',                         ministry: 'Udenrigsministeriet',                        party: 'M' },
@@ -57,21 +57,21 @@ const governmentData = {
     }
   },
   formation: {
-    status: 'active',
-    headline: 'Regeringsdannelse i gang',
-    description: 'Danmark er i en overgangsfase efter nyvalg. Kongeligt udpeget forhandlingsleder leder forhandlinger om en ny regeringskoalition.',
-    lastUpdated: '2026-05-22',
-    note: 'Data opdateres manuelt. Følg ft.dk og dr.dk for seneste nyt.',
+    status: 'formed',
+    headline: 'Ny bred flertalsregering præsenteret 2. juni 2026',
+    description: 'Danmark har en ny bred flertalsregering bestående af A·V·M·I·C·D. Koalitionsaftalen "Danmark Fremad — ansvar, vækst og tryghed" er underskrevet og regeringen er godkendt af Dronningen.',
+    lastUpdated: '2026-06-02',
+    note: 'Opdatér ministers-listen med den faktiske ny regering.',
     timeline: [
-      { label: 'Valg afholdt',                  date: '2025',          status: 'done'    },
-      { label: 'Mandatfordeling opgjort',        date: '2025',          status: 'done'    },
-      { label: 'Forhandlingsleder udpeget',      date: 'Forår 2026',    status: 'done'    },
-      { label: 'Partier i koalitionsforhandlinger', date: 'Maj 2026',  status: 'active'  },
-      { label: 'Koalitionsaftale underskrives',  date: 'Forventet 2026', status: 'pending' },
-      { label: 'Ny regering præsenteres',        date: 'Forventet 2026', status: 'pending' }
+      { label: 'Valg afholdt',                  date: '2025',          status: 'done'   },
+      { label: 'Mandatfordeling opgjort',        date: '2025',          status: 'done'   },
+      { label: 'Forhandlingsleder udpeget',      date: 'Forår 2026',    status: 'done'   },
+      { label: 'Koalitionsforhandlinger',        date: 'Maj 2026',      status: 'done'   },
+      { label: 'Koalitionsaftale underskrevet',  date: '1. juni 2026',  status: 'done'   },
+      { label: 'Ny regering præsenteret',        date: '2. juni 2026',  status: 'active' }
     ],
     partiesInTalks: ['A', 'V', 'M', 'I', 'C', 'D'],
-    sources: ['Kongehuset.dk', 'ft.dk', 'dr.dk/nyheder']
+    sources: ['Statsministeriet.dk', 'ft.dk', 'dr.dk/nyheder']
   },
   partyProfiles: [
     {

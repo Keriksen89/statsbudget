@@ -1,0 +1,42 @@
+[Unit]
+Description=statsbudget.dk — Danmarks finanspolitiske dashboard
+Documentation=https://github.com/keriksen89/statsbudget
+After=network.target
+
+[Service]
+Type=simple
+User=statsbudget
+Group=statsbudget
+WorkingDirectory=/var/www/statsbudget
+Environment="NODE_ENV=production"
+Environment="PORT=3000"
+Environment="HOST=127.0.0.1"
+# Set a strong random value in production:
+Environment="JWT_SECRET=CHANGE_THIS_TO_A_STRONG_SECRET"
+EnvironmentFile=-/var/www/statsbudget/.env
+ExecStart=/usr/bin/node --experimental-sqlite server/index.js
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=statsbudget
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/www/statsbudget/server/data
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+LockPersonality=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+
+LimitNOFILE=8192
+MemoryMax=512M
+
+[Install]
+WantedBy=multi-user.target

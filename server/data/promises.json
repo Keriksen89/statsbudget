@@ -1,0 +1,554 @@
+{
+  "government": {
+    "name": "Frederiksen III",
+    "formed": "2026-06-02",
+    "pm": "Mette Frederiksen",
+    "pm_party": "A",
+    "type": "Flertalsregering (A·V·M·I·C·D)",
+    "parties": ["A", "V", "M", "I", "C", "D"],
+    "agreement_title": "Danmark Fremad — ansvar, vækst og tryghed",
+    "note": "Ny regering præsenteret 2. juni 2026. Løftedata baseret på regeringsgrundlaget."
+  },
+  "promises": [
+    {
+      "id": "p001",
+      "category": "forsvar",
+      "title": "Forsvarsbudget hæves til 3% af BNP inden 2030",
+      "description": "Danmark forpligter sig til at nå 3% af BNP i forsvarsudgifter senest i 2030. Det svarer til en øget bevillingsramme på ca. 18–22 mia. kr. per år, når målet er nået. Indfasning sker gradvis fra 2027.",
+      "status": "annonceret",
+      "parties": ["V", "M", "I", "C", "D", "A"],
+      "announced": "2026-06-02",
+      "cost": {
+        "static_bn_dkk": 20.0,
+        "dynamic_bn_dkk": 17.0,
+        "per_year": true,
+        "horizon": "Fuldt indfaset 2030",
+        "financing": "Ny forsvarsskat (virksomheder) + omprioritering af udviklingsbistand + lånefinansiering"
+      },
+      "dream": {
+        "fiscal_bn": -20.0,
+        "gdp_pct": 0.25,
+        "employment_k": 12,
+        "gini_delta": 0.0,
+        "self_financing_pct": 12,
+        "distribution": "neutral",
+        "sustainability": "negativ",
+        "confidence": "høj",
+        "assessment": "NATO-baseline bekræfter: fra 1,4% til 3% koster ~18–22 mia. kr./år ekstra. Forsvarsudgifter har en multiplikator på ca. 0,7 mod 1,2 for civil investering. Positiv beskæftigelseseffekt (12k job), men begrænset BNP-løft. Holdbarhedsbelastning over 10-årshorisont er ~180 mia. kr. i netto nutidsværdi. Finansieringsmiks er afgørende for fordelingseffekten."
+      }
+    },
+    {
+      "id": "p002",
+      "category": "forsvar",
+      "title": "Ny materielanskaffelse — F-35, droner og cyberforsvar",
+      "description": "Accelereret indkøb af militærudstyr: ekstra F-35-fly (op til 12 stk.), langtrækkende droner, NATO-kompatibelt kommunikationsnetværk og opbygning af et nationalt cyberforsvarscenter.",
+      "status": "annonceret",
+      "parties": ["V", "M", "I", "C"],
+      "announced": "2026-06-02",
+      "cost": {
+        "static_bn_dkk": 25.0,
+        "dynamic_bn_dkk": 25.0,
+        "per_year": false,
+        "horizon": "Éngangsbeløb 2026–2030",
+        "financing": "Del af den generelle forsvarsramme + NATO-fællesfond"
+      },
+      "dream": {
+        "fiscal_bn": -5.0,
+        "gdp_pct": 0.1,
+        "employment_k": 3,
+        "gini_delta": 0.0,
+        "self_financing_pct": 5,
+        "distribution": "neutral",
+        "sustainability": "negativ",
+        "confidence": "middel",
+        "assessment": "Éngangsudgift der belaster budgettet over 5 år. Begrænset dansk produktivitetsgevinst da materialet primært købes i udlandet. Cyberforsvarsdelen har højere hjemlig multipliceringseffekt."
+      }
+    },
+    {
+      "id": "p003",
+      "category": "skat",
+      "title": "Topskatten sænkes med 5 procentpoint",
+      "description": "Topskattesatsen reduceres fra 15% til 10% af personlig indkomst over topskattegrænsen (~633.000 kr. i 2026). Sigte er at øge arbejdsudbuddet for højtuddannede og begrænse emigration af nøglekompetencer.",
+      "status": "annonceret",
+      "parties": ["I", "V", "M", "C"],
+      "announced": "2026-06-02",
+      "cost": {
+        "static_bn_dkk": 4.5,
+        "dynamic_bn_dkk": 3.4,
+        "per_year": true,
+        "horizon": "Løbende",
+        "financing": "Finansieres delvist af dynamisk selvfinansieringseffekt + besparelser på overførsler"
+      },
+      "dream": {
+        "fiscal_bn": -4.5,
+        "gdp_pct": 0.08,
+        "employment_k": -3,
+        "gini_delta": 0.3,
+        "self_financing_pct": 25,
+        "distribution": "regressiv",
+        "sustainability": "let negativ",
+        "confidence": "høj",
+        "assessment": "DREAM-MAKRO estmerer selvfinansieringsgraden til ca. 20–30% via øget arbejdsudbud og reduceret skatteunddragelse. Nettoprovenueffekt er ca. −3,4 mia. kr./år. Tiltaget er klart regressivt — top 10% tjener >95% af skattebesparelsen. Gini stiger med ~0,3 point. Afvejning: gevinsten ved øget arbejdsudbud hos højtlønnet segment vs. uligheds-omkosting."
+      }
+    },
+    {
+      "id": "p004",
+      "category": "skat",
+      "title": "Arbejdsfradrag fordobles for lavere indkomster",
+      "description": "Det beskæftigelsesfradrag der gives for at have arbejde fordobles for borgere med årsindkomst under 450.000 kr. Målet er at gøre det mere attraktivt at arbejde frem for at modtage overførsler.",
+      "status": "annonceret",
+      "parties": ["A", "V", "M"],
+      "announced": "2026-06-02",
+      "cost": {
+        "static_bn_dkk": 3.5,
+        "dynamic_bn_dkk": 2.2,
+        "per_year": true,
+        "horizon": "Løbende",
+        "financing": "Besparelser på kontanthjælp og dagpenge via øget beskæftigelse"
+      },
+      "dream": {
+        "fiscal_bn": -3.5,
+        "gdp_pct": 0.12,
+        "employment_k": 15,
+        "gini_delta": -0.2,
+        "self_financing_pct": 37,
+        "distribution": "progressiv",
+        "sustainability": "neutral",
+        "confidence": "høj",
+        "assessment": "Højere selvfinansieringsgrad end topskattelettelse (~37%) fordi marginale fradrag for lavlønnet segment har større beskæftigelseseffekt per krone. SMILE-modellen viser progressiv fordelingseffekt. Op til 15.000 ekstra fuldtidspersoner i beskæftigelse. Anses som den socialt mest bæredygtige del af skattepakken."
+      }
+    },
+    {
+      "id": "p005",
+      "category": "skat",
+      "title": "Afskaffelse af registreringsafgift på elbiler over 3 år",
+      "description": "Registreringsafgiften på elbiler afskaffes gradvist over 3 år, med en halvering fra 2027 og fuld afskaffelse fra 2029. Målet er at fremme grøn omstilling og gøre elbiler mere tilgængelige.",
+      "status": "annonceret",
+      "parties": ["I", "V", "M"],
+      "announced": "2026-06-02",
+      "cost": {
+        "static_bn_dkk": 2.8,
+        "dynamic_bn_dkk": 1.9,
+        "per_year": true,
+        "horizon": "Fuldt indfaset 2029",
+        "financing": "Delvist opvejet af CO2-afgift på fossile brændstoffer"
+      },
+      "dream": {
+        "fiscal_bn": -2.8,
+        "gdp_pct": 0.04,
+        "employment_k": 2,
+        "gini_delta": 0.15,
+        "self_financing_pct": 30,
+        "distribution": "let regressiv",
+        "sustainability": "positiv",
+        "confidence": "middel",
+        "assessment": "GREU-modellen: CO2-effekten er positiv (fremmer elbilkøb). Fordelingseffekten er moderat regressiv — elbiler primært købt af højtindkomstgrupper. Selvfinansieringsgrad ca. 30% via øget moms og brancheaktivitet. Positivt for 70%-klimamål."
+      }
+    },
+    {
+      "id": "p006",
+      "category": "indvandring",
+      "title": "Asylstop — maks. 500 nye asylansøgere per år",
+      "description": "Antallet af asylansøgere begrænses til maks. 500 per år via øget grænse- og patruljesamarbejde med EU og tredjelandsaftaler. Eksisterende opholdstilladelser revurderes med skærpede krav.",
+      "status": "annonceret",
+      "parties": ["D", "I", "V", "A"],
+      "announced": "2026-06-02",
+      "cost": {
+        "static_bn_dkk": -2.5,
+        "dynamic_bn_dkk": -1.8,
+        "per_year": true,
+        "horizon": "Løbende besparelse",
+        "financing": "Direkte besparelse på integrations- og asylsystem"
+      },
+      "dream": {
+        "fiscal_bn": 2.5,
+        "gdp_pct": -0.08,
+        "employment_k": -5,
+        "gini_delta": 0.05,
+        "self_financing_pct": 0,
+        "distribution": "neutral",
+        "sustainability": "let positiv",
+        "confidence": "middel",
+        "assessment": "Direkte besparelse på asyl- og integrationssystemet (ca. 2,5 mia./år). Negativ beskæftigelseseffekt på sigt (−5k fuldtidspersoner over 5–10 år, da indvandrer-arbejdsudbuddet reduceres). DST: nettobidraget fra asylansøgere varierer kraftigt. Folkeretlig implementering er usikker faktor i modelestimatet."
+      }
+    },
+    {
+      "id": "p007",
+      "category": "indvandring",
+      "title": "Skærpet optjeningsprincip for alle velfærdsydelser",
+      "description": "Alle overførselsindkomster kræver 7 års ophold og beskæftigelse i Danmark inden for de seneste 10 år. Gælder kontanthjælp, børnecheck, folkepension og boligstøtte.",
+      "status": "annonceret",
+      "parties": ["D", "I", "V"],
+      "announced": "2026-06-02",
+      "cost": {
+        "static_bn_dkk": -1.8,
+        "dynamic_bn_dkk": -1.2,
+        "per_year": true,
+        "horizon": "Løbende",
+        "financing": "Direkte besparelse"
+      },
+      "dream": {
+        "fiscal_bn": 1.8,
+        "gdp_pct": 0.03,
+        "employment_k": 4,
+        "gini_delta": 0.2,
+        "self_financing_pct": 33,
+        "distribution": "regressiv",
+        "sustainability": "positiv",
+        "confidence": "middel",
+        "assessment": "Besparelseseffekt ca. 1,8 mia./år. Positiv beskæftigelseseffekt: stærkere incitament til integration på arbejdsmarkedet (+4k fuldtidspersoner). Regressiv fordelingseffekt rammer primært ikke-vestlige familier. Juridisk udfordring: potentiel EU-domstolskonflikt om fri bevægelighed."
+      }
+    },
+    {
+      "id": "p008",
+      "category": "velfaerd",
+      "title": "Kontanthjælpsloft sænkes yderligere, arbejdspligt",
+      "description": "Kontanthjælpen for ikke-arbejdsmarkedsparate reduceres til 80% af nuværende niveau. Alle kontanthjælpsmodtagere i 'aktiveringsparate' kategori pålægges 37 timers ugentlig nytteindsats.",
+      "status": "annonceret",
+      "parties": ["D", "I", "V"],
+      "announced": "2026-06-02",
+      "cost": {
+        "static_bn_dkk": -2.0,
+        "dynamic_bn_dkk": -1.5,
+        "per_year": true,
+        "horizon": "Løbende",
+        "financing": "Direkte besparelse"
+      },
+      "dream": {
+        "fiscal_bn": 2.0,
+        "gdp_pct": -0.02,
+        "employment_k": 5,
+        "gini_delta": 0.4,
+        "self_financing_pct": 25,
+        "distribution": "regressiv",
+        "sustainability": "neutral",
+        "confidence": "middel",
+        "assessment": "DREAM-arbejdsudbudsmodel: kontanthjælpssænkning øger beskæftigelsen med op til 5.000 fuldtidspersoner, men effekten er begrænset for gruppen med store barrierer for ordinær beskæftigelse. Gini stiger markant (0,4 point). Risiko for øget fattigdom og sociale udgifter andetsteds. Holdbarhedseffekten er beskeden."
+      }
+    },
+    {
+      "id": "p009",
+      "category": "pension",
+      "title": "Fleksibel pension — mulighed for tidligere tilbagetrækning",
+      "description": "Borgere med 40+ år på arbejdsmarkedet kan trække sig 3 år tidligere end den officielle pensionsalder, dog med aktuarisk reduktion af folkepensionen. Ikke-nedslidende arbejde giver tilsvarende bonus for at fortsætte.",
+      "status": "annonceret",
+      "parties": ["A", "V", "M"],
+      "announced": "2026-06-02",
+      "cost": {
+        "static_bn_dkk": 5.5,
+        "dynamic_bn_dkk": 4.8,
+        "per_year": true,
+        "horizon": "Fuldt indfaset 2028",
+        "financing": "Delvist finansieret af reduceret folkepension til dem der vælger tidlig tilbagetrækning"
+      },
+      "dream": {
+        "fiscal_bn": -5.5,
+        "gdp_pct": -0.2,
+        "employment_k": -10,
+        "gini_delta": -0.05,
+        "self_financing_pct": 13,
+        "distribution": "let progressiv",
+        "sustainability": "negativ",
+        "confidence": "høj",
+        "assessment": "AE-råd: 1 år ekstra pensionsalder = ~7 mia. kr./år. Omvendt: fleksibel pensionering koster ~5,5 mia./år i reduceret skattebase og øgede pensionsudbetalinger. DREAM OLG-model: negativ holdbarhedseffekt over 15-årig horisont. Den demografiske pres-analyse viser at dette forværrer det strukturelle finansieringsgab."
+      }
+    },
+    {
+      "id": "p010",
+      "category": "sundhed",
+      "title": "Psykiatriplan — 10-årig masterplan med 5 mia. kr.",
+      "description": "Massiv satsning på psykisk sundhed: 1.000 nye sengepladser, 500 nye psykologer og psykiatere i det offentlige, udvidede ydernumre og digital behandlings-platform. Bygges op over 10 år.",
+      "status": "annonceret",
+      "parties": ["A", "V", "M", "F", "Ø"],
+      "announced": "2026-06-02",
+      "cost": {
+        "static_bn_dkk": 5.0,
+        "dynamic_bn_dkk": 4.2,
+        "per_year": true,
+        "horizon": "Fuldt indfaset 2031",
+        "financing": "Prioriteret fra sundhedsbudgettets vækst + ny digital sundhedsbesparelse"
+      },
+      "dream": {
+        "fiscal_bn": -5.0,
+        "gdp_pct": 0.15,
+        "employment_k": 8,
+        "gini_delta": -0.2,
+        "self_financing_pct": 16,
+        "distribution": "progressiv",
+        "sustainability": "let positiv",
+        "confidence": "middel",
+        "assessment": "Produktivitetskommissionen: psykisk sundhed koster samfundet ~40 mia. kr./år i tabt produktion og sociale udgifter. Investering i psykiatri estimeret til 0,15% BNP-gevinst over 10 år via øget erhvervsdeltagelse. 8.000 nye job i sundhedssektoren. Progressiv fordelingseffekt da lavindkomstgrupper er overrepræsenteret i psykiatrien."
+      }
+    },
+    {
+      "id": "p011",
+      "category": "sundhed",
+      "title": "Ret til behandling inden for 30 dage — venteliste-garanti",
+      "description": "Lovfæstet garanti: alle patienter har ret til behandling på hospital inden for 30 dage. Ved overskridelse har borgeren ret til privat behandling på det offentliges regning.",
+      "status": "annonceret",
+      "parties": ["V", "M", "I", "C"],
+      "announced": "2026-06-02",
+      "cost": {
+        "static_bn_dkk": 3.0,
+        "dynamic_bn_dkk": 2.1,
+        "per_year": true,
+        "horizon": "Løbende",
+        "financing": "Øget sygehusbudget + fremskyndet digitalisering af patientflow"
+      },
+      "dream": {
+        "fiscal_bn": -3.0,
+        "gdp_pct": 0.08,
+        "employment_k": 5,
+        "gini_delta": -0.1,
+        "self_financing_pct": 30,
+        "distribution": "let progressiv",
+        "sustainability": "neutral",
+        "confidence": "middel",
+        "assessment": "Venteliste-garanti forventes at reducere sygefravær og øge erhvervsdeltagelse (selvfinansieringsgrad ~30%). Direkte sygehusomkostning 3 mia./år, men positiv effekt på sygefravær og produktivitet reducerer nettoomkostningen. Progressiv fordi lavindkomstgrupper er mindst i stand til at købe private behandlinger i dag."
+      }
+    },
+    {
+      "id": "p012",
+      "category": "uddannelse",
+      "title": "Reform af SU — målretning til studerende i job",
+      "description": "SU-systemet reformeres: klippekortet afkortes med 6 klip, men SU-satsen øges for studerende der arbejder mere end 8 timer ugentligt. Fokus på hurtigere studiegennemførelse.",
+      "status": "annonceret",
+      "parties": ["I", "V", "M"],
+      "announced": "2026-06-02",
+      "cost": {
+        "static_bn_dkk": -1.5,
+        "dynamic_bn_dkk": -1.1,
+        "per_year": true,
+        "horizon": "Løbende",
+        "financing": "Nettobesparelse"
+      },
+      "dream": {
+        "fiscal_bn": 1.5,
+        "gdp_pct": 0.05,
+        "employment_k": 8,
+        "gini_delta": 0.1,
+        "self_financing_pct": 0,
+        "distribution": "let regressiv",
+        "sustainability": "let positiv",
+        "confidence": "middel",
+        "assessment": "Besparelse på 1,5 mia./år. Positiv arbejdsudbudseffekt da studerende øger arbejdstid. Let regressiv: studerende fra lavindkomstfamilier rammes hårdest af reduceret klipkort. Hurtigere studiegennemførelse øger skattebase over 10–15 år."
+      }
+    },
+    {
+      "id": "p013",
+      "category": "uddannelse",
+      "title": "Løft af erhvervsuddannelser — 1 mia. kr. pakke",
+      "description": "Massiv investering i erhvervsuddannelserne: nye faciliteter, bedre lærerlønninger, virksomhedssamarbejde og praktikpladser. Målet er at 30% af en ungdomsårgang vælger EUD inden 2030.",
+      "status": "annonceret",
+      "parties": ["A", "V", "M", "I"],
+      "announced": "2026-06-02",
+      "cost": {
+        "static_bn_dkk": 1.2,
+        "dynamic_bn_dkk": 0.8,
+        "per_year": true,
+        "horizon": "Løbende fra 2027",
+        "financing": "Omprioritet fra gymnasiesektor + EUD-effektiviseringsfond"
+      },
+      "dream": {
+        "fiscal_bn": -1.2,
+        "gdp_pct": 0.1,
+        "employment_k": 10,
+        "gini_delta": -0.15,
+        "self_financing_pct": 67,
+        "distribution": "progressiv",
+        "sustainability": "positiv",
+        "confidence": "middel",
+        "assessment": "Uddannelsesinvesteringer: afkast ca. 7–9% per år, effekt viser sig 10–15 år frem. Selvfinansieringsgrad estimeret til 67% via øget produktivitet og skattebase. Progressiv fordelingseffekt. En af de mest holdbarhedspositiv tiltag i regeringsprogrammet per investeret krone."
+      }
+    },
+    {
+      "id": "p014",
+      "category": "klima",
+      "title": "Fasthold 70%-klimamål — men fjern sektorkoblede CO2-afgifter",
+      "description": "70%-målet for CO2-reduktion i 2030 fastholdes, men de sektorkoblede CO2-afgifter på landbrug og transport erstattes af en fælles, lavere CO2-pris. Vindkraftudbyning og grønt brint prioriteres.",
+      "status": "annonceret",
+      "parties": ["M", "V", "I"],
+      "announced": "2026-06-02",
+      "cost": {
+        "static_bn_dkk": 2.0,
+        "dynamic_bn_dkk": 2.5,
+        "per_year": true,
+        "horizon": "Løbende",
+        "financing": "Ny samlet CO2-afgift (lavere sats) + vindkraft-auktionsindtægter"
+      },
+      "dream": {
+        "fiscal_bn": -2.0,
+        "gdp_pct": 0.05,
+        "employment_k": 3,
+        "gini_delta": 0.05,
+        "self_financing_pct": 0,
+        "distribution": "let regressiv",
+        "sustainability": "let negativ",
+        "confidence": "lav",
+        "assessment": "GREU-model: afskaffelse af sektorkoblede CO2-afgifter reducerer provenuet med ~2 mia./år. Risiko for at 70%-målet ikke nås — Klimarådet estimerer at denne ændring forsinker CO2-reduktion med 2–4 år. Let regressiv da lavindkomstgrupper bruger større andel af indkomst på energi og transport."
+      }
+    },
+    {
+      "id": "p015",
+      "category": "klima",
+      "title": "Grønt investeringsfond — 10 mia. kr. over 5 år",
+      "description": "Staten etablerer en grøn investeringsfond på 10 mia. kr. der co-investerer med private i offshore vindkraft, grønt brint og Power-to-X. Fonden er selvfinansierende over 15 år via afkast.",
+      "status": "annonceret",
+      "parties": ["A", "M", "V"],
+      "announced": "2026-06-02",
+      "cost": {
+        "static_bn_dkk": 2.0,
+        "dynamic_bn_dkk": 1.2,
+        "per_year": true,
+        "horizon": "5 år (2026-2030)",
+        "financing": "Lånefinansiering (statsobligationer) — tilbagebetalt via fondsafkast"
+      },
+      "dream": {
+        "fiscal_bn": -2.0,
+        "gdp_pct": 0.2,
+        "employment_k": 12,
+        "gini_delta": -0.05,
+        "self_financing_pct": 60,
+        "distribution": "neutral",
+        "sustainability": "positiv",
+        "confidence": "middel",
+        "assessment": "IEA/DMI: 1 mia. kr. klimainvestering = ca. 0,7 mia. BNP og 150–200 job. 10 mia.-fond giver positiv langsigtede skattebaseeffekt. Fondkonstruktionen reducerer den direkte budgetbelastning. Klimarådet vurderer dette som et af de mest effektive klimatiltag i pakken."
+      }
+    },
+    {
+      "id": "p016",
+      "category": "bolig",
+      "title": "Reform af planloven — hurtigere byggetilladelser",
+      "description": "Kommuners behandlingstid for byggetilladelser lovfæstes til maks. 8 uger. Statslige arealreservationer til boliger frigives automatisk efter 5 år. Regulering af almene boliger lempes.",
+      "status": "annonceret",
+      "parties": ["I", "V", "M", "C"],
+      "announced": "2026-06-02",
+      "cost": {
+        "static_bn_dkk": 0.3,
+        "dynamic_bn_dkk": -1.5,
+        "per_year": true,
+        "horizon": "Løbende",
+        "financing": "Netto positiv effekt via øget byggeaktivitet og grundskyld"
+      },
+      "dream": {
+        "fiscal_bn": -0.3,
+        "gdp_pct": 0.12,
+        "employment_k": 8,
+        "gini_delta": -0.1,
+        "self_financing_pct": 500,
+        "distribution": "let progressiv",
+        "sustainability": "positiv",
+        "confidence": "middel",
+        "assessment": "Øget boligbyggeri forbedrer boligudbuddet og reducerer prispres. DREAM-boligmarkedsmodel: 10% stigning i boligbyggeri = −2% boligpriser over 5 år. Positive afledte effekter for grundskyld og momsindtægter overstiger administrationsomkostningerne. Let progressiv fordelingseffekt."
+      }
+    },
+    {
+      "id": "p017",
+      "category": "transport",
+      "title": "Motorvejspakke — ny forbindelser og udvidelser",
+      "description": "12 mia. kr. til motorvejsinfrastruktur: udvidelse af E45, ny Østfyn-motorvej, omfartsveje ved Odense og Vejle samt Femern-tilslutningsanlæg.",
+      "status": "annonceret",
+      "parties": ["V", "M", "C", "D"],
+      "announced": "2026-06-02",
+      "cost": {
+        "static_bn_dkk": 12.0,
+        "dynamic_bn_dkk": 12.0,
+        "per_year": false,
+        "horizon": "Éngangsbeløb 2026–2033",
+        "financing": "Anlægslån + Femern A/S-model for Femern-del"
+      },
+      "dream": {
+        "fiscal_bn": -1.5,
+        "gdp_pct": 0.08,
+        "employment_k": 6,
+        "gini_delta": 0.05,
+        "self_financing_pct": 10,
+        "distribution": "let regressiv",
+        "sustainability": "neutral",
+        "confidence": "middel",
+        "assessment": "Transportøkonomisk: vejinvesteringer har en benefit-cost-ratio på 1,5–3,0 afhængig af trængselsgrad. Positiv beskæftigelseseffekt under anlæg (6k job). Let regressiv da bilister i gennemsnit er velhavende. Klimaeffekten er negativ — øget bilkørsel øger CO2-udledningen."
+      }
+    },
+    {
+      "id": "p018",
+      "category": "velfaerd",
+      "title": "Kommunalt serviceløft — 3 mia. kr. til frontpersonale",
+      "description": "3 mia. kr. øremærket til frontpersonale i kommunerne: SOSU-assistenter, pædagoger og sagsbehandlere. Pengene er betinget af kommunernes egenfinansiering og dokumenteret ansættelse af nyt personale.",
+      "status": "annonceret",
+      "parties": ["A", "M", "V"],
+      "announced": "2026-06-02",
+      "cost": {
+        "static_bn_dkk": 3.0,
+        "dynamic_bn_dkk": 2.5,
+        "per_year": true,
+        "horizon": "Løbende",
+        "financing": "Bloktilskud til kommunerne — betinget af modydelse"
+      },
+      "dream": {
+        "fiscal_bn": -3.0,
+        "gdp_pct": 0.06,
+        "employment_k": 10,
+        "gini_delta": -0.1,
+        "self_financing_pct": 17,
+        "distribution": "progressiv",
+        "sustainability": "let negativ",
+        "confidence": "middel",
+        "assessment": "Direkte udgift til kommunalt ansatte giver bred beskæftigelseseffekt (10k job). Multiplikatoreffekt ca. 1,0 da der er tale om offentlig ansættelse. Progressiv fordelingseffekt da det styrker velfærdsservices der bruges af alle indkomstlag. Holdbarhedsbelastning da den kommunale udgiftsvækst er strukturelt svær at rulle tilbage."
+      }
+    },
+    {
+      "id": "p019",
+      "category": "erhverv",
+      "title": "Digitaliseringsfond for det offentlige — 2 mia. kr.",
+      "description": "2 mia. kr. til AI-drevet digitalisering af offentlig sektor: automatisering af sagshåndtering, digital patientjournal nationalt, intelligent skatteopkrævning og predictive analytics i kommunerne.",
+      "status": "annonceret",
+      "parties": ["M", "V", "I"],
+      "announced": "2026-06-02",
+      "cost": {
+        "static_bn_dkk": 2.0,
+        "dynamic_bn_dkk": 0.5,
+        "per_year": false,
+        "horizon": "Éngangsbeløb 2026–2030",
+        "financing": "Finansieret af besparelser der realiseres undervejs"
+      },
+      "dream": {
+        "fiscal_bn": -2.0,
+        "gdp_pct": 0.1,
+        "employment_k": -5,
+        "gini_delta": 0.05,
+        "self_financing_pct": 75,
+        "distribution": "neutral",
+        "sustainability": "positiv",
+        "confidence": "lav",
+        "assessment": "Digitaliseringsinvesteringer har historisk set en høj selvfinansieringsgrad (50–100%) via effektiviseringsgevinster. Negative beskæftigelseseffekt på sigt (−5k offentlige job), men frigjorte ressourcer kan omdirigeres. Usikkerhedsintervallet er bredt — digitaliseringsprojekter har hyppige forsinkelser og fordyrelser."
+      }
+    },
+    {
+      "id": "p020",
+      "category": "erhverv",
+      "title": "Erhvervspakke — reducering af overregulering",
+      "description": "Målrettet afbureaukratisering: 25% reduktion i erhvervs-compliance-byrder over 3 år, lettere adgang til udenlandsk specialiseret arbejdskraft, og hurtigere sagsbehandling i Erhvervsstyrelsen.",
+      "status": "annonceret",
+      "parties": ["I", "V", "M", "C"],
+      "announced": "2026-06-02",
+      "cost": {
+        "static_bn_dkk": 0.5,
+        "dynamic_bn_dkk": -2.0,
+        "per_year": true,
+        "horizon": "Løbende",
+        "financing": "Netto positiv via øget erhvervsaktivitet"
+      },
+      "dream": {
+        "fiscal_bn": -0.5,
+        "gdp_pct": 0.15,
+        "employment_k": 12,
+        "self_financing_pct": 400,
+        "gini_delta": 0.1,
+        "distribution": "let regressiv",
+        "sustainability": "positiv",
+        "confidence": "lav",
+        "assessment": "OECD: administrative byrder reducerer erhvervsproduktiviteten med 0,5–1,0% BNP. Reduktion på 25% estimeres til +0,15% BNP via øget investeringsaktivitet. Let regressiv da ejere og ledere af virksomheder primært er velhavende. Selvfinansieringsgraden er meget høj men usikker."
+      }
+    }
+  ]
+}

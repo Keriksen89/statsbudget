@@ -1,0 +1,22 @@
+{
+  "p001": ["forsvarsbudget", "forsvarsudgifter", "3 procent af bnp", "3%-mål", "nato mål", "forsvarsmål 2030", "forsvarsramma", "forsvarsbevillinger"],
+  "p002": ["f-35", "militærfly", "droner forsvar", "cyberforsvar", "nyt militærudstyr", "forsvarsmateriel", "forsvarets udstyr"],
+  "p003": ["topskat", "topskatten sænkes", "topskattelettelse", "topskatteprocent", "topskat fjernes", "topskat reduceres"],
+  "p004": ["arbejdsfradrag", "beskæftigelsesfradrag", "arbejdsfradraget fordobles", "beskæftigelsesfradraget øges"],
+  "p005": ["registreringsafgift elbil", "elbilafgift", "elbiler afgiftsfri", "afgiftsfritagelse elbil", "registreringsafgiften elbiler"],
+  "p006": ["asylstop", "500 asylansøgere", "asylansøgere grænse", "asyltal begrænses", "asylstramning", "asyl cap"],
+  "p007": ["optjeningsprincip", "7 års ophold", "opholdskrav velfærd", "optjeningskrav overførsler", "velfærd optjeningsprincip"],
+  "p008": ["kontanthjælpsloft sænkes", "nytteindsats", "arbejdspligt kontanthjælp", "kontanthjælp reduceres", "kontanthjælpsreform"],
+  "p009": ["fleksibel pension", "tidligere pension 40 år", "tidlig tilbagetrækning 40 år", "fleksibel tilbagetrækning", "pension fleksibel ordning"],
+  "p010": ["psykiatriplan", "psykiatri masterplan", "10-årig psykiatriplan", "psykiatri investering", "psykiatri løft", "psykiatrisk kapacitet"],
+  "p011": ["30 dages behandlingsgaranti", "venteliste garanti", "ret til behandling 30 dage", "30-dages garanti", "behandlingsret"],
+  "p012": ["su reform", "su afkortes", "su klip reduceres", "studiestøtte reform", "su ændres", "su ordning"],
+  "p013": ["erhvervsuddannelse løft", "eud investering", "erhvervsskoler styrkes", "erhvervsuddannelser prioriteres", "eud løft"],
+  "p014": ["co2-afgift afskaffes", "sektorkoblet afgift fjernes", "klimaafgift ændres", "co2-afgift landbrug fjernes", "klimaafgiftsreform"],
+  "p015": ["grøn investeringsfond", "grønt brint investering", "offshore vindkraft fond", "grøn fond", "power-to-x investering"],
+  "p016": ["planlovsreform", "byggetilladelse hastighed", "planloven lempes", "planlov reform", "byggeregulering lempelse"],
+  "p017": ["motorvejspakke", "e45 udvidelse", "østfyn motorvej", "motorvej ny", "motorvejsudbygning", "femern tilslutning"],
+  "p018": ["kommunalt løft", "frontpersonale kommuner", "sosu-assistenter ansættes", "kommunale pædagoger", "kommunalt bloktilskud løft"],
+  "p019": ["digitaliseringsfond offentlig", "ai offentlig", "offentlig digitalisering fond", "digital transformation stat"],
+  "p020": ["erhvervspakke", "afbureaukratisering erhverv", "erhvervsregulering lempelse", "compliance byrder", "erhvervsvilkår"]
+}

@@ -1,7 +1,7 @@
 services:
   app:
     build: .
-    container_name: virtuel-regering
+    container_name: statsbudget
     restart: unless-stopped
     ports:
       - "127.0.0.1:3000:3000"
@@ -9,14 +9,21 @@ services:
       - NODE_ENV=production
       - PORT=3000
       - HOST=0.0.0.0
+      - JWT_SECRET=${JWT_SECRET}
+    volumes:
+      - statsbudget-data:/app/server/data
     healthcheck:
       test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
       interval: 30s
       timeout: 5s
       retries: 3
-      start_period: 10s
+      start_period: 15s
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "3"
+
+volumes:
+  statsbudget-data:
+    driver: local

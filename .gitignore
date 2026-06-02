@@ -2,3 +2,13 @@ node_modules/
 *.log
 .DS_Store
 .claude/
+.env
+
+# SQLite database — lives on server, not in git
+server/data/statsbudget.db
+server/data/statsbudget.db-shm
+server/data/statsbudget.db-wal
+
+# Keep votes.json in git as seed data, but not runtime changes
+# (uncomment next line if you don't want to track vote counts)
+# server/data/votes.json
