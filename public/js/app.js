@@ -39,24 +39,22 @@ VG.actions.share = function() {
   const urlE = encodeURIComponent(url);
   const text = encodeURIComponent('Se mit statsbudget for Danmark 2026 — lavet på statsbudget.dk:');
   const html = `
-    <div class="modal-subtitle">Del dit budget — linket indeholder kun dine ændringer, ikke personlige data</div>
+    <p style="font-size:13px;color:var(--text-2);margin-bottom:10px">Del dit budget — linket indeholder kun dine ændringer, ikke personlige data.</p>
     <input class="share-input" value="${url}" readonly id="share-url">
-    <div class="share-buttons" style="margin-top:12px">
+    <div class="share-buttons">
       <button class="share-btn linkedin" onclick="window.open('https://www.linkedin.com/sharing/share-offsite/?url=${urlE}','_blank')">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
         LinkedIn
       </button>
       <button class="share-btn facebook" onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=${urlE}','_blank')">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
         Facebook
       </button>
       <button class="share-btn" onclick="window.open('https://twitter.com/intent/tweet?text=${text}&url=${urlE}','_blank')">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
         X / Twitter
       </button>
-      <button class="share-btn copy" id="btn-copy-url">
-        <i class="ph ph-copy"></i> Kopier link
-      </button>
+      <button class="share-btn copy" id="btn-copy-url"><i class="ph ph-copy"></i> Kopier link</button>
     </div>`;
   VG.showModal('Del dit budget', html);
   setTimeout(() => {
@@ -190,11 +188,6 @@ VG.bootstrap = async function() {
 
     VG.render.all();
 
-    // Load promises and overview on startup
-    VG.promises && VG.promises.load();
-    // Pre-render overview so it's ready when navigated to
-    VG.render.safePanel && VG.render.safePanel('panel-overview', () => VG.render.overview());
-
     document.getElementById('data-status').textContent = `Finanslov ${baseline.fiscalYear} · v${baseline.version}`;
     document.getElementById('version-info').textContent = `Kalibreret ${baseline.lastCalibrated}`;
 
@@ -264,10 +257,8 @@ VG.bootstrap = async function() {
     }).catch(() => {});
   } catch (err) {
     console.error('Bootstrap error:', err);
-    const status = document.getElementById('data-status');
-    if (status) status.textContent = 'Fejl ved indlæsning';
-    const panel = document.getElementById('panel-overview') || document.querySelector('.panel.active');
-    if (panel) panel.innerHTML = `<div class="card"><h2>Kunne ikke indlæse</h2><p>Der opstod en fejl ved indlæsning af data: ${err.message}. Prøv at genindlæse siden.</p></div>`;
+    document.getElementById('data-status').textContent = 'Fejl ved indlæsning';
+    document.getElementById('panel-overview').innerHTML = `<div class="card"><h2>Kunne ikke indlæse</h2><p>Der opstod en fejl ved indlæsning af data: ${err.message}. Prøv at genindlæse siden.</p></div>`;
   }
 };
 
@@ -276,68 +267,71 @@ document.addEventListener('DOMContentLoaded', () => {
   VG.bootstrap();
 
   const GROUPS = {
-    loefter: { label: 'Regeringsløfter 2026', tabs: [
-      { id: 'promises',            label: 'Løfter & DREAM-analyse' },
-      { id: 'overview',            label: 'Danmark i dag — overblik' },
-      { id: 'regering',            label: 'Regering & koalition' },
-      { id: 'folketing',           label: 'Folketing — afstemninger' },
-      { id: 'partier',             label: 'Partier' },
-      { id: 'mandater',            label: 'Mandater' },
-    ]},
-    budget: { label: 'Budget & Simulator', tabs: [
-      { id: 'rygter',              label: 'Nyheder & DREAM-analyse' },
-      { id: 'policy',              label: 'Politiske parametre (MAKRO)' },
-      { id: 'spending',            label: 'Udgifter' },
-      { id: 'revenue',             label: 'Indtægter' },
-      { id: 'projection',          label: 'Fremskrivning & Holdbarhed' },
-      { id: 'scenarios',           label: 'Scenarier' },
-      { id: 'statsgaeld',          label: 'Statsgæld' },
-      { id: 'laboratorium',        label: 'Politisk Lab' },
-      { id: 'historik',            label: 'Historik' },
-    ]},
-    okonomi: { label: 'Økonomi Live', tabs: [
-      { id: 'inflation',           label: 'Inflation & Priser' },
-      { id: 'ledighed',            label: 'Ledighed' },
-      { id: 'boligmarked',         label: 'Boligmarked' },
-      { id: 'energi',              label: 'Energi & Strøm' },
-      { id: 'co2',                 label: 'Klima & CO₂' },
-      { id: 'udenrigshandel',      label: 'Udenrigshandel' },
-      { id: 'erhverv',             label: 'Erhverv & Vækst' },
-      { id: 'innovation',          label: 'Innovation' },
-      { id: 'indkomst',            label: 'Indkomst & Ulighed' },
-    ]},
-    politik: { label: 'Politik', tabs: [
-      { id: 'meningsmaalinger',    label: 'Meningsmålinger' },
-      { id: 'borger',              label: 'Borgerforslag' },
-      { id: 'platform',            label: 'Mit Parti' },
-      { id: 'party',               label: 'Borgerstemmer' },
-      { id: 'valgkort',            label: 'Valgkort' },
+    personligt: { label: 'Personligt', tabs: [
+      { id: 'borger',              label: 'Skatteberegner' },
+      { id: 'bolig',               label: 'Boligberegner' },
+      { id: 'pension',             label: 'Pensionsberegner' },
+      { id: 'elpris',              label: 'El-priser' },
     ]},
     samfund: { label: 'Samfund', tabs: [
       { id: 'demographics',        label: 'Demografi & Befolkning' },
+      { id: 'kommuner',            label: 'Kommuner' },
       { id: 'sundhed',             label: 'Sundhed & Sygehuse' },
       { id: 'psykiatri',           label: 'Psykiatri' },
       { id: 'ventetider',          label: 'Ventetider' },
       { id: 'aeldrepleje',         label: 'Ældrepleje' },
-      { id: 'uddannelse',          label: 'Uddannelse' },
-      { id: 'pension',             label: 'Pensionsberegner' },
-      { id: 'bolig',               label: 'Boligberegner' },
-      { id: 'integration',         label: 'Integration' },
-      { id: 'forsvar',             label: 'Forsvar & Sikkerhed' },
-      { id: 'kommuner',            label: 'Kommuner' },
-      { id: 'elpris',              label: 'El-priser' },
-      { id: 'landbrug',            label: 'Landbrug' },
-      { id: 'kriminalitet',        label: 'Kriminalitet' },
+      { id: 'ledighed',            label: 'Ledighed' },
+      { id: 'indkomst',            label: 'Indkomst & Ulighed' },
+      { id: 'arbejdsmiljoe',       label: 'Arbejdsmiljø' },
+      { id: 'ligestilling',        label: 'Ligestilling' },
+      { id: 'boligmarked',         label: 'Boligmarked' },
+      { id: 'forbrug',             label: 'Forbrug' },
+      { id: 'dsb',                 label: 'Transport & DSB' },
+      { id: 'co2',                 label: 'Klima & CO₂' },
+      { id: 'energi',              label: 'Energi & Strøm' },
       { id: 'naturvand',           label: 'Natur & Drikkevand' },
+      { id: 'uddannelse',          label: 'Uddannelse' },
+      { id: 'integration',         label: 'Integration' },
+      { id: 'kriminalitet',        label: 'Kriminalitet' },
+      { id: 'forsvar',             label: 'Forsvar & Sikkerhed' },
+      { id: 'landbrug',            label: 'Landbrug' },
+      { id: 'medietillid',         label: 'Medie & Tillid' },
+      { id: 'velfaerdsstat',       label: 'Velfærdsstat' },
+      { id: 'generationsregnskab', label: 'Generationsregnskab' },
+    ]},
+    politik: { label: 'Politik', tabs: [
+      { id: 'platform',            label: 'Mit Parti' },
+      { id: 'party',               label: 'Borgerstemmer' },
+      { id: 'partier',             label: 'Partier' },
+      { id: 'regering',            label: 'Regering' },
+      { id: 'folketing',           label: 'Folketing' },
+      { id: 'mandater',            label: 'Mandater' },
+      { id: 'valgkort',            label: 'Valgkort' },
+      { id: 'meningsmaalinger',    label: 'Meningsmålinger' },
+      { id: 'laboratorium',        label: 'Politisk Lab' },
+    ]},
+    oekonomi: { label: 'Økonomi', tabs: [
+      { id: 'rygter',              label: 'Nyheder & DREAM-analyse' },
+      { id: 'policy',              label: 'Politiske parametre' },
+      { id: 'spending',            label: 'Udgifter' },
+      { id: 'revenue',             label: 'Indtægter' },
+      { id: 'projection',          label: 'Fremskrivning' },
+      { id: 'historik',            label: 'Historik' },
+      { id: 'scenarios',           label: 'Scenarier' },
+      { id: 'statsgaeld',          label: 'Statsgæld' },
+      { id: 'erhverv',             label: 'Erhverv & Vækst' },
+      { id: 'innovation',          label: 'Innovation' },
+      { id: 'inflation',           label: 'Inflation' },
+      { id: 'udenrigshandel',      label: 'Udenrigshandel' },
     ]},
   };
 
+  // Pinned sub-tabs shown in the secondary bar (others go in "Alle ▾" dropdown)
   const PINNED_TABS = {
-    loefter: ['promises', 'regering', 'folketing', 'partier'],
-    budget:  ['policy', 'spending', 'revenue', 'projection', 'rygter'],
-    okonomi: ['inflation', 'ledighed', 'co2', 'energi'],
-    politik: ['meningsmaalinger', 'borger', 'platform'],
-    samfund: ['demographics', 'sundhed', 'uddannelse', 'pension'],
+    personligt: ['borger', 'bolig', 'pension', 'elpris'],
+    samfund:    ['demographics', 'sundhed', 'ledighed', 'co2', 'boligmarked', 'uddannelse'],
+    politik:    ['platform', 'party', 'partier', 'regering', 'folketing', 'meningsmaalinger', 'laboratorium'],
+    oekonomi:   ['policy', 'spending', 'revenue', 'projection', 'rygter', 'statsgaeld'],
   };
 
   let activeGroup = null;
@@ -349,11 +343,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!nav) return;
 
     const GROUP_ICONS = {
-      loefter: '<i class="ph ph-flag-banner"></i>',
-      budget:  '<i class="ph ph-chart-line-up"></i>',
-      okonomi: '<i class="ph ph-trend-up"></i>',
-      politik: '<i class="ph ph-buildings"></i>',
-      samfund: '<i class="ph ph-users"></i>',
+      personligt: '<i class="ph ph-user-circle"></i>',
+      samfund:    '<i class="ph ph-globe-hemisphere-west"></i>',
+      politik:    '<i class="ph ph-buildings"></i>',
+      oekonomi:   '<i class="ph ph-chart-line-up"></i>',
     };
     const TAB_ICONS = {
       dashboard:'<i class="ph ph-squares-four"></i>',  feed:'<i class="ph ph-newspaper"></i>',
@@ -390,16 +383,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const stripLabel = s => s.replace(/^[\p{Emoji_Presentation}\p{Extended_Pictographic}🏛🌍]+\s*/gu, '').trim();
 
     let html = `
+      <a class="sb-item" data-sb="promises">
+        <span class="sb-item-icon"><i class="ph ph-flag-banner"></i></span>
+        <span class="sb-item-label">Regeringsløfter 2026</span>
+        <span class="sb-item-live"></span>
+      </a>
+      <a class="sb-item" data-sb="overview">
+        <span class="sb-item-icon">${TAB_ICONS.overview || '<i class="ph ph-map-trifold"></i>'}</span>
+        <span class="sb-item-label">Danmark i dag — overblik</span>
+      </a>
       <a class="sb-item" data-sb="feed">
-        <span class="sb-item-icon"><i class="ph ph-newspaper"></i></span>
-        <span class="sb-item-label">Nyheder</span>
+        <span class="sb-item-icon">${TAB_ICONS.feed}</span>
+        <span class="sb-item-label">Nyheder & Indsigter</span>
         <span class="sb-item-live"></span>
       </a>
       <a class="sb-item" data-sb="profile">
         <span class="sb-item-icon"><i class="ph ph-user-circle"></i></span>
         <span class="sb-item-label">Min løsning</span>
       </a>
-      <div class="sb-section-label">Analyser</div>`;
+      <div class="sb-section-label">Udforsk data</div>`;
 
     for (const [gk, group] of Object.entries(GROUPS)) {
       const gIcon = GROUP_ICONS[gk] || '<i class="ph ph-circle"></i>';
@@ -442,7 +444,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function navigateTo(panelId) {
-    const REDIRECTS = { dashboard: 'overview', folkesundhed: 'sundhed', groenomstilling: 'co2', boligkrise: 'boligmarked', folkeskolen: 'uddannelse', danmarkskort: 'overview' };
+    // Redirect removed panel IDs to their canonical equivalents
+    const REDIRECTS = { dashboard: 'overview', danmarkskort: 'overview', folkesundhed: 'sundhed', groenomstilling: 'co2', boligkrise: 'boligmarked', folkeskolen: 'uddannelse' };
     if (REDIRECTS[panelId]) panelId = REDIRECTS[panelId];
 
     // Lazy-load panel-specific modules
@@ -458,10 +461,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     activeGroup = owningGroup;
 
-    // Budget KPI bar only in Budget section
+    // Budget KPI bar only in Økonomi
     const summaryEl = document.getElementById('summary');
-    if (summaryEl) summaryEl.classList.toggle('summary-visible', owningGroup === 'budget');
+    if (summaryEl) summaryEl.classList.toggle('summary-visible', owningGroup === 'oekonomi');
 
+    document.body.classList.remove('dk-immersive', 'dk-peek');
 
     switchTab(panelId);
     _updateSidebarActive(panelId, owningGroup);
@@ -498,9 +502,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function _updateBreadcrumb(panelId, owningGroup) {
     let section = '', page = panelId;
-    if (panelId === 'promises') { page = 'Regeringsløfter 2026'; }
-    else if (panelId === 'feed') { page = 'Nyheder'; }
-    else if (panelId === 'profile') { page = 'Min løsning'; }
+    if (panelId === 'danmarkskort') { page = 'Danmarksmaskinen'; }
+    else if (panelId === 'dashboard') { page = 'Mit Dashboard'; }
+    else if (panelId === 'feed') { page = 'Nyheder & Indsigter'; }
     else if (owningGroup && GROUPS[owningGroup]) {
       const g   = GROUPS[owningGroup];
       const tab = g.tabs.find(t => t.id === panelId);
@@ -520,10 +524,12 @@ document.addEventListener('DOMContentLoaded', () => {
   function _updateMobileNav(panelId, owningGroup) {
     const nav = document.getElementById('mobile-nav');
     if (!nav) return;
-    const GROUP_MAP = { loefter: 'promises', budget: 'spending', okonomi: 'spending', politik: 'meningsmaalinger', samfund: 'demographics' };
+    const GROUP_MAP = { personligt: null, samfund: 'demographics', politik: 'meningsmaalinger', oekonomi: 'laboratorium' };
     nav.querySelectorAll('.mnav-item').forEach(btn => {
       const target = btn.dataset.mnav;
-      const isActive = target === panelId || (owningGroup && GROUP_MAP[owningGroup] === target);
+      const isActive = target === panelId ||
+        (owningGroup && GROUP_MAP[owningGroup] === target) ||
+        (panelId === 'reddit' && target === 'feed');
       btn.classList.toggle('active', isActive);
     });
   }
@@ -533,8 +539,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('sb-overlay')?.classList.remove('active');
   }
 
-  // Logo click → go to promises
-  document.querySelector('.sb-brand')?.addEventListener('click', () => navigateTo('promises'));
+  // Logo click → go to dashboard
+  document.querySelector('.sb-brand')?.addEventListener('click', () => navigateTo('dashboard'));
 
   // Sidebar collapse (desktop)
   document.getElementById('sb-collapse')?.addEventListener('click', () => {
@@ -609,12 +615,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   buildSidebar();
 
-  navigateTo('promises');
+  // Start on overview (original landing), pre-load promises panel too
+  navigateTo('overview');
+  VG.promises && VG.promises.load();
 
   window.__switchGroup = switchGroup;
   window.__switchTab   = switchTab;
-  window.__goHome      = () => navigateTo('promises');
+  window.__goHome      = () => navigateTo('overview');
   window.__mkClick     = navigateTo;
+
+  // Brand logo → overview
+  document.querySelector('.sb-brand')?.addEventListener('click', () => navigateTo('overview'));
 
   document.getElementById('btn-reset')?.addEventListener('click', () => {
     VG.reset();
@@ -626,8 +637,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-share')?.addEventListener('click', VG.actions.share);
   document.getElementById('btn-analyze')?.addEventListener('click', VG.actions.analyze);
   document.getElementById('theme-toggle')?.addEventListener('click', VG.theme.toggle);
-  document.getElementById('btn-auth')?.addEventListener('click', () => VG.auth.showAuthModal());
-  document.getElementById('btn-save')?.addEventListener('click', () => VG.auth.showSaveModal());
+  document.getElementById('btn-auth')?.addEventListener('click', () => VG.auth && VG.auth.showAuthModal());
+  document.getElementById('btn-save')?.addEventListener('click', () => VG.auth && VG.auth.showSaveModal());
 
   document.getElementById('live-indicators')?.addEventListener('click', e => {
     const ind = e.target.closest('[data-nav]');
@@ -644,9 +655,9 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   window.addEventListener('resize', () => {
-    if (VG.state.activeTab === 'projection') VG.chart.drawDebt && VG.chart.drawDebt();
+    if (VG.state.activeTab === 'projection') VG.chart.drawDebt();
   });
 
-  // Init auth (silent token check)
+  // Init auth silently
   VG.auth && VG.auth.init();
 });

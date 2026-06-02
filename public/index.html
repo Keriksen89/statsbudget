@@ -5,36 +5,35 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>statsbudget.dk — Danmarks finanspolitiske dashboard</title>
 
-<meta name="description" content="Følg regeringens løfter live, simuler statsbudgettet og analysér konsekvenserne med DREAM-modellen. Åbne data fra Finanslov 2026, DST og Folketinget.">
-<meta name="keywords" content="statsbudget, finanslov, regering, løfter, danmark, politik, DREAM, budget-simulator">
+<meta name="description" content="statsbudget.dk: Realtids politisk data, finanslov, statsbudget, meningsmålinger og samfundsstatistik. Åbne data fra Finanslov 2026, DST og Folketinget.">
+<meta name="keywords" content="oculus, politisk data, finanslov, statsbudget, danmark, politik, meningsmålinger, åbne data, samfund">
 <meta name="author" content="statsbudget.dk">
 <meta name="robots" content="index, follow">
 
-<meta property="og:type"        content="website">
-<meta property="og:title"       content="statsbudget.dk — Danmarks finanspolitiske dashboard">
-<meta property="og:description" content="Følg regeringens løfter live, simuler statsbudgettet og se de reelle DREAM-model omkostninger. Åbne data fra Finanslov 2026, DST og Folketing.">
-<meta property="og:image"       content="https://www.statsbudget.dk/og-image.png">
-<meta property="og:url"         content="https://www.statsbudget.dk">
-<meta property="og:locale"      content="da_DK">
-<meta property="og:site_name"   content="statsbudget.dk">
+<meta property="og:type" content="website">
+<meta property="og:title" content="statsbudget.dk — Danmarks finanspolitiske dashboard">
+<meta property="og:description" content="Realtids politisk data, finanslov, meningsmålinger og samfundsstatistik. Live data fra Finanslov 2026, Danmarks Statistik og Folketinget.">
+<meta property="og:image" content="https://www.statsbudget.dk/og-image.png">
+<meta property="og:locale" content="da_DK">
 
-<meta name="twitter:card"        content="summary_large_image">
-<meta name="twitter:title"       content="statsbudget.dk">
-<meta name="twitter:description" content="Dansk finanspolitisk dashboard — løfter, budget og DREAM-analyse.">
-<meta name="twitter:image"       content="https://www.statsbudget.dk/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Oculus Omnividens">
+<meta name="twitter:description" content="Realtids politisk data og samfundsstatistik for Danmark. Se finanslov, meningsmålinger og meget mere.">
 
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="/css/app.css">
-<script src="https://unpkg.com/@phosphor-icons/web@2.1.1" defer></script>
+<script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+<!-- CesiumJS true-3D globe. Base URL must be set before the bundle loads so it
+     can find its Workers/Assets/Widgets. Vendored same-origin under /vendor. -->
 </head>
 <body>
 
 <!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
   <div class="sb-top">
-    <div class="sb-brand" id="sb-brand">
+    <div class="sb-brand">
       <span class="sb-logo-mark">SB</span>
       <span class="sb-logo-name">statsbudget.dk</span>
     </div>
@@ -46,7 +45,9 @@
     <input class="sb-search" type="text" id="sb-search" placeholder="Søg i data og emner…" autocomplete="off">
   </div>
 
-  <nav class="sb-nav" id="sb-nav" aria-label="Primær navigation"></nav>
+  <nav class="sb-nav" id="sb-nav" aria-label="Primær navigation">
+    <!-- Built dynamically by app.js -->
+  </nav>
 
   <div class="sb-bottom">
     <div class="sb-status-row">
@@ -59,33 +60,38 @@
   </div>
 </aside>
 
+<!-- Mobile sidebar overlay -->
 <div class="sb-overlay" id="sb-overlay"></div>
 
-<!-- Mobile bottom nav -->
+<!-- Immersive map mode: subtle reveal handle + backdrop -->
+<button class="dk-reveal-handle" id="dk-reveal-handle" aria-label="Vis menu" title="Vis menu">›</button>
+<div class="dk-peek-backdrop" id="dk-peek-backdrop"></div>
+
+<!-- Mobile bottom navigation bar — visible only on phones -->
 <nav class="mobile-nav" id="mobile-nav" aria-label="Mobil navigation">
-  <button class="mnav-item active" data-mnav="promises">
-    <i class="ph ph-flag-banner"></i>
-    <span>Løfter</span>
-  </button>
-  <button class="mnav-item" data-mnav="spending">
-    <i class="ph ph-chart-line-up"></i>
-    <span>Budget</span>
-  </button>
-  <button class="mnav-item" data-mnav="meningsmaalinger">
-    <i class="ph ph-buildings"></i>
-    <span>Politik</span>
-  </button>
-  <button class="mnav-item" data-mnav="demographics">
-    <i class="ph ph-users"></i>
-    <span>Samfund</span>
+  <button class="mnav-item active" data-mnav="overview">
+    <i class="ph ph-squares-four"></i>
+    <span>Oversigt</span>
   </button>
   <button class="mnav-item" data-mnav="feed">
     <i class="ph ph-newspaper"></i>
     <span>Nyheder</span>
   </button>
+  <button class="mnav-item" data-mnav="demographics">
+    <i class="ph ph-globe-hemisphere-west"></i>
+    <span>Samfund</span>
+  </button>
+  <button class="mnav-item" data-mnav="meningsmaalinger">
+    <i class="ph ph-buildings"></i>
+    <span>Politik</span>
+  </button>
+  <button class="mnav-item" data-mnav="laboratorium">
+    <i class="ph ph-chart-line-up"></i>
+    <span>Økonomi</span>
+  </button>
 </nav>
 
-<!-- APP -->
+<!-- MAIN CONTENT AREA -->
 <div class="app" id="app-main">
 
   <!-- TOPBAR -->
@@ -95,131 +101,99 @@
       <span class="hamburger-line"></span>
       <span class="hamburger-line"></span>
     </button>
-    <div class="topbar-breadcrumb">
+    <div class="topbar-breadcrumb" id="topbar-bc">
       <span class="topbar-bc-section" id="topbar-bc-section"></span>
-      <span class="topbar-bc-sep"     id="topbar-bc-sep"></span>
-      <span class="topbar-bc-page"    id="topbar-bc-page">Regeringsløfter 2026</span>
+      <span class="topbar-bc-sep" id="topbar-bc-sep" aria-hidden="true"></span>
+      <span class="topbar-bc-page" id="topbar-bc-page">Oversigt</span>
     </div>
     <div class="topbar-ticker" id="live-indicators" aria-live="polite"></div>
     <div class="topbar-controls">
-      <button class="topbar-btn" id="btn-share"   title="Del dit budget">↗ Del</button>
-      <button class="topbar-btn" id="btn-save"    title="Gem din løsning" style="display:none">Gem løsning</button>
+      <button class="topbar-btn" id="btn-share" title="Del budgettet">↗ Del</button>
+      <button class="topbar-btn" id="btn-save" title="Gem din løsning" style="display:none">Gem løsning</button>
       <button class="topbar-btn primary" id="btn-analyze" title="Analysér konsekvenser">Analysér</button>
-      <button class="topbar-btn" id="btn-auth"    title="Log ind / Opret konto">
-        <i class="ph ph-user-circle"></i> Log ind
-      </button>
+      <button class="topbar-btn" id="btn-auth" title="Log ind"><i class="ph ph-user-circle"></i> Log ind</button>
     </div>
   </header>
 
-  <!-- Budget KPI bar — shown only in Budget section -->
+  <!-- Budget KPI bar — shown only in Økonomi section -->
   <div class="summary" id="summary">
-    <div class="stat">
-      <div class="stat-label">Indtægter</div>
-      <div class="stat-num"   id="s-rev">—</div>
-      <div class="stat-delta" id="s-rev-d">basis</div>
-    </div>
-    <div class="stat">
-      <div class="stat-label">Udgifter</div>
-      <div class="stat-num"   id="s-exp">—</div>
-      <div class="stat-delta" id="s-exp-d">basis</div>
-    </div>
-    <div class="stat" id="s-bal-card">
-      <div class="stat-label">Budgetsaldo</div>
-      <div class="stat-num"   id="s-bal">—</div>
-      <div class="stat-delta" id="s-bal-d">% af BNP</div>
-    </div>
-    <div class="stat" id="s-debt-card">
-      <div class="stat-label">Gæld 2030</div>
-      <div class="stat-num"   id="s-debt">—</div>
-      <div class="stat-delta">% af BNP, hvis fortsat</div>
-    </div>
+    <div class="stat"><div class="stat-label">Indtægter</div><div class="stat-num" id="s-rev">—</div><div class="stat-delta" id="s-rev-d">basis</div></div>
+    <div class="stat"><div class="stat-label">Udgifter</div><div class="stat-num" id="s-exp">—</div><div class="stat-delta" id="s-exp-d">basis</div></div>
+    <div class="stat" id="s-bal-card"><div class="stat-label">Budgetsaldo</div><div class="stat-num" id="s-bal">—</div><div class="stat-delta" id="s-bal-d">% af BNP</div></div>
+    <div class="stat" id="s-debt-card"><div class="stat-label">Gæld 2030</div><div class="stat-num" id="s-debt">—</div><div class="stat-delta">% af BNP, hvis fortsat</div></div>
     <div class="summary-actions">
       <button class="btn btn-sm" id="btn-reset">↺ Nulstil</button>
       <button class="btn btn-sm" id="btn-changes">Mine ændringer</button>
     </div>
   </div>
 
-  <!-- PANELS -->
+  <!-- ALL PANELS — keep every single panel div exactly as-is -->
   <main class="panels-main" id="panels-main">
-
-    <!-- ── Løfter ─────────────────────────────────────────── -->
-    <div id="panel-promises"        class="panel active"></div>
-    <div id="panel-regering"        class="panel"></div>
-    <div id="panel-folketing"       class="panel"></div>
-    <div id="panel-partier"         class="panel"></div>
-    <div id="panel-mandater"        class="panel"></div>
-
-    <!-- ── Budget & Økonomi ──────────────────────────────── -->
-    <div id="panel-policy"          class="panel"></div>
-    <div id="panel-spending"        class="panel"></div>
-    <div id="panel-revenue"         class="panel"></div>
-    <div id="panel-projection"      class="panel"></div>
-    <div id="panel-scenarios"       class="panel"></div>
-    <div id="panel-statsgaeld"      class="panel"></div>
-    <div id="panel-rygter"          class="panel"></div>
-    <div id="panel-laboratorium"    class="panel"></div>
-    <div id="panel-historik"        class="panel"></div>
-
-    <!-- ── Økonomi Live ───────────────────────────────────── -->
-    <div id="panel-inflation"       class="panel"></div>
-    <div id="panel-ledighed"        class="panel"></div>
-    <div id="panel-boligmarked"     class="panel"></div>
-    <div id="panel-energi"          class="panel"></div>
-    <div id="panel-co2"             class="panel"></div>
-    <div id="panel-udenrigshandel"  class="panel"></div>
-    <div id="panel-erhverv"         class="panel"></div>
-    <div id="panel-innovation"      class="panel"></div>
-
-    <!-- ── Politik ────────────────────────────────────────── -->
+    <div id="panel-feed" class="panel"></div>
+    <div id="panel-overview" class="panel"></div>
+    <div id="panel-platform" class="panel"></div>
+    <div id="panel-party" class="panel"></div>
+    <div id="panel-regering" class="panel"></div>
+    <div id="panel-partier" class="panel"></div>
+    <div id="panel-policy" class="panel"></div>
+    <div id="panel-spending" class="panel"></div>
+    <div id="panel-revenue" class="panel"></div>
+    <div id="panel-projection" class="panel"></div>
+    <div id="panel-scenarios" class="panel"></div>
+    <div id="panel-laboratorium" class="panel"></div>
+    <div id="panel-folketing" class="panel"></div>
+    <div id="panel-demographics" class="panel"></div>
+    <div id="panel-borger" class="panel"></div>
+    <div id="panel-mandater" class="panel"></div>
+    <div id="panel-valgkort" class="panel"></div>
+    <div id="panel-historik" class="panel"></div>
+    <div id="panel-energi" class="panel"></div>
+    <div id="panel-kommuner" class="panel"></div>
+    <div id="panel-sundhed" class="panel"></div>
+    <div id="panel-forbrug" class="panel"></div>
+    <div id="panel-rygter" class="panel"></div>
+    <div id="panel-bolig" class="panel"></div>
+    <div id="panel-pension" class="panel"></div>
+    <div id="panel-ventetider" class="panel"></div>
+    <div id="panel-dsb" class="panel"></div>
+    <div id="panel-aeldrepleje" class="panel"></div>
+    <div id="panel-boligmarked" class="panel"></div>
+    <div id="panel-indkomst" class="panel"></div>
+    <div id="panel-co2" class="panel"></div>
+    <div id="panel-kriminalitet" class="panel"></div>
+    <div id="panel-uddannelse" class="panel"></div>
+    <div id="panel-elpris" class="panel"></div>
+    <div id="panel-ledighed" class="panel"></div>
     <div id="panel-meningsmaalinger" class="panel"></div>
-    <div id="panel-borger"          class="panel"></div>
-    <div id="panel-platform"        class="panel"></div>
-    <div id="panel-party"           class="panel"></div>
-    <div id="panel-valgkort"        class="panel"></div>
-
-    <!-- ── Samfund ────────────────────────────────────────── -->
-    <div id="panel-demographics"    class="panel"></div>
-    <div id="panel-sundhed"         class="panel"></div>
-    <div id="panel-uddannelse"      class="panel"></div>
-    <div id="panel-pension"         class="panel"></div>
-    <div id="panel-bolig"           class="panel"></div>
-    <div id="panel-integration"     class="panel"></div>
-    <div id="panel-forsvar"         class="panel"></div>
-    <div id="panel-psykiatri"       class="panel"></div>
-    <div id="panel-indkomst"        class="panel"></div>
-    <div id="panel-kommuner"        class="panel"></div>
-    <div id="panel-elpris"          class="panel"></div>
-    <div id="panel-landbrug"        class="panel"></div>
-
-    <!-- ── Ekstra samfundspaneler ─────────────────────────── -->
-    <div id="panel-ventetider"          class="panel"></div>
-    <div id="panel-aeldrepleje"         class="panel"></div>
-    <div id="panel-kriminalitet"        class="panel"></div>
-    <div id="panel-naturvand"           class="panel"></div>
-    <div id="panel-forbrug"             class="panel"></div>
-    <div id="panel-dsb"                 class="panel"></div>
-    <div id="panel-folkesundhed"        class="panel"></div>
-    <div id="panel-ligestilling"        class="panel"></div>
-    <div id="panel-velfaerdsstat"       class="panel"></div>
+    <div id="panel-inflation" class="panel"></div>
+    <div id="panel-udenrigshandel" class="panel"></div>
+    <div id="panel-landbrug" class="panel"></div>
+    <div id="panel-statsgaeld" class="panel"></div>
+    <div id="panel-erhverv" class="panel"></div>
+    <div id="panel-innovation" class="panel"></div>
+    <div id="panel-folkesundhed" class="panel"></div>
+    <div id="panel-ligestilling" class="panel"></div>
+    <div id="panel-velfaerdsstat" class="panel"></div>
     <div id="panel-generationsregnskab" class="panel"></div>
-    <div id="panel-arbejdsmiljoe"       class="panel"></div>
-    <div id="panel-medietillid"         class="panel"></div>
-    <div id="panel-groenomstilling"     class="panel"></div>
-    <div id="panel-boligkrise"          class="panel"></div>
-    <div id="panel-folkeskolen"         class="panel"></div>
-
-    <!-- ── Nyheder ────────────────────────────────────────── -->
-    <div id="panel-feed"            class="panel"></div>
-
-    <!-- ── Min Løsning ─────────────────────────────────────── -->
-    <div id="panel-profile"         class="panel"></div>
-
+    <div id="panel-arbejdsmiljoe" class="panel"></div>
+    <div id="panel-medietillid" class="panel"></div>
+    <div id="panel-groenomstilling" class="panel"></div>
+    <div id="panel-boligkrise" class="panel"></div>
+    <div id="panel-psykiatri" class="panel"></div>
+    <div id="panel-folkeskolen" class="panel"></div>
+    <div id="panel-naturvand" class="panel"></div>
+    <div id="panel-integration" class="panel"></div>
+    <div id="panel-forsvar" class="panel"></div>
+    <div id="panel-promises"        class="panel"></div>
+    <div id="panel-profile"          class="panel"></div>
   </main>
 
+  <!-- Version info (hidden from view but kept for JS) -->
   <div style="display:none"><span id="version-info"></span></div>
-</div>
 
-<!-- MODAL: Analysis / Share / Auth -->
+</div><!-- /.app -->
+
+<!-- MODAL -->
 <div class="modal-backdrop" id="modal-backdrop">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
     <button class="modal-close" id="modal-close" aria-label="Luk">×</button>
@@ -228,9 +202,10 @@
   </div>
 </div>
 
+<!-- TOAST -->
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<!-- Scripts (no gridstack, no cesium, no satellite) -->
+<!-- All script tags: keep EXACTLY as before, just add feed.js before app.js -->
 <script src="/js/state.js"></script>
 <script src="/js/api.js"></script>
 <script src="/js/render.js"></script>
