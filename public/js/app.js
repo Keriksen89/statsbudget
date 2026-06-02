@@ -264,8 +264,10 @@ VG.bootstrap = async function() {
     }).catch(() => {});
   } catch (err) {
     console.error('Bootstrap error:', err);
-    document.getElementById('data-status').textContent = 'Fejl ved indlæsning';
-    document.getElementById('panel-overview').innerHTML = `<div class="card"><h2>Kunne ikke indlæse</h2><p>Der opstod en fejl ved indlæsning af data: ${err.message}. Prøv at genindlæse siden.</p></div>`;
+    const status = document.getElementById('data-status');
+    if (status) status.textContent = 'Fejl ved indlæsning';
+    const panel = document.getElementById('panel-overview') || document.querySelector('.panel.active');
+    if (panel) panel.innerHTML = `<div class="card"><h2>Kunne ikke indlæse</h2><p>Der opstod en fejl ved indlæsning af data: ${err.message}. Prøv at genindlæse siden.</p></div>`;
   }
 };
 

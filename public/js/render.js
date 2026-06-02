@@ -454,11 +454,13 @@ VG.render.folketing = function() {
 };
 
 VG.render.safePanel = function(id, fn) {
+  const panel = document.getElementById(id);
+  if (!panel) return;
   try {
-    document.getElementById(id).innerHTML = fn();
+    panel.innerHTML = fn();
   } catch (e) {
     console.error('[render] ' + id + ':', e);
-    document.getElementById(id).innerHTML = '<div class="card"><p style="color:var(--pos)">Fejl ved rendering af dette panel. Se konsollen for detaljer.</p></div>';
+    panel.innerHTML = '<div class="card"><p style="color:var(--pos)">Fejl ved rendering af dette panel. Se konsollen for detaljer.</p></div>';
   }
 };
 

@@ -4,10 +4,10 @@
     "formed": "2026-06-02",
     "pm": "Mette Frederiksen",
     "pm_party": "A",
-    "type": "Flertalsregering (A·V·M·I·C·D)",
-    "parties": ["A", "V", "M", "I", "C", "D"],
-    "agreement_title": "Danmark Fremad — ansvar, vækst og tryghed",
-    "note": "Ny regering præsenteret 2. juni 2026. Løftedata baseret på regeringsgrundlaget."
+    "type": "Regeringsdannelse (S/SF/M/RV foreløbigt)",
+    "parties": ["A", "F", "M", "B"],
+    "agreement_title": "Foreløbigt regeringsgrundlag",
+    "note": "Foreløbig løfte- og DREAM-screening. Opdateres når det officielle regeringsgrundlag og ministerlisten er publiceret."
   },
   "promises": [
     {
