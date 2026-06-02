@@ -977,6 +977,336 @@ canvas { display: block; }
 .col         { display: flex; flex-direction: column; }
 .wrap        { flex-wrap: wrap; }
 
+/* ═══ RENDER.JS COMPATIBILITY LAYER ════════════════════════════════════
+   render.js was written with its own CSS class names. These map them to
+   the new design system without touching the 3,300-line render.js file.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Live indicators (topbar ticker) ─────────────────────────────────── */
+.live-indicator {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 9px; border-radius: var(--r-sm);
+  font-size: 11.5px; white-space: nowrap; cursor: pointer;
+  background: var(--surface-2); border: 1px solid var(--border);
+  color: var(--text-2); transition: background .12s;
+}
+.live-indicator:hover { background: var(--surface-3); color: var(--text); }
+.live-indicator .live-dot {
+  width: 5px; height: 5px; border-radius: 50%; background: var(--pos);
+  flex-shrink: 0; animation: pulse-dot 2s infinite;
+}
+.live-indicator .label { color: var(--text-3); font-size: 10px; font-weight: 600; letter-spacing: .05em; }
+.live-indicator .value { font-family: var(--mono); font-size: 11.5px; font-weight: 500; color: var(--text); }
+.ticker-cfg-btn {
+  padding: 3px 7px; border-radius: var(--r-sm); font-size: 12px;
+  background: var(--surface-2); border: 1px solid var(--border);
+  color: var(--text-3); cursor: pointer; transition: color .12s;
+}
+.ticker-cfg-btn:hover { color: var(--text); }
+.ticker-cfg-list { display: flex; flex-direction: column; gap: 6px; }
+.ticker-cfg-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-2); cursor: pointer; }
+
+/* ── General ─────────────────────────────────────────────────────────── */
+.intro { font-size: 13px; color: var(--text-2); line-height: 1.6; margin-bottom: 14px; }
+.intro a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+.loading { padding: 24px; text-align: center; color: var(--text-3); font-size: 13px; }
+.row-source { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+
+/* ── Overview / "Danmark i dag" ──────────────────────────────────────── */
+.today-section { margin-bottom: 28px; }
+.today-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; gap: 12px; }
+.today-title { font-size: 22px; font-weight: 700; letter-spacing: -.01em; margin-bottom: 4px; }
+.today-sub { font-size: 13px; color: var(--text-3); }
+.today-ts { font-size: 11px; color: var(--text-3); white-space: nowrap; padding-top: 6px; }
+.today-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.today-skeleton { height: 130px; border-radius: var(--r-lg); background: var(--surface-1); border: 1px solid var(--border); animation: shimmer 1.5s infinite; }
+.today-card {
+  background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 16px;
+  display: flex; flex-direction: column; gap: 10px;
+  cursor: pointer; text-align: left; transition: border-color .15s, transform .1s;
+  width: 100%;
+}
+.today-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+.today-card-static { opacity: .7; cursor: default; }
+.today-card-static:hover { transform: none; border-color: var(--border); }
+.today-card-news {}
+.today-card-meta { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+.today-headline { font-size: 13.5px; font-weight: 600; color: var(--text); line-height: 1.4; }
+.today-age { font-size: 10px; color: var(--text-3); }
+.today-card-data {}
+.today-topic { font-size: 11px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 3px; }
+.today-stat { font-size: 12px; color: var(--text-2); }
+.today-cta { font-size: 11px; color: var(--text-3); margin-top: 5px; }
+.today-empty { color: var(--text-3); font-size: 13px; grid-column: 1/-1; padding: 24px; text-align: center; }
+
+/* ── Hub grid (overview categories) ─────────────────────────────────── */
+.hub-section { margin-top: 8px; }
+.hub-section-title { font-size: 13px; font-weight: 600; color: var(--text-3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 14px; }
+.hub-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.hub-cat { background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 14px 16px; }
+.hub-cat-hd { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 10px; }
+.hub-item {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  width: 100%; padding: 6px 8px; border-radius: var(--r-sm);
+  font-size: 13px; color: var(--text-2); text-align: left;
+  transition: background .12s, color .12s; cursor: pointer;
+}
+.hub-item:hover { background: var(--surface-2); color: var(--text); }
+.hub-item-label {}
+.hub-item-stat { font-size: 11px; color: var(--text-3); font-family: var(--mono); white-space: nowrap; }
+
+/* Source badges */
+.rygte-source-badge {
+  display: inline-block; padding: 1px 7px; border-radius: 20px;
+  font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+}
+.source-dr         { background: rgba(208,0,111,.15); color: #d0006f; border: 1px solid rgba(208,0,111,.3); }
+.source-tv2        { background: rgba(227,66,52,.15);  color: #e34234; border: 1px solid rgba(227,66,52,.3); }
+.source-jp         { background: rgba(0,67,136,.15);   color: #004388; border: 1px solid rgba(0,67,136,.3); }
+.source-berlingske { background: rgba(180,0,0,.15);    color: #b40000; border: 1px solid rgba(180,0,0,.3); }
+.source-politiken  { background: rgba(60,120,60,.15);  color: #3c783c; border: 1px solid rgba(60,120,60,.3); }
+.source-weekendavisen { background: var(--surface-2);  color: var(--text-2); border: 1px solid var(--border); }
+.source-altinget   { background: rgba(0,80,160,.15);   color: #0050a0; border: 1px solid rgba(0,80,160,.3); }
+.source-information { background: rgba(20,100,160,.15);color: #1464a0; border: 1px solid rgba(20,100,160,.3); }
+.source-børsen     { background: rgba(0,90,60,.15);    color: #005a3c; border: 1px solid rgba(0,90,60,.3); }
+
+/* ── SMILE distribution badges ───────────────────────────────────────── */
+.smile-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 10px; border-radius: var(--r-sm);
+  font-size: 12px; margin-top: 8px;
+  border: 1px solid transparent;
+}
+.smile-progressive { background: var(--pos-bg);    color: var(--pos); border-color: rgba(52,211,153,.25); }
+.smile-regressive  { background: var(--neg-bg);    color: var(--neg); border-color: rgba(248,113,113,.25); }
+.smile-neutral     { background: var(--surface-2); color: var(--text-2); border-color: var(--border); }
+.smile-icon { font-weight: 600; }
+.smile-note { font-size: 11px; opacity: .85; }
+
+/* ── MAKRO dynamic effects ───────────────────────────────────────────── */
+.makro-banner {
+  display: flex; align-items: flex-start; gap: 10px;
+  background: var(--accent-dim); border: 1px solid rgba(240,165,32,.25);
+  border-radius: var(--r-sm); padding: 10px 14px; margin-bottom: 16px;
+  font-size: 13px; color: var(--text-2); line-height: 1.5;
+}
+.makro-banner-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.makro-banner a { color: var(--accent); }
+.makro-impact {
+  background: var(--surface-2); border-radius: var(--r-sm);
+  border-left: 3px solid var(--accent);
+  padding: 12px 14px; margin-top: 10px;
+}
+.makro-header { font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 8px; }
+.makro-rows { display: flex; flex-direction: column; gap: 4px; }
+.makro-row { display: flex; justify-content: space-between; align-items: center; font-size: 12.5px; color: var(--text-2); padding: 3px 0; }
+.makro-row.makro-net { border-top: 1px solid var(--border); padding-top: 6px; margin-top: 2px; font-weight: 600; color: var(--text); }
+.makro-positive .makro-num { color: var(--pos); font-family: var(--mono); }
+.makro-negative .makro-num { color: var(--neg); font-family: var(--mono); }
+.makro-num { font-family: var(--mono); font-size: 12px; }
+.makro-note { font-size: 11.5px; color: var(--text-3); margin-top: 8px; line-height: 1.5; }
+.makro-source { font-size: 11px; color: var(--text-3); margin-top: 4px; }
+.makro-source a { color: var(--accent); }
+
+/* ── Policy panel (render.js naming) ─────────────────────────────────── */
+.policy-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.policy-val  { font-family: var(--mono); font-size: 16px; font-weight: 500; color: var(--accent); }
+.policy-row  { display: flex; align-items: center; gap: 10px; margin: 10px 0 6px; }
+.policy-row input[type="range"] {
+  flex: 1; appearance: none; height: 5px;
+  background: var(--surface-3); border-radius: 3px; outline: none; cursor: pointer;
+}
+.policy-row input[type="range"]::-webkit-slider-thumb {
+  appearance: none; width: 16px; height: 16px; border-radius: 50%;
+  background: var(--accent); cursor: pointer; box-shadow: 0 0 0 3px var(--accent-dim);
+}
+.policy-impact { font-size: 12px; font-family: var(--mono); font-weight: 500; }
+.policy-impact.pos { color: var(--pos); }
+.policy-impact.neg { color: var(--neg); }
+
+/* ── Budget rows slider variant ───────────────────────────────────────── */
+.row input[type="range"] {
+  width: 140px; appearance: none; height: 4px;
+  background: var(--surface-3); border-radius: 2px; outline: none; cursor: pointer;
+}
+.row input[type="range"]::-webkit-slider-thumb {
+  appearance: none; width: 14px; height: 14px; border-radius: 50%;
+  background: var(--accent); cursor: pointer; box-shadow: 0 0 0 2px var(--accent-dim);
+}
+
+/* ── Projection / debt chart ─────────────────────────────────────────── */
+.chart-container { position: relative; background: var(--surface-2); border-radius: var(--r-sm); padding: 12px; margin: 14px 0; }
+.year-grid { display: flex; gap: 16px; justify-content: center; margin: 12px 0; }
+.year-stat { text-align: center; padding: 10px 16px; background: var(--surface-2); border-radius: var(--r-sm); }
+.year-stat-y { font-size: 12px; color: var(--text-3); margin-bottom: 3px; }
+.year-stat-v { font-family: var(--mono); font-size: 18px; font-weight: 500; color: var(--text); }
+
+/* EU budget rules pills */
+.eu-pills { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0 16px; }
+.pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 12px; border-radius: 20px;
+  font-size: 12px; font-weight: 600; border: 1px solid transparent;
+}
+.pill.ok   { background: var(--pos-bg);    color: var(--pos); border-color: rgba(52,211,153,.3); }
+.pill.fail { background: var(--neg-bg);    color: var(--neg); border-color: rgba(248,113,113,.3); }
+
+/* Holdbarhed box */
+.holdbarhed-box {
+  border-radius: var(--r-sm); padding: 16px 18px; margin: 14px 0;
+  border-left: 4px solid var(--border-2);
+}
+.hold-ok   { background: var(--pos-bg);    border-left-color: var(--pos); }
+.hold-warn { background: var(--warn-bg);   border-left-color: var(--warn); }
+.hold-fail { background: var(--neg-bg);    border-left-color: var(--neg); }
+.holdbarhed-head { display: flex; align-items: flex-start; gap: 12px; }
+.holdbarhed-icon { font-size: 20px; flex-shrink: 0; }
+.holdbarhed-desc { font-size: 12.5px; color: var(--text-2); line-height: 1.6; margin-top: 4px; }
+.holdbarhed-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+.holdbarhed-item { background: rgba(255,255,255,.05); border-radius: var(--r-sm); padding: 8px 12px; font-size: 12px; }
+.holdbarhed-item span { display: block; color: var(--text-3); margin-bottom: 2px; }
+.holdbarhed-item strong { font-family: var(--mono); }
+.holdbarhed-source { font-size: 11px; color: var(--text-3); margin-top: 10px; line-height: 1.5; }
+.holdbarhed-source a { color: var(--accent); }
+
+/* Climate progress */
+.climate-status-box { display: flex; gap: 0; margin: 14px 0; border: 1px solid var(--border); border-radius: var(--r-sm); overflow: hidden; }
+.climate-col { flex: 1; padding: 14px 16px; text-align: center; background: var(--surface-2); }
+.climate-col + .climate-col { border-left: 1px solid var(--border); }
+.climate-col--current { background: var(--info-bg); }
+.climate-col--target  { background: var(--pos-bg); }
+.climate-year { font-size: 12px; color: var(--text-3); margin-bottom: 4px; }
+.climate-mt   { font-family: var(--mono); font-size: 20px; font-weight: 500; }
+.climate-lbl  { font-size: 11px; color: var(--text-3); margin-top: 3px; }
+.climate-progress-wrap { margin: 10px 0 14px; }
+.climate-progress-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-3); margin-bottom: 5px; }
+.climate-progress-track { height: 8px; background: var(--surface-3); border-radius: 4px; overflow: hidden; }
+.climate-progress-done  { height: 100%; background: var(--pos); border-radius: 4px; transition: width .5s; }
+.climate-gap-note { font-size: 12px; color: var(--warn); margin-top: 8px; line-height: 1.5; }
+
+/* Historical table */
+.hist-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 12px; }
+.hist-table th { padding: 7px 12px; text-align: left; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--text-3); border-bottom: 1px solid var(--border); }
+.hist-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text-2); font-family: var(--mono); font-size: 12.5px; }
+.hist-table tr:last-child td { border-bottom: none; }
+.hist-table .pos { color: var(--pos); }
+.hist-table .neg { color: var(--neg); }
+
+/* ── Folketing: bills ────────────────────────────────────────────────── */
+.bills-list { display: flex; flex-direction: column; gap: 8px; }
+.bill-card {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px; background: var(--surface-2);
+  border-radius: var(--r-sm); border: 1px solid var(--border);
+}
+.bill-status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-3); flex-shrink: 0; }
+.bill-status-dot.status-new    { background: var(--info); }
+.bill-status-dot.status-active { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+.bill-body { flex: 1; min-width: 0; }
+.bill-title { font-size: 13.5px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bill-meta { font-size: 11.5px; color: var(--text-3); margin-top: 2px; }
+.bill-link { color: var(--accent); font-size: 14px; flex-shrink: 0; padding: 4px; }
+
+/* ── Votes ───────────────────────────────────────────────────────────── */
+.vote-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 5px; }
+.vote-title { font-size: 14px; font-weight: 500; color: var(--text); flex: 1; }
+.vote-status { padding: 2px 9px; border-radius: 20px; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+.vote-status.passed { background: var(--pos-bg); color: var(--pos); }
+.vote-status.failed { background: var(--neg-bg); color: var(--neg); }
+
+/* ── Scenarios ───────────────────────────────────────────────────────── */
+.scenarios { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 14px; }
+.scenario {
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: var(--r-sm); padding: 14px 16px; cursor: pointer; transition: all .15s;
+}
+.scenario:hover { border-color: var(--accent); background: var(--accent-dim); }
+.scenario-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.scenario-desc  { font-size: 12px; color: var(--text-3); line-height: 1.5; }
+
+/* ── Rygter / DREAM news analysis ────────────────────────────────────── */
+.rygte-card {
+  background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: var(--r-lg); overflow: hidden; margin-bottom: 14px;
+}
+.rygte-head { padding: 14px 16px; cursor: pointer; }
+.rygte-headline { font-size: 14.5px; font-weight: 600; color: var(--text); margin: 8px 0 6px; line-height: 1.4; }
+.rygte-meta { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 11px; color: var(--text-3); }
+.rygte-age { color: var(--text-3); }
+.rygte-cat-badge {
+  padding: 2px 8px; border-radius: 20px; font-size: 10.5px; font-weight: 600;
+  background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border);
+}
+.rygte-conf-badge {
+  padding: 2px 8px; border-radius: 20px; font-size: 10.5px; font-weight: 600;
+}
+.rygte-conf-vedtaget  { background: var(--pos-bg); color: var(--pos); }
+.rygte-conf-forslag   { background: var(--info-bg); color: var(--info); }
+.rygte-conf-forhandling { background: var(--warn-bg); color: var(--warn); }
+.rygte-conf-rygte     { background: var(--surface-2); color: var(--text-3); }
+.rygte-fiscal-row { display: flex; gap: 12px; flex-wrap: wrap; padding: 0 16px 12px; }
+.rygte-fiscal-item { font-size: 12px; }
+.rygte-fiscal-label { color: var(--text-3); margin-right: 4px; }
+.rygte-fiscal-val { font-family: var(--mono); font-weight: 500; }
+.rygte-fiscal-val.pos { color: var(--pos); }
+.rygte-fiscal-val.neg { color: var(--neg); }
+.rygte-body { border-top: 1px solid var(--border); padding: 14px 16px; display: none; }
+.rygte-card.expanded .rygte-body { display: block; }
+.rygte-explanation { font-size: 13px; color: var(--text-2); line-height: 1.7; }
+.rygte-link { font-size: 12px; color: var(--accent); margin-top: 8px; display: inline-block; }
+.rygte-score-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 12px; }
+.rygte-score-label { color: var(--text-3); }
+.rygte-score-bar { flex: 1; height: 5px; background: var(--surface-3); border-radius: 3px; overflow: hidden; }
+.rygte-score-fill { height: 100%; border-radius: 3px; background: var(--accent); }
+.rygte-empty { text-align: center; padding: 40px 20px; color: var(--text-3); font-size: 13px; }
+.dream-filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.dream-filter-btn {
+  padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 500;
+  background: var(--surface-2); border: 1px solid var(--border); color: var(--text-2); cursor: pointer; transition: all .12s;
+}
+.dream-filter-btn:hover { border-color: var(--border-2); color: var(--text); }
+.dream-filter-btn.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+/* ── Demographics / population panels ───────────────────────────────── */
+.demo-section { margin-bottom: 24px; }
+.demo-section-title { font-size: 13px; font-weight: 700; color: var(--text-2); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 12px; }
+.demo-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 13.5px; }
+.demo-row:last-child { border-bottom: none; }
+.demo-row-label { color: var(--text-2); }
+.demo-row-val { font-family: var(--mono); font-weight: 500; color: var(--text); }
+.demo-pyramid-wrap { background: var(--surface-2); border-radius: var(--r-sm); padding: 12px; }
+.region-table th { background: var(--surface-2); }
+
+/* ── Meningsmålinger polls ───────────────────────────────────────────── */
+.polls-section-label {
+  font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em;
+  color: var(--text-3); padding: 14px 0 6px; border-bottom: 1px solid var(--border); margin-bottom: 4px;
+}
+.polls-update { font-size: 11px; color: var(--text-3); margin-bottom: 14px; }
+.polls-source { font-size: 11px; color: var(--text-3); margin-top: 12px; }
+.poll-coalition-label {
+  font-size: 10px; font-weight: 600; color: var(--text-3); letter-spacing: .05em;
+  text-transform: uppercase; margin: 12px 0 6px;
+}
+
+/* ── Responsive fixes for render.js panels ───────────────────────────── */
+@media (max-width: 1100px) {
+  .today-grid { grid-template-columns: repeat(2, 1fr); }
+  .hub-grid   { grid-template-columns: repeat(2, 1fr); }
+  .holdbarhed-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 760px) {
+  .today-grid { grid-template-columns: 1fr; }
+  .hub-grid   { grid-template-columns: 1fr; }
+  .scenarios  { grid-template-columns: 1fr; }
+  .holdbarhed-grid { grid-template-columns: 1fr; }
+  .climate-status-box { flex-direction: column; }
+  .year-grid { gap: 8px; }
+  .eu-pills  { flex-direction: column; }
+  .rygte-fiscal-row { flex-direction: column; gap: 4px; }
+}
+
 /* Light theme */
 [data-theme="light"] {
   --bg:        #f4f6fa;

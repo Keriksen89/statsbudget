@@ -190,8 +190,10 @@ VG.bootstrap = async function() {
 
     VG.render.all();
 
-    // Load promises on startup (it's the landing page)
+    // Load promises and overview on startup
     VG.promises && VG.promises.load();
+    // Pre-render overview so it's ready when navigated to
+    VG.render.safePanel && VG.render.safePanel('panel-overview', () => VG.render.overview());
 
     document.getElementById('data-status').textContent = `Finanslov ${baseline.fiscalYear} · v${baseline.version}`;
     document.getElementById('version-info').textContent = `Kalibreret ${baseline.lastCalibrated}`;
@@ -273,25 +275,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const GROUPS = {
     loefter: { label: 'Regeringsløfter 2026', tabs: [
-      { id: 'promises',            label: 'Alle løfter & DREAM-analyse' },
+      { id: 'promises',            label: 'Løfter & DREAM-analyse' },
+      { id: 'overview',            label: 'Danmark i dag — overblik' },
       { id: 'regering',            label: 'Regering & koalition' },
       { id: 'folketing',           label: 'Folketing — afstemninger' },
       { id: 'partier',             label: 'Partier' },
       { id: 'mandater',            label: 'Mandater' },
     ]},
     budget: { label: 'Budget & Simulator', tabs: [
-      { id: 'policy',              label: 'Politiske parametre' },
+      { id: 'rygter',              label: 'Nyheder & DREAM-analyse' },
+      { id: 'policy',              label: 'Politiske parametre (MAKRO)' },
       { id: 'spending',            label: 'Udgifter' },
       { id: 'revenue',             label: 'Indtægter' },
-      { id: 'projection',          label: 'Fremskrivning' },
+      { id: 'projection',          label: 'Fremskrivning & Holdbarhed' },
       { id: 'scenarios',           label: 'Scenarier' },
       { id: 'statsgaeld',          label: 'Statsgæld' },
-      { id: 'rygter',              label: 'Nyheder & DREAM-analyse' },
       { id: 'laboratorium',        label: 'Politisk Lab' },
       { id: 'historik',            label: 'Historik' },
     ]},
     okonomi: { label: 'Økonomi Live', tabs: [
-      { id: 'inflation',           label: 'Inflation' },
+      { id: 'inflation',           label: 'Inflation & Priser' },
       { id: 'ledighed',            label: 'Ledighed' },
       { id: 'boligmarked',         label: 'Boligmarked' },
       { id: 'energi',              label: 'Energi & Strøm' },
@@ -299,6 +302,7 @@ document.addEventListener('DOMContentLoaded', () => {
       { id: 'udenrigshandel',      label: 'Udenrigshandel' },
       { id: 'erhverv',             label: 'Erhverv & Vækst' },
       { id: 'innovation',          label: 'Innovation' },
+      { id: 'indkomst',            label: 'Indkomst & Ulighed' },
     ]},
     politik: { label: 'Politik', tabs: [
       { id: 'meningsmaalinger',    label: 'Meningsmålinger' },
@@ -311,15 +315,18 @@ document.addEventListener('DOMContentLoaded', () => {
       { id: 'demographics',        label: 'Demografi & Befolkning' },
       { id: 'sundhed',             label: 'Sundhed & Sygehuse' },
       { id: 'psykiatri',           label: 'Psykiatri' },
+      { id: 'ventetider',          label: 'Ventetider' },
+      { id: 'aeldrepleje',         label: 'Ældrepleje' },
       { id: 'uddannelse',          label: 'Uddannelse' },
       { id: 'pension',             label: 'Pensionsberegner' },
       { id: 'bolig',               label: 'Boligberegner' },
       { id: 'integration',         label: 'Integration' },
       { id: 'forsvar',             label: 'Forsvar & Sikkerhed' },
-      { id: 'indkomst',            label: 'Indkomst & Ulighed' },
       { id: 'kommuner',            label: 'Kommuner' },
       { id: 'elpris',              label: 'El-priser' },
       { id: 'landbrug',            label: 'Landbrug' },
+      { id: 'kriminalitet',        label: 'Kriminalitet' },
+      { id: 'naturvand',           label: 'Natur & Drikkevand' },
     ]},
   };
 
@@ -433,7 +440,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function navigateTo(panelId) {
-    const REDIRECTS = { overview: 'promises', dashboard: 'promises', folkesundhed: 'sundhed', groenomstilling: 'co2', boligkrise: 'boligmarked', folkeskolen: 'uddannelse', danmarkskort: 'promises' };
+    const REDIRECTS = { dashboard: 'overview', folkesundhed: 'sundhed', groenomstilling: 'co2', boligkrise: 'boligmarked', folkeskolen: 'uddannelse', danmarkskort: 'overview' };
     if (REDIRECTS[panelId]) panelId = REDIRECTS[panelId];
 
     // Lazy-load panel-specific modules
