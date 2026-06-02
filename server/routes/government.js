@@ -24,7 +24,7 @@ const governmentData = {
   government: {
     pm: { name: 'Mette Frederiksen', party: 'A', since: 'Juni 2026' },
     formed: 'Juni 2026',
-    type: 'Flertalsregering (A·V·M·I·C·D)',
+    type: 'Regeringsdannelse (S/SF/M/RV foreloebigt)',
     ministers: [
       { name: 'Mette Frederiksen',      title: 'Statsminister',                            ministry: 'Statsministeriet',                           party: 'A' },
       { name: 'Lars Løkke Rasmussen',   title: 'Udenrigsminister',                         ministry: 'Udenrigsministeriet',                        party: 'M' },
@@ -57,11 +57,11 @@ const governmentData = {
     }
   },
   formation: {
-    status: 'formed',
-    headline: 'Ny bred flertalsregering præsenteret 2. juni 2026',
-    description: 'Danmark har en ny bred flertalsregering bestående af A·V·M·I·C·D. Koalitionsaftalen "Danmark Fremad — ansvar, vækst og tryghed" er underskrevet og regeringen er godkendt af Dronningen.',
+    status: 'active',
+    headline: 'Regeringsgrundlag praesenteres 2. juni 2026',
+    description: 'Statsministeriet har indkaldt til pressemoede paa Marienborg med Mette Frederiksen (S), Pia Olsen Dyhr (SF), Lars Loekke Rasmussen (M) og Martin Lidegaard (RV). Ministerliste og endeligt regeringsgrundlag opdateres, naar de officielle dokumenter er publiceret.',
     lastUpdated: '2026-06-02',
-    note: 'Opdatér ministers-listen med den faktiske ny regering.',
+    note: 'Foreloebig status baseret paa Statsministeriets pressemeddelelse.',
     timeline: [
       { label: 'Valg afholdt',                  date: '2025',          status: 'done'   },
       { label: 'Mandatfordeling opgjort',        date: '2025',          status: 'done'   },
@@ -70,9 +70,94 @@ const governmentData = {
       { label: 'Koalitionsaftale underskrevet',  date: '1. juni 2026',  status: 'done'   },
       { label: 'Ny regering præsenteret',        date: '2. juni 2026',  status: 'active' }
     ],
-    partiesInTalks: ['A', 'V', 'M', 'I', 'C', 'D'],
-    sources: ['Statsministeriet.dk', 'ft.dk', 'dr.dk/nyheder']
+    partiesInTalks: ['A', 'F', 'M', 'B'],
+    sources: ['Statsministeriet.dk', 'ft.dk']
   },
+  sources: [
+    { label: 'Folketinget', scope: 'Mandater, partier og regeringsperioder', url: 'https://www.ft.dk/' },
+    { label: 'Statsministeriet', scope: 'Regeringsdannelse og regeringsgrundlag', url: 'https://www.stm.dk/' },
+    { label: 'Finansministeriet', scope: 'Finanslov, fremskrivninger og reformeffekter', url: 'https://fm.dk/' },
+    { label: 'DREAM-gruppen', scope: 'Langsigtede makro- og befolkningsfremskrivninger', url: 'https://dreamgruppen.dk/' },
+    { label: 'Danmarks Statistik', scope: 'Befolkning, arbejdsmarked, BNP og offentlige finanser', url: 'https://www.dst.dk/' }
+  ],
+  modelCalibration: {
+    framework: 'DREAM/MAKRO-screening',
+    note: 'Nyheder annoteres kun med et DREAM/MAKRO-estimat, naar teksten peger paa en finanspolitisk, arbejdsudbuds-, demografi-, klima- eller investeringskanal.',
+    channels: [
+      { key: 'arbejdsudbud', label: 'Arbejdsudbud', horizon: '2026-2035' },
+      { key: 'offentlig_saldo', label: 'Offentlig saldo', horizon: '2026-2030' },
+      { key: 'bnp', label: 'BNP-effekt', horizon: 'kort og mellemlang sigt' },
+      { key: 'co2', label: 'CO2', horizon: '2030' }
+    ]
+  },
+  historicalGovernments: [
+    {
+      id: 's-sf-r-2011',
+      name: 'Thorning-Schmidt I',
+      years: '2011-2014',
+      pm: 'Helle Thorning-Schmidt',
+      parties: ['A', 'F', 'B'],
+      type: 'Mindretalsregering',
+      agreement: 'Et Danmark der staar sammen',
+      priorities: ['Velfaerd', 'Uddannelse', 'Skat', 'Klima'],
+      profile: { tax: 68, welfare: 82, climate: 75, immigration: 38, defense: 36, labor: 55 }
+    },
+    {
+      id: 'v-2015',
+      name: 'Lars Loekke Rasmussen II',
+      years: '2015-2016',
+      pm: 'Lars Loekke Rasmussen',
+      parties: ['V'],
+      type: 'Mindretalsregering',
+      agreement: 'Sammen for fremtiden',
+      priorities: ['Skat', 'Erhverv', 'Udlaendinge', 'Landdistrikter'],
+      profile: { tax: 34, welfare: 48, climate: 45, immigration: 76, defense: 58, labor: 70 }
+    },
+    {
+      id: 'v-la-k-2016',
+      name: 'Lars Loekke Rasmussen III',
+      years: '2016-2019',
+      pm: 'Lars Loekke Rasmussen',
+      parties: ['V', 'I', 'C'],
+      type: 'Mindretalsregering',
+      agreement: 'For et friere, rigere og tryggere Danmark',
+      priorities: ['Skat', 'Forsvar', 'Erhverv', 'Udlaendinge'],
+      profile: { tax: 25, welfare: 42, climate: 42, immigration: 78, defense: 70, labor: 74 }
+    },
+    {
+      id: 's-2019',
+      name: 'Frederiksen I',
+      years: '2019-2022',
+      pm: 'Mette Frederiksen',
+      parties: ['A'],
+      type: 'Mindretalsregering',
+      agreement: 'Retfaerdig retning for Danmark',
+      priorities: ['Velfaerd', 'Klima', 'Uddannelse', 'Arbejdsmarked'],
+      profile: { tax: 63, welfare: 83, climate: 82, immigration: 66, defense: 52, labor: 58 }
+    },
+    {
+      id: 's-v-m-2022',
+      name: 'Frederiksen II',
+      years: '2022-2026',
+      pm: 'Mette Frederiksen',
+      parties: ['A', 'V', 'M'],
+      type: 'Flertalsregering',
+      agreement: 'Ansvar for Danmark',
+      priorities: ['Arbejdsudbud', 'Forsvar', 'Sundhed', 'Klima'],
+      profile: { tax: 48, welfare: 66, climate: 68, immigration: 66, defense: 82, labor: 78 }
+    },
+    {
+      id: 's-sf-m-rv-2026',
+      name: 'Ny regeringsdannelse',
+      years: '2026-',
+      pm: 'Mette Frederiksen',
+      parties: ['A', 'F', 'M', 'B'],
+      type: 'Forhandling',
+      agreement: 'Afventer officielt regeringsgrundlag',
+      priorities: ['Velfaerd', 'Klima', 'Arbejdsudbud', 'Uddannelse'],
+      profile: { tax: 58, welfare: 78, climate: 82, immigration: 56, defense: 70, labor: 68 }
+    }
+  ],
   partyProfiles: [
     {
       abbr: 'A', name: 'Socialdemokratiet', color: '#E32D1C',

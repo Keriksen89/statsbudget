@@ -17,6 +17,7 @@ VG.regering.renderPanel = function() {
   const panel = document.getElementById('panel-regering');
   if (!panel) return;
   panel.innerHTML = VG.regering.buildHTML();
+  VG.regering.bindInteractive();
   // Draw hemicycle after DOM is ready
   requestAnimationFrame(() => VG.regering.drawHemicycle('hemicycle-canvas'));
 };
@@ -135,6 +136,7 @@ VG.regering.buildHTML = function() {
 
   return `
 ${formationHTML}
+${VG.regering.buildCompareHTML()}
 <div class="card">
   <h2>🏛 Regering & Folketing</h2>
   <p style="font-size:13px;color:var(--text-2);margin-top:4px">${type} · Dannet ${formed}</p>
@@ -165,6 +167,109 @@ ${formationHTML}
   <h3 style="margin-top:20px;margin-bottom:4px;font-size:15px">Ministre (${ministers.length})</h3>
   ${ministerHTML}
 </div>`;
+};
+
+VG.regering.buildCompareHTML = function() {
+  const data = VG.regering.data;
+  if (!data || !data.historicalGovernments) return '';
+
+  const govs = data.historicalGovernments;
+  const selectedA = govs[govs.length - 2]?.id || govs[0].id;
+  const selectedB = govs[govs.length - 1]?.id || govs[0].id;
+  const options = govs.map(g => `<option value="${g.id}">${g.label} (${g.years})</option>`).join('');
+
+  return `<div class="gov-lab">
+    <div class="gov-lab-head">
+      <div>
+        <div class="gov-eyebrow">Aabne kilder + MAKRO-kalibrering</div>
+        <h2>Regeringstjek</h2>
+        <p>Sammenlign tidligere regeringer med officielle kilder. DREAM/MAKRO-effekter vises i nyhedsfeedet, naar en konkret nyhed matcher en politisk modelregel.</p>
+      </div>
+      <div class="gov-source-pill">Kilder: STM, Regeringen.dk, Folketinget, DST, DREAM</div>
+    </div>
+
+    <div class="gov-lab-grid">
+      <section class="gov-tool">
+        <div class="gov-tool-title">Sammenlign regeringer</div>
+        <div class="gov-select-row">
+          <label>Venstre kort<select id="gov-compare-a">${options}</select></label>
+          <label>Hoejre kort<select id="gov-compare-b">${options}</select></label>
+        </div>
+        <div id="gov-compare-output" class="gov-compare-output" data-a="${selectedA}" data-b="${selectedB}"></div>
+      </section>
+    </div>
+
+    <div class="source-grid">
+      ${(data.sources || []).map(s => `<a href="${s.url}" target="_blank" rel="noopener" class="source-card">
+        <strong>${s.name}</strong><span>${s.note}</span>
+      </a>`).join('')}
+    </div>
+  </div>`;
+};
+
+VG.regering.bindInteractive = function() {
+  const data = VG.regering.data;
+  if (!data) return;
+
+  const compareA = document.getElementById('gov-compare-a');
+  const compareB = document.getElementById('gov-compare-b');
+  const compareOut = document.getElementById('gov-compare-output');
+
+  const renderCompare = () => {
+    if (!compareOut) return;
+    const govs = data.historicalGovernments || [];
+    const a = govs.find(g => g.id === (compareA?.value || compareOut.dataset.a)) || govs[0];
+    const b = govs.find(g => g.id === (compareB?.value || compareOut.dataset.b)) || govs[govs.length - 1];
+    if (!a || !b) return;
+    compareOut.innerHTML = `
+      ${VG.regering.renderGovCard(a)}
+      <div class="gov-profile-bars">${VG.regering.renderProfileBars(a, b)}</div>
+      ${VG.regering.renderGovCard(b)}
+    `;
+  };
+
+  if (compareA) compareA.value = compareOut?.dataset.a || compareA.value;
+  if (compareB) compareB.value = compareOut?.dataset.b || compareB.value;
+  compareA?.addEventListener('change', renderCompare);
+  compareB?.addEventListener('change', renderCompare);
+  renderCompare();
+};
+
+VG.regering.renderGovCard = function(g) {
+  return `<article class="gov-card">
+    <div class="gov-card-top">
+      <strong>${g.label}</strong>
+      <span>${g.years}</span>
+    </div>
+    <div class="gov-card-pm">${g.pm}</div>
+    <div class="gov-card-type">${g.type}</div>
+    <div class="gov-party-row">${(g.parties || []).map(p => `<span>${p}</span>`).join('')}</div>
+    <div class="gov-agreement">${g.agreement}</div>
+    <p>${g.promiseStyle}</p>
+    <div class="gov-priority-list">${(g.priorities || []).map(p => `<span>${p}</span>`).join('')}</div>
+  </article>`;
+};
+
+VG.regering.renderProfileBars = function(a, b) {
+  const labels = [
+    ['tax', 'Skat'],
+    ['welfare', 'Velfaerd'],
+    ['defence', 'Forsvar'],
+    ['climate', 'Klima'],
+    ['laborSupply', 'Arbejdsudbud']
+  ];
+  return labels.map(([key, label]) => {
+    const av = a.fiscalProfile?.[key] || 0;
+    const bv = b.fiscalProfile?.[key] || 0;
+    return `<div class="profile-row">
+      <div class="profile-label">${label}</div>
+      <div class="profile-track">
+        <span class="profile-bar a" style="width:${av}%"></span>
+        <span class="profile-bar b" style="width:${bv}%"></span>
+      </div>
+      <div class="profile-values"><span>${av}</span><span>${bv}</span></div>
+    </div>`;
+  }).join('');
 };
 
 VG.regering.drawHemicycle = function(canvasId) {

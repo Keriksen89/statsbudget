@@ -390,7 +390,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let html = `
       <a class="sb-item" data-sb="feed">
         <span class="sb-item-icon"><i class="ph ph-newspaper"></i></span>
-        <span class="sb-item-label">Nyheder & Indsigter</span>
+        <span class="sb-item-label">Nyheder</span>
         <span class="sb-item-live"></span>
       </a>
       <a class="sb-item" data-sb="profile">
@@ -497,7 +497,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function _updateBreadcrumb(panelId, owningGroup) {
     let section = '', page = panelId;
     if (panelId === 'promises') { page = 'Regeringsløfter 2026'; }
-    else if (panelId === 'feed') { page = 'Nyheder & Indsigter'; }
+    else if (panelId === 'feed') { page = 'Nyheder'; }
     else if (panelId === 'profile') { page = 'Min løsning'; }
     else if (owningGroup && GROUPS[owningGroup]) {
       const g   = GROUPS[owningGroup];
