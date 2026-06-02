@@ -46,7 +46,7 @@ function detectConfidence(text) {
   if (/vedtaget|godkendt|aftale indgået|loven er|er vedtaget/.test(t)) return 'vedtaget';
   if (/forslag|vil foreslå|har fremsat|udspil|planer om/.test(t)) return 'forslag';
   if (/forhandler|drøfter|taler om|overvejer|er ved at/.test(t)) return 'forhandling';
-  return 'rygte';
+  return 'nyhed';
 }
 
 function detectCategory(text) {
