@@ -31,5 +31,8 @@
     "open-data"
   ],
   "license": "MIT",
-  "author": "statsbudget.dk"
+  "author": "statsbudget.dk",
+  "devDependencies": {
+    "ssh2": "^1.17.0"
+  }
 }

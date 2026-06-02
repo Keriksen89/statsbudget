@@ -13,3 +13,6 @@ server/data/statsbudget.db-wal
 # (uncomment next line if you don't want to track vote counts)
 # server/data/votes.json
 deploy/hetzner_server_ed25519.pub
+
+# SSH deploy keys — public key is safe to commit, private key is NOT
+deploy/id_statsbudget
